@@ -1,0 +1,331 @@
+<x-app-layout>
+    <x-slot name="header">
+        <h2 class="font-semibold text-xl text-gray-800 leading-tight">
+            {{ __('Dashboard') }}
+        </h2>
+    </x-slot>
+
+    <div class="py-12">
+        <style>
+            a {
+                text-decoration: none;
+            }
+            .calendar-wrap {
+                width:58rem;
+                background: #eee;
+                color: #333;
+            }
+            .calender_head {
+                line-height: 60px;
+                text-align: center;
+                font-size: 2rem;
+            }
+            .calender_center {
+                width:40%;
+                text-align: center;
+                font-size: 3rem;
+                color:#408040;
+                font-weight: bold;
+                /*-webkit-text-stroke: 2px #FFF; 白抜き文字はもっと大きい文字が必要なのでヤメ
+                text-stroke: 1px #FFF;*/
+                text-shadow: 1px 1px 0 #333;
+            }
+            .calender_link {
+                display:static;
+                width:30%;
+                text-align: center;
+            }
+            .calender {
+                padding:10px;
+                font-size:1.2rem;
+            }
+            .dateBeforLink {
+                text-align: center;
+                clip-path: polygon(0 10%,81% 10%,80% 0,100% 50%,80% 100%,80% 90%,0 90%,0 10%);
+            }
+            .dateAfterLink {
+                text-align: center;
+                clip-path: polygon(0 50%,15% 0%,15% 15%,100% 15%,100% 75%,15% 75%,15% 100%,0 50%);
+            }
+            .calender th,td {
+                border:2px solid #408040;
+            }		
+            .calender th {
+                height: 30px;
+                width: 8rem;
+                text-align: center;
+            }
+            .calender td {
+                height: 6rem;
+                vertical-align: top;
+            }
+            .calender th:nth-of-type(1), td:nth-of-type(1) {    /* 日曜日 */
+                background: #fee;
+                color: red;
+            }
+            .calender th:nth-of-type(7), td:nth-of-type(7) {    /* 土曜日 */
+                background: #eef;
+                color: blue;
+            }
+            .today {
+                background: orange !important;
+            }
+            /* ■■■■■ １日の枠 ■■■■■ */
+            .area {
+                display: grid;
+                grid-template-areas:
+                    "date date"
+                    "names names"
+                    "cnt Yoyaku";
+                grid-gap: 10px;
+                border: 1px solid #ccc;
+                padding: 1px 1px 4px 1px;
+            }
+            .day {
+                grid-area: date;
+                width: 3rem;
+                text-align: center;
+                font-size:1.2rem;
+                background: rgb(157, 237, 200);
+            }
+            .day_today {
+                grid-area: date;
+                width: 3rem;
+                text-align: center;
+                font-size:1.2rem;
+                font-weight: bold;
+                background: rgb(57, 137, 100);
+            }
+            .cnt {
+                grid-area: cnt;
+                width: 2.5rem;
+                text-align: center;
+                font-size:0.8rem;
+                background: rgb(232, 206, 224);
+            }
+            .cnt::before {
+                content: "残";
+                font-size:0.5rem;
+            }
+            .names {
+                grid-area: names;
+                min-height: 100px;
+                font-size:0.6rem;
+            }
+            .calender button {
+                grid-area: Yoyaku;
+                height: 1.2rem;
+                width: 100%;
+                vertical-align: bottom;
+                background-color: #c8c480;
+                color: black;
+                border: 1px solid #008440;
+                text-align: center;
+                text-decoration: none;
+                font-size: 0.8rem;
+                display: inline-block;     
+                clip-path: polygon(0 10%,81% 10%,80% 0,100% 50%,80% 100%,80% 90%,0 90%,0 10%);       
+            }
+            button:hover {  /* マウスホバー時の状態 */
+                background-color: #3e8e41;
+            }
+            button:active { /* 押下時の状態 */
+                background-color: #3e8e41;
+                box-shadow: 0 5px #666;
+                transform: translateY(4px);
+            }
+        </style>    
+
+        <div class="card">
+            <div class="card-header" style="text-align: center;">
+                - 予約 -
+            </div>
+            <div class="card-body">
+                <ul>
+                    <li>カレンダーより、ご希望の予約日をお選びください。</li>
+                    <li>予約日は次回予約のみお取りいただけます。</li>
+                    <li>予約日時を変更される場合は、いったんキャンセルしてから予約をお取りなおしください。</li>
+                </ul>
+
+                <div class="calender">
+                    <form class="prev-next-form"></form>
+                    <table class="calender">
+                        <thead>
+                        <tr>
+                            <td colspan="2">
+                                <label>
+                                    <a href="#" class="dateBeforLink" id="date_befor_link" onclick="GetYoyakuCalender( '{{ calendar_culc($month,-1) }}' )">前月</a>
+                                </label>
+                            </td>
+                            <th colspan="3">
+                                <label  class="text-center" id="date_month">
+                                    {{ date('Y',strtotime($month)) }}年{{ date('m', strtotime($month)) }}月
+                                </label>
+                            </th>
+                            <td colspan="2">
+                                <label>
+                                    <a href="#" class="dateAfterLink" id="date_after_link" onclick="GetYoyakuCalender( '{{ calendar_culc($month,+1) }}' )">次月</a>
+                                </label>
+                            </td>
+                        </tr>
+                        <tr>
+                            <th class="sun"><div class="text-center">日</div></th>
+                            <th class="mon"><div class="text-center">月</div></th>
+                            <th class="tue"><div class="text-center">火</div></th>
+                            <th class="wed"><div class="text-center">水</div></th>
+                            <th class="thu"><div class="text-center">木</div></th>
+                            <th class="fri"><div class="text-center">金</div></th>
+                            <th class="sat"><div class="text-center">土</div></th>
+                        </tr>
+                        </thead>
+                        <tbody id="calenderTable">
+                        </tbody>
+                    </table>
+
+                    <script>
+
+                    var CurrYM = '{{ $month }}';
+                    const today= new Date();
+                    const todayYY = today.getFullYear();
+                    const todayMM = ('0' + (today.getMonth() + 1)).slice(-2); // 月は0から始まるため+1し、桁数を2桁に調整
+                    const todayDD = ('0' + today.getDate()).slice(-2);
+
+                    GetYoyakuCalender(CurrYM);  //  初回のカレンダー表示
+                    function calendar_culc(reqYM,numMonth){
+                        // DateTimeオブジェクトに変換
+                        const [year, month] = reqYM.split('-');
+                        const date = new Date(year, month - 1, 1);
+
+                        // 前の月の末日を取得
+                        date.setMonth(date.getMonth() + numMonth);
+                        const lastDayOfPreviousMonth = new Date(date.getFullYear(), date.getMonth() + 1, 0);
+
+                        // 年と月を取得
+                        const previousYear = lastDayOfPreviousMonth.getFullYear();
+                        const previousMonth = lastDayOfPreviousMonth.getMonth() + 1;
+
+                        return `${previousYear}-${previousMonth.toString().padStart(2, '0')}`;
+                    }
+
+                    function GetYoyakuCalender(reqYM) {
+                        CurrYM = reqYM;
+                        const [reqYY, reqMM, reqDD] = reqYM.split('-');
+                        chkDD = 0;
+                        if((reqYY == todayYY) && (reqMM == todayMM)) {
+                            chkDD = todayDD;
+                        }
+
+                        // 既存のtbody要素を削除
+                        const tbody = document.getElementById('calenderTable'); // idが'calenderTable'のtbody要素を想定
+                        while (tbody.firstChild) {    // tbodyの子要素がなくなるまでループ
+                            tbody.removeChild(tbody.firstChild);
+                        }
+                        document.getElementById('date_month').textContent = reqYY + '年　' + reqMM + '月';
+
+                        // 前月へのリンクを書き換え
+                        const dateBeforLink = document.getElementById('date_befor_link');
+                        dateBeforLink.onclick = function() {
+                            var strLink = calendar_culc( reqYM,-1);
+                            GetYoyakuCalender(strLink);
+                        };
+
+                        // 次月へのリンクを書き換え
+                        const dateAfterLink = document.getElementById('date_after_link');
+                        dateAfterLink.onclick = function() {
+                            var strLink = calendar_culc( reqYM,+1);
+                            GetYoyakuCalender(strLink);
+                        };
+
+                        let clsAry = ["sun","mon","tue","wed","thu","fri","sat"];
+                        var calendarDiv = document.getElementById('calenderTable');
+                        /*  var calendarAry =  @#json($calender); 呼び出し元からのカレンダーデータ取得*/
+                        const maxYoyaku = 16;
+                        $.ajax({
+                            url: '{{ route('reserve.calenderGet') }}', // リクエストを送るURL
+                            type: 'GET',
+                            data: {
+                                type    : '1',
+                                month   : reqYM
+                            },                            
+                            success: function(response) {
+                                // サーバーから返ってきたデータの処理
+                                console.log(response);
+
+                                calendarAry = response;
+
+                                var weekStr=""; //  編集先文字列
+                                var dayIx = 0;
+                                var weekIx = 0;
+                                const template = document.createElement('template');
+                                calendarAry.forEach(function(weekAry) {
+
+                                    weekStr="<tr>"; //  編集先文字列
+                                    dayIx = 0;
+                                    weekAry.forEach(function(dayInfo) {     //  一週間分づつ編集
+                                        weekStr+='<td><div class="area">';
+
+                                        if(dayInfo.day > 0) {
+                                            if(dayInfo.day == chkDD) {
+                                                weekStr += '<div class="day_today">' + dayInfo.day + '</div>';
+                                            } else {
+                                                weekStr += '<div class="day">' + dayInfo.day + '</div>';
+                                            }
+                                            var zanSeki = maxYoyaku - dayInfo.totalCnt;
+                                            weekStr += '<div class="cnt">' + zanSeki + '</div>';
+
+                                            weekStr += '<div class="names">';
+                                            if(dayInfo.totalCnt > 0) {
+                                                //  予約者がいる場合、名前・人数とリンクを追加
+                                                var memCnt = 0;
+                                                dayInfo.member.forEach(function(member) {
+                                                    if(memCnt > 0) {
+                                                        weekStr += '<br>';
+                                                    }
+                                                    weekStr += member.name + ':' + member.cnt;
+                                                    memCnt++;
+                                                })
+                                                
+                                            }
+                                            else {
+                                                weekStr += "　　　　　";
+                                            }
+                                            weekStr += '</div>';
+                                            //  予約ボタン
+                                            weekStr += '<button class="Yoyaku" id="Yoyaku' + dayInfo.day + '" onclick="openYoyakuInput(' + dayInfo.day + ')" ';  
+                                            if(zanSeki <= 0) {
+                                                weekStr += 'disabled';
+                                            }
+                                            weekStr += '>予約</button>';  
+                                        }
+
+                                        //  枠の終わり
+                                        weekStr+='</div></td>';
+                                        dayIx++;
+                                    })
+                                    weekStr+='</tr>';
+                                    template.innerHTML = weekStr;
+                                    content = template.content;
+                                    calendarDiv.appendChild(content);
+                                    weekIx++;
+                                })
+                            },
+                            error: function(error) {
+                                // エラーが発生した場合の処理
+                                console.error(error);
+                            }
+                        });
+                    }
+                    function openYoyakuInput(day) {
+                        //  YYYY-MM-DD に編集
+                        var reqDate = CurrYM.substr(0,8) + ('00' + day).slice(-2);
+
+                        //  新規画面へのURL
+                        const newUrl = '{{ Route('reserve.create') }}/' + reqDate;
+                        window.location.href = newUrl;            // リダイレクト
+                    }
+                    </script>
+                </div>
+            </div>
+        </div>
+    </div>
+</x-app-layout>
