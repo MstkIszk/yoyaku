@@ -1,0 +1,44 @@
+<style>
+	.header_img{
+		display:flex;
+	}
+	.header-nav{
+		display:flex;
+		margin-left:auto;
+	}
+
+	img {
+	  width: 100%;
+	  height: auto;
+	  object-fit: cover; /* 表示領域を完全に覆う */
+	  /* または object-fit: contain; /* 画像を完全に表示領域内に収める */
+	}
+
+	.base-picture {
+		position: relative;
+	}
+
+	.sub-picture {
+		width: 50px;
+		height: 50px;
+		display: flex;
+		justify-content: center;
+		align-items: center;
+		position: absolute;
+		top: 50%;
+		left: 50%;
+	}
+
+</style>
+
+<div class="base-picture">
+	<img src="../../resources/images/head_mounten.png"/>
+    <div class="sub-picture">
+        <i class="fab fa-angellist"></i>
+    </div>
+</div>
+
+<!--div class="header_img">
+<img src="../../resources/images/head_mounten.png"/>
+</！div-->
+

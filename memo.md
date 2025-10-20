@@ -31,17 +31,15 @@ li {
 
 </style>
 
-
 環境変数の確認
+
 > \>rundll32.exe sysdm.cpl,EditEnvironmentVariables
 
-
 ルート設定の一覧表示
+
 > \>php artisan route:list
 
-
-
-## VsCodeでXAMAPPをデバッグする設定
+## VsCode で XAMAPP をデバッグする設定
 
 <ul>
 <Li type="1"> ブラウザでphpinfo()を表示して全てコピー(CTRL-A)</li>
@@ -50,32 +48,78 @@ li {
 <Li type="1"> xamp\php\php.iniを開き、以下を追加  </li>
 </ul>
 
-```  
-[XDebug]  
-xdebug.remote_enable=1  
-xdebug.remote_autostart=1  
-;以下はサイトに記載されてたもの  
-zend_extension = D:\xampp\php\ext\php_xdebug-XXX.dll  
+```
+[XDebug]
+xdebug.remote_enable=1
+xdebug.remote_autostart=1
+;以下はサイトに記載されてたもの
+zend_extension = D:\xampp\php\ext\php_xdebug-XXX.dll
 ```
 
 ◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆
 
-## Laravelプロジェクト新規作成
+## Laravel プロジェクト新規作成
+
+#### Lolipop ログイン
+
+> ssh chu.jp-kyum@ssh.lolipop.jp -p2222
+> SMqeduZhkmeJe5sgEH2KkBdNF5rMRHjl
+
+#### PHP のパスを通す
+
+> export PATH=$PATH:/usr/local/php/8.2/bin/
+
+#### Perl のパスを通す
+
+> export PATH=$PATH:/usr/local/bin/perl/
+
+.bash_profile を作成しておくと、毎回パス設定が不要になる
+
+> vi ~/.bash_profile
+> vi コマンドが見つからないとき
+> /usr/bin/vi ~/.bash_profile
+> perl の場所
+> /usr/local/bin/perl -v
+
+.bash_profile へ下記を記入
+PATH="$PATH:/usr/local/php/8.2/bin"
+:wq
+
+###### bash_profile 設定に反映
+
+source ~/.bash_profile
+
+###### 現在の PATH 設定を確認するには
+
+echo $PATH
+
+#### composer をインストール
+
+> php -r "eval('?>'.file_get_contents('https://getcomposer.org/installer'));"
+
+現在のフォルダに composer.phar が作られる
 
 #### yoyaku プロジェクトを作成
-> composer create-project laravel/laravel yoyaku --prefer-dist
+
+> php composer.phar create-project laravel/laravel yoyaku --prefer-dist
+
+パーミッションの変更
+
+> $ chmod -R 777 storage
+> $ chmod -R 775 bootstrap/cache
 
 #### laravelcollective パッケージのインストール
 
 > composer require laravelcollective/html
 
 #### laravelcollective の削除
+
 > composer remove laravelcollective/html
 
 #### spatie/laravel-html パッケージののインストール
 
-
 #### ＤＢの接続設定
+
 <li>.env  の以下を変更</li>
 
 ```
@@ -84,66 +128,184 @@ DB_HOST=127.0.0.1　　　　　　　　　　　← ローカルデバッグ�
 #DB_HOST=mysql303.phy.lolipop.lan　　← Loripop 用. アップロード時に変更
 DB_DATABASE=LAA1590428-kyum
 DB_USERNAME=LAA1590428
-DB_PASSWORD=k1lt7Ovl 
+DB_PASSWORD=k1lt7Ovl
 ```
 
 #### 言語設定
-<li>app.php の以下を変更</li>
+
+<li>config\app.php の以下を変更</li>
 
 ```
 'timezone' => 'Asia/Tokyo',
 'local' => 'ja',
 'faker_local' => 'ja_JP',
 ```
+
 <li>日本語化翻訳ファイルを作成</li>
 
 > php artisan lang:publish
 
 実行すると、プロジェクトフォルダ直下に\lang\フォルダが作成させる
 
-Laravel Breeze日本語化パッケージ（Breezeとは 認証画面の機能)
+Laravel Breeze 日本語化パッケージ（Breeze とは 認証画面の機能)
 https://github.com/askdkc/breezejp
 
 php.ini の以下のコメントを外す
 extension=zip
 
 組み込みコマンド
+
 > \>composer require askdkc/breezejp --dev
 > \>php artisan breezejp
 
 これにより、\lang\フォルダに\ja\が作成され、日本語メッセージが定義されたファイルが作成される
 
+日本語データは以下に定義する
+lang\ja.json
+
+```JSON
+{
+    "Name": "名前",
+    "Profile": "アカウント",
+    "Profile Information": "アカウント情報",
+    "Cancel": "キャンセル",
+　　　　：
+```
+
+使う場合は以下のように記述する
+
+```html
+{{ __('Profile') }}
+```
+
+lang\ja\validation.php 内の'attributes' で定義された文字列を view から参照するには
+
+```html
+{{ __('validation.attributes.name') }}
+```
+
+## 郵便番号から自動住所入力
+
+① <form >　タグに class="h-adr" を追加
+
+```html
+<form class="h-adr" method="POST" action="{{ route('register') }}"></form>
+```
+
+② JS を取り込み
+
+```html
+<script
+  src="https://yubinbango.github.io/yubinbango/yubinbango.js"
+  charset="UTF-8"
+></script>
+```
+
+③ 日本を設定
+<span class="p-country-name" style="display:none;">Japan</span>
+
+④ 入力フォーム
+
+```html
+<form class="h-adr">
+  ・・・①
+  <script
+    src="https://yubinbango.github.io/yubinbango/yubinbango.js"
+    charset="UTF-8"
+  ></script>
+  ・・・②
+  <span class="p-country-name" style="display:none;">Japan</span>
+  〒<input type="text" class="p-postal-code" size="3" maxlength="3" /> -<input
+    type="text"
+    class="p-postal-code"
+    size="4"
+    maxlength="4"
+  /><br />
+  <label>
+    <span>都道府県</span><input type="text" class="p-region" readonly /><br />
+  </label>
+  <label>
+    <span>市町村区</span><input type="text" class="p-locality" readonly /><br />
+  </label>
+  <label>
+    <span>町域</span><input type="text" class="p-street-address" /><br />
+  </label>
+  <label>
+    <span>以降の住所</span><input type="text" class="p-extended-address" />
+  </label>
+</form>
+```
+
 ◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆
 
 ## コマンドライン(CLI)から MySQL に接続する
+
 ```
->C:\XAMPP\MySQL\BIN\mysql -u LAA1590428 -p -h localhost ` LAA1590428-kyum 
+>C:\XAMPP\MySQL\BIN\mysql -u LAA1590428 -p -h localhost ` LAA1590428-kyum
 password : k1lt7Ovl
 ```
 
-## LarabelからMySQLへの接続設定
+## キャッシュのクリア
 
->create table users(id int,title varchar(10));
+#### config ディレクトリ以下の設定ファイルのキャッシュを作成
 
+.env や config/\*.php のファイルを編集したら実行しないと変更した設定情報が反映されない
 
-◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆
+> php artisan config:cache
 
-## ブラウザから Larabelページへのアクセス
+#### 設定ファイルのキャッシュをクリア
 
-#### ブラウザで以下のurlにアクセス
+> php artisan config:clear
+
+#### アプリケーションのキャッシュをクリア
+
+> php artisan cache:clear
+
+#### ビューのキャッシュをクリア
+
+> php artisan view:clear
+
+#### ルートキャッシュを作り直します。
+
+> php artisan route:cache
+
+#### ルートのキャッシュをクリア
+
+> php artisan route:clear
+
+#### 8.0 以降ならまとめて消せる
+
+> php artisan optimize:clear
+
+#### autoload を自動で生成
+
+> composer dump-autoload
+> Composer は、PHP の依存性管理ツールで、composer.json ファイルに記述された依存ライブラリやクラスの情報をもとに、vendor/autoload.php というオートロードファイルを生成。
+> composer.json ファイルには、プロジェクトで使用するすべてのクラスファイル（ライブラリ、フレームワーク、アプリケーションのクラスなど）のパスが登録されています。
+
+新たなクラス定義やファイル定義を行うたびに実行します。
+git pull で大きな変更があった場合は実行するといいです。
+
+## ブラウザから Larabel ページへのアクセス
+
+#### ブラウザで以下の url にアクセス
+
 http://localhost/yoyaku/public/
 
-ルート定義　routes\web.php　が呼ばれ
+ルート定義　 routes\web.php 　が呼ばれ
+
 ```php
 Route::get('/', function () {
     return view('welcome');
 });
 ```
-ルートが呼ばれると 
+
+ルートが呼ばれると
 resources\views\welcome.blade.php
 画面が開く
 
-####　ブラウザからリクエストが来ると、以下の流れでWebページが表示される
+####　ブラウザからリクエストが来ると、以下の流れで Web ページが表示される
+
 <ul>
 <li >リクエスト</li>ブラウザからindex.phpへのリクエストが送られる
 <li>初期化</li>index.phpがLaravelフレームワークを初期化し、ルーティング情報などを設定します。</li>
@@ -153,18 +315,22 @@ resources\views\welcome.blade.php
 <li>レスポンス</li>生成されたHTMLコードがブラウザに送信され、Webページとして表示されます。</li>
 </ul>
 
+## ログファイルの場所
 
-## 認証画面としてBreezeを追加
+"C:\Tools\AnHttpd\nmaki\yoyaku\storage\logs\laravel.log"
 
-breezeを使用するには composer を使用する
-composerとはlaravelにおいて使用可能な便利なフレームワークやライブラリを管理するシステムです。
-composerがあることで、例えばAというライブラリをダウンロードする際に他に必要なライブラリも自動的にダウンロードしてくれる
+## 認証画面として Breeze を追加
 
+breeze を使用するには composer を使用する
+composer とは laravel において使用可能な便利なフレームワークやライブラリを管理するシステム
+composer があることで、例えば A というライブラリをダウンロードする際に他に必要なライブラリも自動的にダウンロードしてくれる
 
 #### 以下のコマンドを入力すると認証画面が追加される
+
 > \>composer require laravel/breeze
 
-実行するとcomposer.jsonファイルにBreezeのバージョン情報が入る
+実行すると yoyaku\composer.json ファイルに Breeze のバージョン情報が入る
+
 ```
     "require": {
         "php": "^8.1",
@@ -177,15 +343,16 @@ composerがあることで、例えばAというライブラリをダウンロ�
 ```
 
 #### プロジェクトへの組み込み
->php artisan breeze:install blade
 
-app\Http\Controllers\Authフォルダ内に幾つかのソースが追加され、ブラウザで開くと画面左上にメニュー「login (ログイン)」と「Resister (登録)」が追加されている
+> php artisan breeze:install blade
 
+app\Http\Controllers\Auth フォルダ内に幾つかのソースが追加され、ブラウザで開くと画面左上にメニュー「login (ログイン)」と「Resister (登録)」が追加されている
 
 #### テーブルの定義を追加
->\> php artisan make:migration create_XXXX_table
 
-実行すると以下のPHPファイルが作成＆追加される
+> \> php artisan make:migration create_XXXX_table
+
+実行すると以下の PHP ファイルが作成＆追加される
 yoyaku\database\migrations\2019_12_14_000001_create_XXXX_table.php
 
 <table><tr><td>
@@ -200,13 +367,12 @@ class Connector
     use DetectsLostConnections;
 　　　　　：
 ```
+
 <td></tr></table>
-
-
 
 ## artisan make: の種類
 
-makeはLaravel フレームワークで提供されるコマンドラインツールで、様々な種類の PHP ファイルを生成することができます
+make は Laravel フレームワークで提供されるコマンドラインツールで、様々な種類の PHP ファイルを生成することができます
 開発者は定型的なコードを書く手間を省き、より本質的な開発に集中することができます。
 
 <table border=2>
@@ -226,15 +392,14 @@ makeはLaravel フレームワークで提供されるコマンドラインツ�
 <tr><td>php artisan make:command	</td><td>コマンド	</td><td>カスタムのコマンドを作成するためのクラス</td></tr>
 </table>
 
-
-
-
 ## フォームの追加
 
-#### Laravelフォームを追加するには 最低限以下 を作成する
+#### Laravel フォームを追加するには 最低限以下 を作成する
+
 <table border=2>
-<tr><th>モデル           </th><td>\app\Models\ *.php </td><td>
+<tr><th rowspan=2>モデル           </th><td>\app\Models\ *.php </td><td>
                                     Eloquent（DBのデータを操作する実装）の機能とビジネスロジックを持つ</td></tr>
+                                    <tr><td colspan=2>php artisan make:model </td</tr>
 <tr><th>マイグレーション </th><td>\database\migrations\ * .php </th><td>
                                     データベース定義</td></tr>
 <tr><th>ビュー           </th><td>\resources\views\post\ *.blade.php</th><td>
@@ -246,12 +411,12 @@ makeはLaravel フレームワークで提供されるコマンドラインツ�
                                     methodとパスにより使用するコントローラーを定義する</td></tr>
 </table>
 
-
 #### モデル(ファイル)の新規作成</li>
 
 モデルファイルを作成時に、関連するファイルも生成する場合は、以下の [option]指定を行う
->\>php artisan make:model モデル名 [option]
- 
+
+> \>php artisan make:model モデル名 [option]
+
 <table border=1>
 <tr><th>option            </th><th> モデル</th><th>マイグ<br>レーション</th><th>コントローラ</th><th>シーダ </th><th>ファクトリ</th><th>フォーム<br>リクエスト</th><th>ポリシー</th></tr>
 <tr><td>--all , -a        </td><td>●      </td><td>●                  </td><td>●          </td><td>●      </td><td>●         </td><td>●                    </td><td>●</td></tr>
@@ -268,13 +433,14 @@ makeはLaravel フレームワークで提供されるコマンドラインツ�
 <tr><td>--test            </td><td>-      </td><td>-                  </td><td>-          </td><td>-      </td><td>-         </td><td>-                    </td><td>-</td></tr>
 </table>
 
-#### Eloquentの規定
+#### Eloquent の規定
 
 ###### テーブル名
 
 クラスの複数形の「スネークケース」をテーブル名として使用。
-この場合、EloquentはFlightモデルがflightsテーブルにレコードを格納し、AirTrafficControllerモデルはair_traffic_controllersテーブルにレコードを格納すると想定できます。
-モデルの対応するデータベーステーブルがこの規約に適合しない場合は、モデルにtableプロパティを定義してモデルのテーブル名を自分で指定できます。
+この場合、Eloquent は Flight モデルが flights テーブルにレコードを格納し、AirTrafficController モデルは air_traffic_controllers テーブルにレコードを格納すると想定できます。
+モデルの対応するデータベーステーブルがこの規約に適合しない場合は、モデルに table プロパティを定義してモデルのテーブル名を自分で指定できます。
+
 ```php
 class Flight extends Model
 {
@@ -284,8 +450,8 @@ class Flight extends Model
 
 ###### 主キー
 
-各モデルの対応するデータベーステーブルにidという名前の主キーカラムがあることも想定している。
-主キーを変更する場合は、モデルのprotected $primaryKeyプロパティを定義する。
+各モデルの対応するデータベーステーブルに id という名前の主キーカラムがあることも想定している。
+主キーを変更する場合は、モデルの protected $primaryKey プロパティを定義する。
 
 ```php
 class Flight extends Model
@@ -295,9 +461,9 @@ class Flight extends Model
 }
 ```
 
-主キーは増分整数値であることも想定しています。これは、Eloquentが主キーを自動的に整数にキャストすることを意味します。非インクリメントまたは非数値の主キーを使用する場合は、モデルにpublicの$incrementingプロパティを定義し、falseをセットする必要があります。
+主キーは増分整数値であることも想定しています。これは、Eloquent が主キーを自動的に整数にキャストすることを意味します。非インクリメントまたは非数値の主キーを使用する場合は、モデルに public の$incrementing プロパティを定義し、false をセットする必要があります。
 
-主キーが整数でない場合は、モデルにprotectedな$keyTypeプロパティを定義する必要があります。このプロパティの値はstringにする必要があります。
+主キーが整数でない場合は、モデルに protected な$keyType プロパティを定義する必要があります。このプロパティの値は string にする必要があります。
 
 ```php
 class Flight extends Model
@@ -309,8 +475,8 @@ class Flight extends Model
 
 ##### 主キータイムスタンプ
 
-モデルと対応するデータベーステーブルに、created_atカラムとupdated_atカラムが存在していると想定します。Eloquentはモデルが作成または更新されるときに、これらの列の値を自動的にセットします。これらのカラムがEloquentによって自動的に管理されないようにする場合は、モデルに$timestampsプロパティを定義し、false値をセットします。
-タイムスタンプの保存に使用するカラム名をカスタマイズする必要がある場合は、モデルにCREATED_ATおよびUPDATED_AT定数を定義
+モデルと対応するデータベーステーブルに、created_at カラムと updated_at カラムが存在していると想定します。Eloquent はモデルが作成または更新されるときに、これらの列の値を自動的にセットします。これらのカラムが Eloquent によって自動的に管理されないようにする場合は、モデルに$timestamps プロパティを定義し、false 値をセットします。
+タイムスタンプの保存に使用するカラム名をカスタマイズする必要がある場合は、モデルに CREATED_AT および UPDATED_AT 定数を定義
 
 ```php
 class Flight extends Model
@@ -324,6 +490,7 @@ class Flight extends Model
 ```
 
 ###### デフォルト属性値
+
 ```php
 class Flight extends Model
 {
@@ -333,21 +500,32 @@ class Flight extends Model
 }
 ```
 
-###### データベースにデータを登録または更新したい場合は、fillableまたはguardedを記載する。
+###### データベースにデータを登録または更新したい場合は、fillable または guarded を記載する。
+
 <ul>
 <li> $fillableはホワイトリスト方式としてデータ登録、更新を許可するカラムを指定します。</li>
 
 ```php
-    protected $fillable = [
-            'OrderNo',      //  予約番号');
-            'KeyStr',       //  照会時に比較する');	
-                :
-    ];
+protected $fillable = [
+        'OrderNo',      //  予約番号');
+        'KeyStr',       //  照会時に比較する');
+            :
+];
 ```
+
 </ul>
 
+<ul>
 <li>$guardedはブラックリスト方式としてデータ登録、更新を許可しないカラムを指定。指定したカラム以外は許可される。</li>
 
+```php
+protected $guarded = [
+        'id',
+            :
+];
+```
+
+</ul>
 
 <ul>
 <li>$castsでカラムに対しての型を定義する</li>
@@ -360,9 +538,11 @@ protected $casts = [
     'flag' => 'boolean'
 ];
 ```
+
 </ul>
 
-cast指定の種類
+cast 指定の種類
+
 <table border=1>
 <tr><th>型名</th>           <th> 機能</th></tr>
 <tr><td>Integer</td>        <td>数字へ変換</td></tr>
@@ -381,8 +561,6 @@ false　・・・　0, 文字列の空白</td></tr>
 <tr><td>encrypted</td>      <td>暗号化</td></tr>
 </table>
 
-
-
 <li>リレーションを定義する</li>
 <table border=1>
 <tr><th>メソッド</th><th> 機能</th></tr>
@@ -396,7 +574,7 @@ false　・・・　0, 文字列の空白</td></tr>
 
 マイグレーションファイルの新規作成
 
->\>php artisan make:migration マイグレーションファイル名 [option]
+> \>php artisan make:migration マイグレーションファイル名 [option]
 
 <table border=1>
 <tr><th>option         </th><th> 機能</th></tr>
@@ -424,6 +602,7 @@ false　・・・　0, 文字列の空白</td></tr>
         Schema::dropIfExists('tests');
     }
 ```
+
 </td><td></td></tr>
 <tr><td>--table=tests  </td><td>「tests」というテーブルの構造を変更するphpを生成
 具体的には up() / down() 関数に以下の定義が入る
@@ -437,8 +616,8 @@ false　・・・　0, 文字列の空白</td></tr>
 </td><td></td></tr>
 </table>
 
-
 migrate: xxx コマンド
+
 <table border=1>
 <tr><td>php artisan migrate:status              </td><td> マイグレーションの状態確認</td></tr>
 <tr><td>php artisan migrate [--path=<i>migratonファイル名</i>]</td><td> マイグレーション実行<br>
@@ -453,10 +632,9 @@ migrate: xxx コマンド
 <b> --path=database\migrations\"ファイル名"_table.php</b></td></tr>
 </table>
 
-
 ## テーブル構造の変更
 
->\>php artisan make:migration add_test_column --table=users
+> \>php artisan make:migration add_test_column --table=users
 
 ```php
    INFO  Migration [C:\Tools\AnHttpd\nmaki\yoyaku\database\migrations/2024_08_03_100631_add_test_column.php] created successfully.
@@ -466,12 +644,10 @@ migrate: xxx コマンド
 
 database\migrations\2024_08_03_100631_add_test_column.php
 
-```
+```java
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
+    /** migrations実行 */
     public function up(): void
     {   //  'test'カラムを追加する処理
         Schema::table('users', function (Blueprint $table) {
@@ -485,9 +661,7 @@ return new class extends Migration
         });
     }
 
-    /**
-     * Reverse the migrations.
-     */
+    /** migrations 解除 */
     public function down(): void
     {   //  'test'カラムを削除する処理
         Schema::table('users', function (Blueprint $table) {
@@ -509,7 +683,7 @@ return new class extends Migration
 <tr><td>enum('カラム名', ['定数', '定数'])</td><td></td><td>$table->enum('status', ['Draft', 'Published', 'Archived']);</td></tr>
 <tr><td>json('カラム名')</td><td></td><td>JSON型	</td></tr>
 <tr><td>binary('カラム名')</td><td></td><td>バイナリデータ型</td></tr>
-<tr><td>text</td><td>TEXT</td><td>大きなテキストデータを格納する　16384文字まで</td></tr>
+<tr><td>text</td><td>TEXT</td><td>大きなテキストデータを格納。最大16384文字</td></tr>
 <tr><td>longText</td><td>TEXT</td><td>大きなテキストデータを格納する　１GB</td></tr>
 <tr><td>increments</td><td>符号なしINT</td><td>1から始まり、次のレコードは2、3と自動的に増加する整数。自動的に主キーとして設定されます</td></tr>
 <tr><td>integer</td><td>int</td><td>整数</td></tr>
@@ -522,7 +696,8 @@ return new class extends Migration
 </tbody>
 </table>
 
- データベースカラムに制約を追加するためのメソッド</h1>
+データベースカラムに制約を追加するためのメソッド</h1>
+
 <table>
 <thead>
 <tr><th>メソッド</th><th>使用例</th><th>説明</th></tr>
@@ -539,37 +714,46 @@ return new class extends Migration
 </tbody>
 </table>
 
-## migrateコマンドでカラムを追加する
+## migrate コマンドでカラムを追加する
+
 > /> php artisan migrate
+
 ```php
    INFO  Running migrations.
 
   2024_08_03_100631_add_test_column .................................................................... 28ms DONE
 ```
-add_test_column.phpのup()関数が呼ばれて、'test'カラムが追加される
 
-migrateで全てのmigrateを削除するには以下のコマンドを入力
+add_test_column.php の up()関数が呼ばれて、'test'カラムが追加される
+
+migrate で全ての migrate を削除するには以下のコマンドを入力
+
 > \> php artisan migrate:reset
+
 ```php
    INFO  Rolling back migrations.
 
-  2024_08_03_100631_add_test_column ..................................................................... 2ms DONE
-  2019_12_14_000001_create_personal_access_tokens_table ................................................ 20ms DONE
-  2019_08_19_000000_create_failed_jobs_table ........................................................... 14ms DONE
-  2014_10_12_100000_create_password_reset_tokens_table ................................................. 15ms DONE
-  2014_10_12_000000_create_users_table ................................................................. 14ms DONE
+  2024_08_03_100631_add_test_column ............................. 2ms DONE
+  2019_12_14_000001_create_personal_access_tokens_table ......... 20ms DONE
+  2019_08_19_000000_create_failed_jobs_table .................... 14ms DONE
+  2014_10_12_100000_create_password_reset_tokens_table .......... 15ms DONE
+  2014_10_12_000000_create_users_table .......................... 14ms DONE
 ```
-特定のテーブルのみmigrate
+
+特定のテーブルのみ migrate
+
 > \>php artisan migrate:refresh --path=/database/migrations/2021_08_28_061818_create_boards_table.php
 
 </ul>
 
-◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆
+php artisan session:table
+
 ## コントローラーの作成
+
 <ul>
 <li type="1"> コマンド</li>
 
->\>php artisan make:controller TestController
+> \>php artisan make:controller TestController
 
 ソース yoyaku\app\Http\Controllers\TestController.php が作成される
 
@@ -589,7 +773,8 @@ class TestController extends Controller
 
 <li type="1"> 表示内容を定義</li>
 
-yoyaku\resources\views\test.blade.phpに表示内容を定義する
+yoyaku\resources\views\test.blade.php に表示内容を定義する
+
 ```
     こんにちわ
 ```
@@ -607,16 +792,51 @@ routes\web.php に呼び出しを追加
 Route::get('/ルート定義', 宣言方法 [ファイル/クラス名::class, '関数名'])
 
 ```php
-Route::get('/test', [TestController::class, 'test']) 
+Route::get('/test', [TestController::class, 'test'])
     ->name('test');
 ```
+
 </ul>
 
-■まとめ■
+■ まとめ ■
 http://127.0.0.1/yoyaku/public/test で任意のページを表示させるには
-Controllerを作成 → viewに表示内容を定義 → routes\web.phpで引数を定義
+Controller を作成 → view に表示内容を定義 → routes\web.php で引数を定義
 
-## View操作
+## View ファイルで使用されている共通定義
+
+共通定義は　\resources\views\components\ に定義されている
+
+<table>
+<tr><th >　　　定義　　　</th><th>　　　　　　　ファイル名　　　　　　　</th></tr>
+
+<tr><td>x-application-logo  </td><td>application-logo.blade.php</td></tr>
+<tr><td>auth-session-status.blade.php</td><td></td></tr>
+<tr><td>cal-date.blade.php</td><td></td></tr>
+<tr><td>danger-button.blade.php</td><td></td></tr>
+<tr><td>input-error.blade.php</td><td></td></tr>
+<tr><td>input-label.blade.php</td><td></td></tr>
+<tr><td>message.blade.php</td><td></td></tr>
+<tr><td>modal.blade.php</td><td></td></tr>
+<tr><td>primary-button.blade.php</td><td></td></tr>
+<tr><td>r-textbox.blade.php</td><td></td></tr>
+<tr><td>secondary-button.blade.php</td><td></td></tr>
+<tr><td>text-input.blade.php</td><td></td></tr>
+
+<tr><td>x-nav-link          </td><td>nav-link.blade.php</td></tr>
+<tr><td>x-dropdown          </td><td>dropdown.blade.php</td></tr>
+<tr><td>x-slot              </td><td></td></tr>
+<tr><td>x-dropdown-link</td><td>dropdown-link.blade.php</td></tr>
+<tr><td>x-responsive-nav-link</td><td>responsive-nav-link.blade.php</td></tr>
+<table>
+
+コンポーネントクラスがない場合:
+
+コンポーネントクラス (app/View/Components/ApplicationLogo.php) が存在しない場合、Laravel は単純に application-logo.blade.php をビューファイルとしてレンダリングします。
+つまり、コンポーネントクラスがなくても、Blade ファイルが存在すればコンポーネントとして機能します。
+ApplicationLogo.php
+
+## View 操作
+
 <table>
 <tr><th >　　　ディレクティブ　　　</th>
 <th>　　　　　　　役割 　　　　　　　</th></tr>
@@ -650,6 +870,7 @@ Controllerを作成 → viewに表示内容を定義 → routes\web.phpで引数
 </table>
 
 #### ディレクティブ使用例
+
 ```php
 //  画面
 @isset ($value)
@@ -664,7 +885,7 @@ Controllerを作成 → viewに表示内容を定義 → routes\web.phpで引数
         @else
         @endif
 
-        // @loopが暗黙で定義され、回数が取得できる  
+        // @loopが暗黙で定義され、回数が取得できる
         @if ($loop->first)              // 最初の繰り返し
         @if ($loop->index === 0)        // 最初の繰り返し(インデックスが取れる)
         @if ($loop->iteration === 1)    // 最初の繰り返し(現在の繰り返し数が取れる)
@@ -685,17 +906,18 @@ Controllerを作成 → viewに表示内容を定義 → routes\web.phpで引数
 @endauth
 ```
 
-※ @yield用のサブコンポーネント
+※ @yield 用のサブコンポーネント
+
 ```php
 //  コンポーネント
-@extends('layouts.app') //  継承元のテンプレート　\resources\views\layouts\app.blade.php
+@extends('layouts.app') //  子テンプレートで親テンプレートを継承することを宣言
+                        //  継承元のテンプレート　\resources\views\layouts\app.blade.php
 
 @section('content')     //  @yield('content') に埋め込まれる範囲
     <h1>Welcome</h1>
     <p>This is the home page.</p>
 @endsection
 ```
-
 
 ## コンポーネントの利用
 
@@ -706,15 +928,16 @@ Controllerを作成 → viewに表示内容を定義 → routes\web.phpで引数
 </ul>
 
 ## テンプレート
+
 <li> 通常テンプレート(app.blade.php)の配置</li>
 \resources\views\layouts\app.blade.php
 通常テンプレートは、ログイン後のユーザに表示するページのテンプレートとして使われる。
 
+#### @Vite 定義
 
-#### @Vite定義
-@Viteはテンプレートの\<head>～\</head>内に定義し、スタイルシートやJavaScriptファイルへのリンクを入れることで、このテンプレートを使用したページでリンクを使用できるようにする。
+@Vite はテンプレートの\<head>～\</head>内に定義し、スタイルシートや JavaScript ファイルへのリンクを入れることで、このテンプレートを使用したページでリンクを使用できるようにする。
 
-Viteは webpack、Rollup、Parcelのようなビルドツールの1つ。
+Vite は webpack、Rollup、Parcel のようなビルドツールの 1 つ。
 これらの役割としては、プロジェクトすべてのファイルをコンパイル・結合して一つの塊（バンドル）となったファイルを生成してくれます。
 
 ```php
@@ -722,14 +945,16 @@ Viteは webpack、Rollup、Parcelのようなビルドツールの1つ。
         @vite(['resources/css/app.css', 'resources/js/app.js'])
 ```
 
-###### app.cssには TailWind CSS の利用宣言が入る
+###### app.css には TailWind CSS の利用宣言が入る
 
 ```php
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 ```
-###### app.jsには Alpine.js  の利用宣言が入る
+
+###### app.js には Alpine.js の利用宣言が入る
+
 ```php
 import './bootstrap';
 import Alpine from 'alpinejs';
@@ -738,7 +963,9 @@ Alpine.start();
 ```
 
 #### スロット定義
+
 テンプレート内に
+
 <li>{{ $header }} と書くと下記のheader定義内が展開される</li>
 <li>{{ $slot }}と書くと下記のslot定義内が展開される</li>
 
@@ -758,18 +985,20 @@ Alpine.start();
 #### コントロールの定義方法
 
 スタイルは「Tailwind CSS」で記述することが推奨されている
-Tailwind CSSは、ユーティリティクラスを使って効率的にスタイリングできるフレームワークです。
+Tailwind CSS は、ユーティリティクラスを使って効率的にスタイリングできるフレームワーク
 
 ```html
 <label for="{{ $name }}">{{ $slot }}</label>
-<input 
-    type="{{ $type }}" 
-    name="{{ $name }}" 
-    id="{{ $name }}" 
-    class="py-2 border border-gray-300 rounded-md"
-    value="{{ $value }}" 
-    placeholder="{{ $placeholder }}" 
-    {{ $attributes }}
+<input
+  type="{{ $type }}"
+  name="{{ $name }}"
+  id="{{ $name }}"
+  class="py-2 border border-gray-300 rounded-md"
+  value="{{ $value }}"
+  placeholder="{{ $placeholder }}"
+  {{
+  $attributes
+  }}
 />
 ```
 
@@ -779,9 +1008,10 @@ Tailwind CSSは、ユーティリティクラスを使って効率的にスタ�
 
 ```html
 <div class="container mx-auto">
-    <!-- コンテンツ -->
+  <!-- コンテンツ -->
 </div>
 ```
+
 </td></tr>
 
 <tr>                                <td> flex </td>             <td> フレックスボックスのコンテナを作成</td></tr>
@@ -803,9 +1033,10 @@ Tailwind CSSは、ユーティリティクラスを使って効率的にスタ�
 ## ルートの定義方法
 
 ルーティングとは、クライアントからのアクセスに対応してどういう処理をするか決めること。
-例えば、「http://.../○○というアドレスにアクセスしたら、××コントローラの△△アクションを実行する」みたいな感じ
+例えば、「http://.../○○ というアドレスにアクセスしたら、×× コントローラの △△ アクションを実行する」みたいな感じ
 
 #### ルーティングを指定するには、function()で処理内容を記述する方法と、コントローラーを指定する方法がある
+
 <ul>
 <li>function指定の書き方</li>
 
@@ -822,10 +1053,10 @@ Route::HTTPメソッド('URLパス', function($message) {
 　　　　①↓　　　　　②↓　　　　　　③↓　　　　　　　　　　　④↓　　　　　　　　　⑤↓
 Route::HTTPメソッド('URLパス', [コントローラー::class, 'メソッド名'])->name('ルート名');
 ```
+
 </ul>
 
-
-#### ① HTTPメソッド(動詞)に対応して、以下が使える
+#### ① HTTP メソッド(動詞)に対応して、以下が使える
 
 <table border=1>
 <tr><th >　　　ディレクティブ　　　</th><th >　　　　　　</th></tr>
@@ -838,14 +1069,15 @@ Route::HTTPメソッド('URLパス', [コントローラー::class, 'メソッ�
 <tr><td><li> Route::redirect</li> </td><td>リダイレクト。302(一時的な転送)と 301(永続的な転送) がある<br>Route::redirect('/old-url', '/new-url');</td></tr>
 </table>
 
-#### function指定による記述例
+#### function 指定による記述例
+
 <table border=1>
 <tr><td>
 
 ```php
 // クロージャの中にpathに対応する処理を書く
 Route::get('/', function() {
-    return view('welcome');  
+    return view('welcome');
 });
 
 //「'/index/test'とアクセスされたら、'test'が$messageに代入されて、helloフォルダのテンプレート'index'をブラウザに表示する」ということになる。
@@ -863,9 +1095,11 @@ Route::get('index/{id}/{name}', function($param1, $param2) {
     return view('hello.index', ['id'=>$param1, 'name'=>$param2]);
 });
 ```
+
 </td></tr></table>
 
-#### class指定による記述例
+#### class 指定による記述例
+
 <li>⑤ ルートに名前(->name()) を付けると、ビューやコントローラーで名前を指定して使用できるようになる</li>
 <table border=1>
 <tr><td>
@@ -874,14 +1108,16 @@ Route::get('index/{id}/{name}', function($param1, $param2) {
 // 使用例
 Route::get('/hello', [HelloController::class, 'index'])->name('hello');
 ```
+
 上記の neme 定義を行うと、コントローラやビューで以下の <b>route{}</b> 定義が使用できる
+
 ```html
 <a href="{{ route('hello') }}>リンク名</a>
 // 引数がある場合
 <a href="{{ route('hello',['id' => 1]) }}">テスト</a>
 ```
-</td></tr></table>
 
+</td></tr></table>
 
 <li>パラメータを指定する方法</li>
 <table border=1>
@@ -897,6 +1133,7 @@ Route::get('/users/{id}/name/{name}', [UserController::class, 'show']);
 ```
 
 XXXcontroller.php には以下を指定することになる
+
 ```php
 public function index($id) { }
 public function index($id,$name) { }
@@ -904,21 +1141,24 @@ public function index($id,$name) { }
 
 </td></tr></table>
 
+#### Laravel のルーティングファイルには、web.php と api.php の 2 種類がある
 
-#### Laravelのルーティングファイルには、web.phpとapi.phpの2種類がある
 ###### web.php
-通常、ブラウザからHTTPリクエストをうけて、画面に表示するようなルーティングを設定する場合に使用する。
-CSRF保護などの機能が有効になっているため外部からのPOSTができない。
+
+通常、ブラウザから HTTP リクエストをうけて、画面に表示するようなルーティングを設定する場合に使用する。
+CSRF 保護などの機能が有効になっているため外部からの POST ができない。
 
 ###### api.php
-外部からのHTTPリクエストをうけて、値を返却したりするようなルーティング(エンドポイント)を設定する場合に使用する。
-CSRF保護が有効になっていないため外部からPOSTができる。
 
+外部からの HTTP リクエストをうけて、値を返却したりするようなルーティング(エンドポイント)を設定する場合に使用する。
+CSRF 保護が有効になっていないため外部から POST ができる。
 
 ## フォームの作成
+
 フォームを追加するには <b>モデル</b>・<b>ビュー</b>と<b>コントローラーファイル</b>を作成する
 
 #### モデルの作成
+
 > \>php artisan make:model Post -m
 
 モデルファイル
@@ -937,26 +1177,29 @@ database\migrations\2024_08_05_174658_create_posts_table.php
 ```
 
 #### ビューファイルの作成
-postフォルダを作成
+
+post フォルダを作成
 resources\views\post\
 
 resources\views\dashboard.blade.php ファイルをコピーして\post\create.blade.php ファイルを作成
+
 > \resources\views\> copy dashboard.blade.php .\post\create.blade.php
 
 \<form>内にコントロールを記述
+
 > method="post" action="{{ route('フォーム送信先のルート設定') }}
-> 
+
 ```php
             <form method="post" action="{{ route('reserve.store') }}">
                 @csrf
                 <label for="reservation_date">予約日:</label>
                 ：
-            </form>    
+            </form>
 ```
 
 #### コントローラーファイルの作成
 
->\> php artisan make:controller PostController
+> \> php artisan make:controller PostController
 
 ```php
 class PostController extends Controller
@@ -1001,16 +1244,18 @@ yoyaku\resources\views\dashboard.blade.php
 </ul>
 
 ## テンプレート
+
 <li> 通常テンプレートの配置</li>
 yoyaku\resources\views\layouts\app.blade.php
 
-Viteとは webpack、Rollup、Parcelのようなビルドツールの1つ。
+Vite とは webpack、Rollup、Parcel のようなビルドツールの 1 つ。
 これらの役割としては、プロジェクトすべてのファイルをコンパイル・結合して一つの塊（バンドル）となったファイルを生成してくれます。
 
 ```php
         <!-- Scripts -->
         @vite(['resources/css/app.css', 'resources/js/app.js'])
 ```
+
 <li> app.cssには TailWind CSS の利用宣言が入る</li>
 
 ```php
@@ -1018,7 +1263,9 @@ Viteとは webpack、Rollup、Parcelのようなビルドツールの1つ。
 @tailwind components;
 @tailwind utilities;
 ```
-app.jsには Alpine.js  の利用宣言が入る
+
+app.js には Alpine.js の利用宣言が入る
+
 ```
 import './bootstrap';
 import Alpine from 'alpinejs';
@@ -1027,11 +1274,14 @@ Alpine.start();
 ```
 
 ## スロット定義
+
 #### 定義方法
-name属性でスロットの名前を指定
+
+name 属性でスロットの名前を指定
 スロット内にコンテンツを記述
 
 #### 定義例
+
 <ul>
 <table border=1>
 <tr><td>*.brade.php</td><td>コンポーネント</td><td>展開後</td></tr>
@@ -1054,57 +1304,49 @@ name属性でスロットの名前を指定
     </x-slot>
 <x-app-layout>
 ```
+
 </td><td>
 
 ```html
 <div>
-    {{ $header }} 
+  {{ $header }}
 
+  <slot></slot>
 
-    <slot></slot>
-
-
-
-    {{ $slot }}  
-
-
-    {{ $footer }} 
-
-
+  {{ $slot }} {{ $footer }}
 </div>
 ```
+
 </td><td>
 
 ```html
 <div>
-    header文字列
+  header文字列
 
+  <h1>ホーム画面</h1>
+  <p>ホーム画面のコンテンツです。</p>
 
-    <h1>ホーム画面</h1>
-    <p>ホーム画面のコンテンツです。</p> 
+  slotの文字列
 
-
-    slotの文字列 
-
-
-    <p>これはフッターです</p>
-
-
+  <p>これはフッターです</p>
 </div>
 ```
+
 </td></table>
 </ul>
-
 
 ## フォームの作成
 
 #### モデルとマイグレーションの作成
+
 > \>php artisan make:model Post -m
 
-このコマンドにより、\app\Models と database\migrations\ に各々のphpファイルが作成される
+このコマンドにより、\app\Models と database\migrations\ に各々の php ファイルが作成される
 
 ###### モデルファイル作成
+
 \app\Models\Post.php
+
 ```php
 <?php
 
@@ -1125,8 +1367,8 @@ class Post extends Model
 }
 ```
 
-
 ###### マイグレーションファイル
+
 database\migrations\2024_08_05_174658_create_posts_table.php
 
 ```php
@@ -1142,64 +1384,182 @@ database\migrations\2024_08_05_174658_create_posts_table.php
 ```
 
 #### ビューファイルの作成
-postフォルダを作成
->\> md resources\views\post\
+
+post フォルダを作成
+
+> \> md resources\views\post\
 
 resources\views\dashboard.blade.php ファイルをコピーして\post\create.blade.php ファイルを作成
+
 > \resources\views\> copy dashboard.blade.php .\post\create.blade.php
 
 <details><summary> ＜form＞内にコントロールを記述</summary>
 
 ```html
 <x-app-layout>
-    <x-slot name="header">
-        <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-            フォーム
-        </h2>
-    </x-slot>
-    <div class="max-w-7xl mx-auto px-6">
-        <!-- セッションの中に messege が含まれていれば表示する -->
-        @if(session('message'))
-            <div class="text-red-600 font-bold">
-                {{session('message')}}
-            </div>
-        @endif
-        <form method="post" action="{{ route('post.store') }}" >
-            <!--  @csrf : cross site request forgeries 攻撃を防ぐための記述 
+  <x-slot name="header">
+    <h2 class="font-semibold text-xl text-gray-800 leading-tight">フォーム</h2>
+  </x-slot>
+  <div class="max-w-7xl mx-auto px-6">
+    <!-- セッションの中に messege が含まれていれば表示する -->
+    @if(session('message'))
+    <div class="text-red-600 font-bold">{{session('message')}}</div>
+    @endif
+    <form method="post" action="{{ route('post.store') }}">
+      <!--  @csrf : cross site request forgeries 攻撃を防ぐための記述 
                   ワンタイムトークンを実装する -->
-            @csrf
-            <div class="mt-8">
-                <div class="w-full flex flex-col" >
-                    <label for="title" class="font-semibold mt-4">件名</label>
-                    <!-- エラーメッセージの実装 -->
-                    <x-input-error :messages="$errors->get('title')" class="mt-2" />
-                    <!-- エラーメッセージが表示されても、前回の入力値が残るようにするには old('項目名') と記述 -->  
-                    <input type="text" name="title" 
-                            class="w-atuo py-2 border border-gray-300 rounded-md" 
-                            id="title" value="{{old('title')}}">
-                </div>
-            </div>
-            <div class="w-full flex flex-col">
-                <label for="body" class="font-semibold mt-4">本文</label>
-                <x-input-error :messages="$errors->get('body')" class="mt-2" />
-                <textarea name="body" class="w-auto py-2 border border-gray-300 rounded-md" 
-                    id="body" cols="30" rows="5">{{old('body')}}</textarea >
-            </div>
-            <x-primary-button class="mt-4">
-                送信する
-            </x-primary-button>
-        </form>
-    </div>
+      @csrf
+      <div class="mt-8">
+        <div class="w-full flex flex-col">
+          <label for="title" class="font-semibold mt-4">件名</label>
+          <!-- エラーメッセージの実装 -->
+          <x-input-error :messages="$errors->get('title')" class="mt-2" />
+          <!-- エラーメッセージが表示されても、前回の入力値が残るようにするには old('項目名') と記述 -->
+          <input
+            type="text"
+            name="title"
+            class="w-atuo py-2 border border-gray-300 rounded-md"
+            id="title"
+            value="{{old('title')}}"
+          />
+        </div>
+      </div>
+      <div class="w-full flex flex-col">
+        <label for="body" class="font-semibold mt-4">本文</label>
+        <x-input-error :messages="$errors->get('body')" class="mt-2" />
+        <textarea
+          name="body"
+          class="w-auto py-2 border border-gray-300 rounded-md"
+          id="body"
+          cols="30"
+          rows="5"
+        >
+{{old('body')}}</textarea
+        >
+      </div>
+      <x-primary-button class="mt-4"> 送信する </x-primary-button>
+    </form>
+  </div>
 </x-app-layout>
 ```
 
 </details>
 
+#### Alpine.js とは
+
+Alpine.js は、Vue.js に似た軽量な JavaScript フレームワークで、HTML 要素に JavaScript の振る舞いを追加することができる
+x-data は、Alpine.js の主要なディレクティブの 1 つで、コンポーネントのデータを定義するために使用する
+
+```html
+x-data="{ isOpen: false }"
+
+<nav x-data="{ isOpen: false }">
+  ・・・・isOpenというデータを定義し、初期値をfalseとする
+  <button @click="isOpen = !isOpen">
+    ・・・・Clickされたら isOpenをtrueとする Menu
+  </button>
+  <ul x-show="isOpen">
+    ・・・・isOpenがtrueならば以下を表示
+    <li><a href="#">Link 1</a></li>
+    <li><a href="#">Link 2</a></li>
+    <li><a href="#">Link 3</a></li>
+  </ul>
+</nav>
+```
+
+###### 主なディレクティブ
+
+<table>
+  <thead>
+    <tr><th>ディレクティブ</th><th>説明</th><th>使用例</th></tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code>x-data</code></td>
+      <td>コンポーネントのデータを定義する</td>
+      <td><code>&lt;div x-data="{ isOpen: false }"&gt;...&lt;/div&gt;</code></td>
+    </tr>
+    <tr>
+      <td><code>x-init</code></td>
+      <td>コンポーネントの初期化時に実行する JavaScript 式を指定する</td>
+      <td><code>&lt;div x-data="{ message: '' }" x-init="message = 'Hello!' "&gt;...&lt;/div&gt;</code></td>
+    </tr>
+    <tr>
+      <td><code>x-on</code> (または <code>@</code>)</td>
+      <td>DOM イベントをリッスンし、JavaScript 式を実行する</td>
+      <td><code>&lt;button @click="isOpen = !isOpen"&gt;Toggle&lt;/button&gt;</code></td>
+    </tr>
+    <tr>
+      <td><code>x-model</code></td>
+      <td>フォーム要素の値をデータにバインドする</td>
+      <td><code>&lt;input type="text" x-model="name"&gt;</code></td>
+    </tr>
+    <tr>
+      <td><code>x-show</code></td>
+      <td>式が truthy の場合に要素を表示する</td>
+      <td><code>&lt;div x-show="isOpen"&gt;...&lt;/div&gt;</code></td>
+    </tr>
+    <tr>
+      <td><code>x-if</code></td>
+      <td>式が truthy(TRUEと評価される値) の場合に要素をレンダリングする</td>
+      <td><code>&lt;template x-if="isOpen"&gt;&lt;div&gt;Content&lt;/div&gt;&lt;/template&gt;</code></td>
+    </tr>
+    <tr>
+      <td><code>x-text</code></td>
+      <td>要素のテキストコンテンツをデータにバインドする</td>
+      <td><code>&lt;span x-text="message"&gt;&lt;/span&gt;</code></td>
+    </tr>
+    <tr>
+      <td><code>x-html</code></td>
+      <td>要素の HTML コンテンツをデータにバインドする</td>
+      <td><code>&lt;div x-html="htmlContent"&gt;&lt;/div&gt;</code></td>
+    </tr>
+    <tr>
+      <td><code>x-bind</code> (または <code>:</code>)</td>
+      <td>要素の属性をデータにバインドする</td>
+      <td><code>&lt;img :src="imageUrl"&gt;</code></td>
+    </tr>
+    <tr>
+      <td><code>x-for</code></td>
+      <td>配列の各要素に対して要素を繰り返す</td>
+      <td><code>&lt;template x-for="item in items"&gt;&lt;div&gt;...&lt;/div&gt;&lt;/template&gt;</code></td>
+    </tr>
+    <tr>
+      <td><code>x-cloak</code></td>
+      <td>Alpine.js が読み込まれるまで要素を非表示にする</td>
+      <td><code>&lt;div x-cloak&gt;...&lt;/div&gt;</code></td>
+    </tr>
+    <tr>
+      <td><code>x-ref</code></td>
+      <td>要素への参照を作成する</td>
+      <td><code>&lt;input type="text" x-ref="myInput"&gt;</code></td>
+    </tr>
+    <tr>
+      <td><code>x-transition</code></td>
+      <td>要素のトランジション（アニメーション）を制御する<br>
+        以下の修飾子（modifier）を使って詳細な設定を行うことができる
+        <li>x-transition:enter: 要素が表示される際のトランジション</li>
+        <li>x-transition:leave: 要素が非表示になる際のトランジション</li>
+        <li>x-transition:duration: トランジションの duration（時間）</li>
+        <li>x-transition:ease: トランジションの easing（イージング関数） </li>       </td>
+      <td><code>&lt;div x-show="isOpen" x-transition&gt;...&lt;/div&gt;</code></td>
+    </tr>
+  </tbody>
+</table>
+
+    <ul>
+
+
+
+    </ul>
+
 #### コントローラーファイルの作成
-コントローラには入力チェック・PostならばDBの更新等とViewの呼び出し等を記述する。
+
+コントローラには入力チェック・Post ならば DB の更新等と View の呼び出し等を記述する。
 
 ###### コントローラ作成コマンド
->\> php artisan make:controller PostController
+
+> \> php artisan make:controller PostController
 
 <details><summary> app\Http\Controllers\PostController.php ファイルが作成される</summary>
 
@@ -1220,7 +1580,7 @@ class PostController extends Controller
         $validated = $request->validate([
             //      required : 必須入力
             //      max:nn : 最大文字列
-            //      'integer | between:0,150' : 数値 0～150 
+            //      'integer | between:0,150' : 数値 0～150
             //      ['max:1', 'regex:/^[男|女]+$/u'],
             "title"=> "required|max:20",
             "body"=> "required|max:400",
@@ -1254,9 +1614,11 @@ class PostController extends Controller
     }
 }
 ```
+
 </details>
 
 ###### よく使うバリデーションルール:Validate
+
 <table border=1>
 <tr><th>ルール </th><th >説明</th></tr>
 <tr><td>required</td><td>必須</td></tr>
@@ -1266,6 +1628,7 @@ class PostController extends Controller
 <tr><td>email</td><td>メールアドレス形式であること</td></tr>
 <tr><td>url</td><td>URL形式であること</td></tr>
 <tr><td>ip</td><td>IPアドレス形式であること</td></tr>
+
 <tr><td>date</td><td>日付形式であること</td></tr>
 <tr><td>alpha	</td><td>アルファベットのみ</td></tr>
 <tr><td>numeric	</td><td>数字のみ</td></tr>
@@ -1277,7 +1640,8 @@ class PostController extends Controller
 <tr><td>in:value1,value2,...	</td><td>指定された値のいずれか</td></tr>
 <tr><td>カスタムバリデーション</td><td>
 
-カスタムバリデーションファイルの場所: 任意のControllerやServiceクラス内
+カスタムバリデーションファイルの場所: 任意の Controller や Service クラス内
+
 ```php
 use Illuminate\Support\Facades\Validator;
 
@@ -1288,6 +1652,7 @@ Validator::extend('custom_rule', function ($attribute, $value, $parameters, $val
 ```
 
 ###### 電話番号チェック
+
 ```php
 $validatedData = Validator::make($request->all(), [
     'phone_number' => 'regex:/^0[0-9]{9,10}$/',
@@ -1300,16 +1665,20 @@ Validator::extend('phone_number', function ($attribute, $value, $parameters, $va
 });
 
 ```
+
 ハイフンありなし両方許容
+
 ```
 '/^(0{1}\d{1,4}-{0,1}\d{1,4}-{0,1}\d{4})$/'
 ```
+
 ###### ルールオブジェクトを使用する方法
-Laravel 8以降で推奨されている方法です。
+
+Laravel 8 以降で推奨されている方法です。
 
 > php artisan make:rule UniqueUsername
 
-App\Rules\UniqueUsername.phpというファイルが生成される
+App\Rules\UniqueUsername.php というファイルが生成される
 
 UniqueUsername.php
 
@@ -1341,7 +1710,7 @@ class UniqueUsername implements Rule
      */
     public function message()
     {
-        return 'The :attribute has already been   
+        return 'The :attribute has already been  
  taken.';
     }
 }
@@ -1351,7 +1720,9 @@ class UniqueUsername implements Rule
 </table>
 
 #### ルート設定を追加
+
 routes\web.php を編集
+
 ```php
 use App\Http\Controllers\PostController;
 ：
@@ -1360,25 +1731,26 @@ Route::get('post/create', [PostController::class,'create']);
 //  投稿の書き込み
 Route::post('post', [PostController::class,'store'])->name('post.store');
 ```
+
 #### ブラウザで表示を確認
 
 http://localhost/yoyaku/public/post/create
 
-
 ## 一覧表示画面の追加
-
 
 #### routes\web.php に http://localhost/yoyaku/public/post/ への get アクセスを追加
 
 PostController クラスの index() 関数を呼ぶという定義を追加
+
 ```
 //  投稿一覧(インデックス)
 Route::get('post', [PostController::class,'index']);
 ```
 
-
 #### yoyaku\app\Http\Controllers\PostController.php に index() 関数を追加
+
 view/post/ の index.blade.php を呼び出す定義を追加
+
 ```php
     //  投稿一覧(インデックス)を表示
     public function index() {
@@ -1386,7 +1758,9 @@ view/post/ の index.blade.php を呼び出す定義を追加
         return view('post.index',compact('posts'));
     }
 ```
+
 データの渡し方
+
 <table border=1>
 <tr><th> 渡し方</th><th >名前</th></tr>
 <tr><td>['user' => $test]</td><td>変数で渡す。</td></tr>
@@ -1394,58 +1768,51 @@ view/post/ の index.blade.php を呼び出す定義を追加
 <tr><td>compact('user' , ...)</td><td>連想配列で渡す。</td></tr>
 </table>
 
-
 #### yoyaku\resources\views\post\index.blade.php に表示方法を定義
 
 渡された $post は配列となっており、定義数分繰り返す
+
 <details><summary>index.blade.php</summary>
 
 ```html
 <x-app-layout>
-    <x-slot name="header">
-        <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-        一覧表示
-        </h2>
-    </x-slot>
-    <div class="mx-auto px-6">
+  <x-slot name="header">
+    <h2 class="font-semibold text-xl text-gray-800 leading-tight">一覧表示</h2>
+  </x-slot>
+  <div class="mx-auto px-6">
     @foreach($posts as $post)
-        <div class="mt-4 p-8 bg-white w-full rounded-2xl">
-            <h1 class="p-4 text-lg font-semibold">
-                {{$post->title}}
-            </h1>
-            <hr class="w-full">
-            <p class="mt-4 p-4">
-                {{$post->body}}
-            </p>
-            <div class="p-4 text-sm font-semibold">
-                <p>
-                    {{$post->created_at}}　/　 {{$post->user->name??'匿名'}}
-                </p>
-            </div>
-        </div>
-    @endforeach
+    <div class="mt-4 p-8 bg-white w-full rounded-2xl">
+      <h1 class="p-4 text-lg font-semibold">{{$post->title}}</h1>
+      <hr class="w-full" />
+      <p class="mt-4 p-4">{{$post->body}}</p>
+      <div class="p-4 text-sm font-semibold">
+        <p>{{$post->created_at}}　/　 {{$post->user->name??'匿名'}}</p>
+      </div>
     </div>
+    @endforeach
+  </div>
 </x-app-layout>
 ```
+
 </details>
 
 #### ブラウザで表示を確認
 
 http://localhost/yoyaku/public/post
 
-
 #### 一覧表示に投稿者名の表示を追加
 
->\>php artisan make:migration add_user_id_column_to_users_table --table=posts
+> \>php artisan make:migration add_user_id_column_to_users_table --table=posts
 
 \database\migrations\2024_08_15_160354_add_user_id_column_to_users_table.php
+
 ```php
    public function up(): void
     {
         Schema::table('posts', function (Blueprint $table) {
             //  postsテーブルに リレーション用の 'user_id' カラムを追加
 
-            //  従来の方法 
+            //  従来の方法
             // $table->unsignedBigInteger('user_id');       // user_id カラムを追加
             // $table->foreign('user_id')->references('id')->on('users');  // users テーブルの idとリレーション追加
 
@@ -1462,18 +1829,21 @@ http://localhost/yoyaku/public/post
     }
 ```
 
->\> php artisan migrate
+> \> php artisan migrate
 
 user_id の設定処理を追加
 \app\Http\Controllers\PostController.php
+
 ```php
         //  user_id の設定を追加
         $validated['user_id'] = auth()->id();
 ```
+
 \app\Models\Post.php
+
 ```php
     //  保存・更新したいカラムを設定
-    //  
+    //
     protected $fillable = [
         'title',
         'body',
@@ -1485,6 +1855,7 @@ user_id の設定処理を追加
 ```
 
 \app\Models\User.php
+
 ```php
     public function posts() {
         //  1 対多のリレーションでは hasMany を使用
@@ -1495,6 +1866,7 @@ user_id の設定処理を追加
 ```
 
 \resources\views\post\index.blade.php
+
 ```php
             <div class="p-4 text-sm font-semibold">
                 <p>
@@ -1525,6 +1897,7 @@ class PostController extends Controller
 Eloquent ORM を使用して where 条件を指定する
 
 \app\Http\Controllers\PostController.php
+
 ```php
         $posts = Post::where('user_id',Auth()->id())->get();     //  自分の投稿だけ
         $posts = Post::where('user_id','!=',Auth()->id())->get();     //  自分の投稿以外
@@ -1533,9 +1906,11 @@ Eloquent ORM を使用して where 条件を指定する
 ```
 
 ## ミドルウェア
+
 ミドルウェアとは、コントローラが実行される前後に配置する処理で、前処理ミドルウェアと後処理ミドルウェアと呼ぶ。
 
 app\Http\Kernel.php
+
 ```php
 class Kernel extends HttpKernel
 {
@@ -1562,6 +1937,7 @@ class Kernel extends HttpKernel
 ```
 
 routes\web.php
+
 ```php
 Route::get('/', function () {
     return view('welcome');
@@ -1571,7 +1947,8 @@ Route::get('/', function () {
 #### 管理者のみがアクセス可能にする
 
 ###### role カラムを追加
->php artisan make:migration add_role_clumn_to_users_table --table=users
+
+> php artisan make:migration add_role_clumn_to_users_table --table=users
 
 作成されたファイル
 database\migrations\2024_08_20_153850_add_role_clumn_to_users_table.php
@@ -1591,10 +1968,12 @@ database\migrations\2024_08_20_153850_add_role_clumn_to_users_table.php
     }
 ```
 
-###### MiddleWareの判定処理を追加
->php artisan make:middleware RoleMiddleware
+###### MiddleWare の判定処理を追加
+
+> php artisan make:middleware RoleMiddleware
 
 app\Http\Middleware\RoleMiddleware.php が作成される
+
 ```php
 <?php
 
@@ -1622,7 +2001,10 @@ class RoleMiddleware
 }
 ```
 
+###### Middleware の登録
+
 app\Http\Kernel.php
+
 ```php
     protected $middlewareAliases = [
 　　　　　　：
@@ -1630,16 +2012,26 @@ app\Http\Kernel.php
 　　　　　　：
 ```
 
+#### Middleware によるアクセス制限の記述を追加
+
+routes\web.php 　に Middleware('admin') を追加
+
+> Route::get('reserve/create', [ReserveController::class,'create'])->name('reserve.create')<b><font color='red'>->Middleware('admin');</font></b>
+
 ## データ変更画面の追加
 
-#### route設定
-routes\web.php　に /edit/ を追加
+#### route 設定
+
+routes\web.php 　に /edit/ を追加
+
 > Route::get('reserve/edit/{reserve}', [ReserveController::class,'edit'])->name('reserve.edit');
 
-{reserve} には呼び出し元画面で読み込まれているJSON定義が渡されてくる
+{reserve} には呼び出し元画面で読み込まれている JSON 定義が渡されてくる
 
-#### contloer設定
-引数を 'reserve' として Viewに渡す
+#### contloer 設定
+
+引数を 'reserve' として View に渡す
+
 ```php
     public function edit(Reserve $reserve) {
         //return view("Reserve.RUpdate",compact('reserve'));
@@ -1647,9 +2039,11 @@ routes\web.php　に /edit/ を追加
     }
 ```
 
-#### Modelに日付フィールドであることを定義する
+#### Model に日付フィールドであることを定義する
+
 これを行わないと、全て文字列型の yyyy/mm/dd となる。
-Viewで日付項目に初期値として設定するためには　yyyy-mm-dd 形式とする必要がある
+View で日付項目に初期値として設定するためには　 yyyy-mm-dd 形式とする必要がある
+
 ```php
     protected $casts = [
         'ReqDate' => 'datetime',
@@ -1657,8 +2051,10 @@ Viewで日付項目に初期値として設定するためには　yyyy-mm-dd �
     ];
 ```
 
-#### view設定
+#### view 設定
+
 resources\views\Reserve\REdit.blade.php
+
 ```html
 <form action="/sample/index" method="post">
     @method('patch')
@@ -1668,7 +2064,7 @@ resources\views\Reserve\REdit.blade.php
         value="{{ old('ClitNameKanji',$reserve->ClitNameKanji) }}"><br>
 
     <label for="reservation_date">日時:</label>
-    <input type="datetime-local" id="ReserveDate" name="ReserveDate" required 
+    <input type="datetime-local" id="ReserveDate" name="ReserveDate" required
             value="{{ old('ReserveDate',$reserve->ReserveDate) }}"><br>
 
     <label for="CliResvType">ドロップダウンリスト :</label>
@@ -1682,28 +2078,67 @@ resources\views\Reserve\REdit.blade.php
     <input type="submit" text="提出">
 </form>
 ```
-@method('patch')と書くと、以下のhtmlが追加される
+
+@method('patch')と書くと、以下の html が追加される
+
 ```html
-<input type="hidden" name="_method" value="patch">
+<input type="hidden" name="_method" value="patch" />
 ```
 
 ###### old()関数を使い、変更前の値を表示させる
+
 テキストボックスの場合
+
 > value="{{ old('ClitNameKanji',$reserve->ClitNameKanji) }}"
 
+## Inertia「イナーシャ」とは
+
+Inertia とはサーバーサイド（バックエンド）とクライアントサイド（フロントエンド）をつなぐためのツール
+今回でいうとクライアントサイド（Vue.js）とサーバーサイド（Laravel）に当たります。
+
+Inertia を使えば、Vue 側でも、laravel のルート設定を使ったり、ヘッダを組み込んだり、ページネーションを簡単に搭載したりできます。
+
+#### Inertia の追加
+
+> composer require inertiajs/inertia-laravel
+
+vendor/inertiajs/inertia-laravel ディレクトリが作成されます。
+
+<ul>
+<li>src/Inertia.php: Inertia ファサードの実装が含まれています。このファイルには、render()、location()、redirect() などのメソッドが定義されています。</li>
+<li>use Inertia\Inertia; という記述は、この Inertia ファサードをアプリケーション内で使用できるようにするためのものです。ファサードを使用することで、Inertia クラスのインスタンスを直接生成せずに、静的なメソッドを呼び出すことができます。</li>
+</ul>
+
+コントローラ
+
+```php
+    public function index()
+    {
+        $items = Item::select('id', 'name', 'price', 'is_selling')->get();
+
+        //Inertia::renderという関数は第一引数にコンポーネント、第二引数にプロパティ配列を渡します。
+        //Inertia::renderを呼び出す事で、どのコンポーネントに対してどの変数をセットするかをここできめ、vueにも反映させることができます。
+        return Inertia::render('Items/Index', [
+            'items' => $items
+        ]);
+    }
+```
 
 ## コンポーネントの追加
-コンポーネントとはWEBページの一部として使うテンプレート
+
+コンポーネントとは WEB ページの一部として使うテンプレート
 
 コンポーネントを追加するには以下のコマンドを入力する
+
 > php artisan make:component Message
 
 コマンドを実行すると、以下２つのファイルが作成される
-<li>コンポーネント：yoyaku\app\View\Components\Message.php</li>
-<li>View : yoyaku\resources\views\components\message.blade.php</li>
 
+<li>コンポーネント  ：yoyaku\app\View\Components\Message.php</li>
+<li>View           : yoyaku\resources\views\components\message.blade.php</li>
 
 #### メッセージを表示するコンポーネント
+
 <ul>
 yoyaku\app\View\Components\Message.php
 
@@ -1719,19 +2154,20 @@ class Message extends Component
 {
     public $message;    //　←メンバ変数を追加
 
-    public function __construct($message) 
+    public function __construct($message)
     {   //  コンストラクタで表示するメッセージ文を受け取る
-        $this->message = $message;  
+        $this->message = $message;
     }
 
     public function render(): View|Closure|string
-    {   
+    {
         return view('components.message');
     }
 }
 ```
 
-#### View 
+#### View
+
 yoyaku\resources\views\components\message.blade.php
 
 ```php
@@ -1742,39 +2178,59 @@ yoyaku\resources\views\components\message.blade.php
 @endif
 ```
 
-#### 使用するViewファイルに以下の定義を追加する
+#### 使用する View ファイルに以下の定義を追加する
 
 ```php
         <x-message :message="session('message')" />
 ```
-コンポーネントを呼び出すbladeファイルでは、タグ形式でコンポーネントを呼び出します。
+
+コンポーネントを呼び出す blade ファイルでは、タグ形式でコンポーネントを呼び出します。
 タグ名はコンポーネント名をケバブケースにして頭に「x-」をつけたものになります。
-（例：コンポーネント名がComponentTestの場合、タグ名はx-component-test）
+（例：コンポーネント名が ComponentTest の場合、タグ名は x-component-test）
 
 パラメータは属性として渡しますが、属性名もケバブケースで表現します。
-（例：コンポーネント側のパラメータ名がtestTitleの場合、属性名はtest-title）
+（例：コンポーネント側のパラメータ名が testTitle の場合、属性名は test-title）
 
 ###### コンポーネントの呼び出し方法
 
-```php
-①    <x-rtextbox  inputName="ClitNameKanji">氏名（漢字）</x-rtextbox>
-②    <x-rtextbox :inputName="ClitNameKanji">氏名（漢字）</x-rtextbox>
-③    <x-rtextbox :inputName="$ClitNameKanji">氏名（漢字）</x-rtextbox>
+コンポーネント名を RTextbox として追加する
+
+> php artisan make:component RTextbox
+
 ```
-①のように属性名にコロンが付いていない場合にはパラメータには文字列のClitNameKanjiが渡される。
-②のようにコロンを付けた場合には固定数のClitNameKanjiが渡される。
-③のようにコロンを付けた場合には、コントローラから渡された変数の$ClitNameKanjiが渡される。
+コンポーネントクラス
+app\View\Components\RTextbox.php
+```
+
+```
+Viewファイル
+resources\views\components\r-textbox.blade.php
+```
+
+```php
+クラス名の1,2文字目
+①    <x-rTextbox  inputName="ClitNameKanji">氏名（漢字）</x-rTextbox>
+②    <x-rTextbox :inputName="ClitNameKanji">氏名（漢字）</x-rTextbox>
+③    <x-rTextbox :inputName="$ClitNameKanji">氏名（漢字）</x-rTextbox>
+```
+
+① のように属性名にコロンが付いていない場合にはパラメータには文字列の ClitNameKanji が渡される。
+② のようにコロンを付けた場合には固定数の ClitNameKanji が渡される。
+③ のようにコロンを付けた場合には、コントローラから渡された変数の$ClitNameKanji が渡される。
 
 本日日付など、関数を呼び出したい場合もコロン付きとする
+
 ```php
-                <x-rtextbox name="ReserveDate" type="datetime-local" 
+                <x-rtextbox name="ReserveDate" type="datetime-local"
                     :value="date('Y-m-d 07:00')" required>予約日:</x-rtextbox>
 ```
 
 #### エラー「Unresolvable dependency resolving ･･･」が表示される場合
+
 > Unresolvable dependency resolving [Parameter #0 [ <required> $name ]] in class App\View\Components\Alert (View: /...path.../resources/views/welcome.blade.php)
 
 ブラウザで「キャッシュの消去と再読み込み」を行うと解消される
+
 </ul>
 
 ## イベントの追加
@@ -1782,11 +2238,12 @@ yoyaku\resources\views\components\message.blade.php
 > php artisan make:event ChatMessageRecieved
 
 yoyaku\app\Events\ChatMessageRecieved.php
+
 ```php
 <?php
- 
+
 namespace App\Events;
- 
+
 use Illuminate\Broadcasting\Channel;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Broadcasting\PrivateChannel;
@@ -1794,14 +2251,14 @@ use Illuminate\Broadcasting\PresenceChannel;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Broadcasting\InteractsWithSockets;
 use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
- 
+
 class ChatMessageRecieved implements ShouldBroadcast
 {
     use Dispatchable, InteractsWithSockets, SerializesModels;
- 
+
     protected $message;
     protected $request;
- 
+
     /*  Create a new event instance.*/
     public function __construct($request) {
         $this->request = $request;
@@ -1825,13 +2282,14 @@ class ChatMessageRecieved implements ShouldBroadcast
 }
 ```
 
-## helper関数の追加
+## helper 関数の追加
 
 ヘルパー関数ファイルを追加
 yoyaku\app\helpers.php
 
 ヘルパー関数としてファイルを登録
 yoyaku\composer.json
+
 ```json
 "autoload": {
     "psr-4": {
@@ -1839,90 +2297,135 @@ yoyaku\composer.json
         "Database\\Factories\\": "database/factories/",
         "Database\\Seeders\\": "database/seeders/"
     },
-    "files": [ 
-        "app/helpers.php" 
-    ]
+    "files": [                  //  ← 追加
+        "app/helpers.php"       //  ← 追加
+    ]                           //  ← 追加
 },
 ```
 
-## ajaxの組み込み。
+定義を追加したら、これを反映するために以下のコマンドを入力
 
-#### ajaxを使えるようにするために、app.blade.phpのheadの部分でスクリプトを読み込む。
+> php artisan config:cache
+
+## ajax の組み込み。
+
+#### ajax を使えるようにするために、app.blade.php の head の部分でスクリプトを読み込む。
+
 \resources\views\layouts\app.blade.php
+
 ```php
 <!-- Scripts -->
 <script src="{{ asset('js/app.js') }}" defer></script>
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
 ```
 
-#### Ajaxのスクリプトを作成
+#### Ajax のスクリプトを作成
 
 フォルダ「\public\js」を作成
-　
+
 public/js/comment.js
+
 ```javascript
-$(function() {
-    get_data();
+$(function () {
+  get_data();
 });
 
-function get_data() {   //  5秒ごとに、jsonデータを取得
-    $.ajax({
-        url: "result/ajax/",
-        dataType: "json",
-        success: data => {
-            console.log(data);
-        },
-        error: () => {
-            alert("ajax Error");
-        }
-    });
+function get_data() {
+  //  5秒ごとに、jsonデータを取得
+  $.ajax({
+    url: "result/ajax/",
+    dataType: "json",
+    success: (data) => {
+      console.log(data);
+    },
+    error: () => {
+      alert("ajax Error");
+    },
+  });
 
-    setTimeout("get_data()", 5000);
+  setTimeout("get_data()", 5000);
 }
 ```
 
 ## 郵便番号から住所を自動入力する方法
 
-Composerを使ってパッケージをインストール
+Composer を使ってパッケージをインストール
+
 > composer require SUKOHI/laravel-jp-postal-code
 
+## ポップアップ画面の追加
 
-## サーバにアップロードするフォルダ
+Composer を使って Laravel プロジェクトに Livewire をインストールします。
 
+> composer require livewire/livewire
 
-<ul>
-<li>AWSにアップロードするフォルダ</li>
-appディレクトリ: アプリケーションのロジックが記述されたファイル群です。
-configディレクトリ: アプリケーションの設定ファイルです。
-databaseディレクトリ: マイグレーションファイルやシーダーファイルなどが含まれます。
-publicディレクトリ: 公開ディレクトリです。
-routesディレクトリ: ルート定義ファイルです。
-storageディレクトリ: ログやキャッシュ、アップロードファイルなどが格納されます。
-vendorディレクトリ: Composerでインストールした依存パッケージです。
-.envファイル: 環境設定ファイルです。
-<ul>
+Livewire のビュー、スタイルシート、JavaScript ファイルをパブリッシュします。
 
+> php artisan livewire:publish
+
+モーダルコンポーネントの作成
+
+> php artisan make:livewire ShopClosedModal
+
+以下の php ファイルが作成される
+app\Livewire\ShopClosedModal.php
+resources/views/livewire/modal.blade.php
+
+コントローラの作成
+
+> php artisan make:controller ShopClosedModalController
+
+## プロジェクトに Bootstrap を適用するまでの手順
+
+#### laravel/ui のパッケージをインストール
+
+> composer require laravel/ui
+
+#### Bootstrap をインストール
+
+> php artisan ui bootstrap
+
+#### プラグインのインストール
+
+※ロリポップでは使えない
+
+> npm install
+
+#### blade ファイルに Bootstrap を適用
+
+```html
+<!DOCTYPE html>
+<html lang="ja">
+  <head>
+    ・・・ @vite(['resources/sass/app.scss', 'resources/js/app.js']) ・・・
+  </head>
+</html>
+```
+
+Laravel10 では、Laravel Mix ではなく Vite を使用しているため、public/css/app.css にスタイルが出力されない
+したがって、blade ファイルでは resources/sass/app.scss のファイルパスを指定している
+
+#### Vite の実行
+
+> npm run dev
 
 プロジェクトに反映
+
 > composer dump-autoload
-
-
-
 
                         value="{{ old('ReserveDate',"<?php echo substr($reserve->ReserveDate,0,10); ?>") }}"><br>
                         value="<?php echo substr($reserve->ReserveDate,0,10); ?>"><br>
 
            <form method="post" action="{{ isset($reserve) ?? route('reserve.store') :: route('reserve.update') }}">
- 
+
 vendor\illuminate\collections\helpers.php
 
 date('Y-m-d', strtotime('-1 month'));
 
-
                     :value="<?php echo date('Y-m-d 07:00');?>" required>予約日:</x-rtextbox>
                     value="2024-09-23 07:00" required>予約日:</x-rtextbox>
 
-                <x-rtextbox name="ReserveDate" type="datetime-local" 
+                <x-rtextbox name="ReserveDate" type="datetime-local"
                     :value="date('Y-m-d 07:00')" required>予約日:</x-rtextbox>
 
 
@@ -1933,7 +2436,7 @@ date('Y-m-d', strtotime('-1 month'));
         document.getElementById('downloadBtn').addEventListener('click', function() {
             // ページ全体のHTMLを取得
             let html = document.documentElement.outerHTML;
-            
+
             // ダウンロード用のリンクを作成
             let blob = new Blob([html], { type: 'text/html' });
             let link = document.createElement('a');
@@ -1962,3 +2465,26 @@ date('Y-m-d', strtotime('-1 month'));
                                         <span class="ntotal">{{ $week[$ix]['totalCnt'] }}</span>
                                     @endisset
                                 </td>
+
+
+                <x-rTextbox name="ReserveDate" type="datetime-local"
+                    value="{{old('ReserveDate', $destdate) }}" required>予約日:</x-rTextbox>
+
+Symfony\Component\HttpFoundation\Response->send (c:\Tools\AnHttpd\nmaki\yoyaku\vendor\symfony\http-foundation\Response.php:423)
+{main} (c:\Tools\AnHttpd\nmaki\yoyaku\public\index.php:53)
+
+## ビューコンポーザー
+
+Laravel のビューコンポーザーは、特定のビューまたはビューグループにデータを自動的にバインドするための仕組みです。これにより、コントローラーでビューにデータを渡す処理を減らし、コードの整理や再利用性を高めることができます。
+
+#### ビューコンポーザーの利点:
+
+コードの整理: ビューに渡すデータをコントローラーから分離し、ビューコンポーザーにまとめることで、コントローラーのコードを簡潔に保つことができます。
+再利用性の向上: 複数のビューで共通のデータを渡す場合に、ビューコンポーザーを一度定義するだけで済みます。
+テストの容易性: ビューコンポーザーは、ビューにデータを渡す処理を独立したクラスとして定義するため、テストが容易になります。
+
+Laravel 8.0 以降では、ビューコンポーザーのクラスを生成するための専用の Artisan コマンドは提供されなくなりました。代わりに、通常のクラスとして作成し、手動で app/Providers/AppServiceProvider.php に登録する必要があります。
+
+ビューコンポーザーのクラスを手動で作成:
+
+app/View/Composers ディレクトリを作成し、その中に SelShopComposer.php ファイルを作成します。

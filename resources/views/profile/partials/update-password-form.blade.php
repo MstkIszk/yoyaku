@@ -1,8 +1,7 @@
+<!--「resources\views\profile\partials\update-password-form.blade.php」---START -->
 <section>
     <header>
-        <h2 class="text-lg font-medium text-gray-900">
-            {{ __('Update Password') }}
-        </h2>
+        <x-article-title caption="{{ __('Update Password') }}" />
 
         <p class="mt-1 text-sm text-gray-600">
             {{ __('Ensure your account is using a long, random password to stay secure.') }}
@@ -46,3 +45,4 @@
         </div>
     </form>
 </section>
+<!--「resources\views\profile\partials\update-password-form.blade.php」---END -->

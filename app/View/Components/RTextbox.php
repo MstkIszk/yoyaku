@@ -33,6 +33,7 @@ class RTextbox extends Component
      */
     public function render(): View|Closure|string
     {
+        /* 表示 : resources\views\components\r-textbox.blade.php */
         return view('components.r-textbox');
     }
 }

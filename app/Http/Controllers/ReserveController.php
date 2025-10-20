@@ -3,12 +3,13 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
 use App\Models\Reserve;
-use Illuminate\Support\Facades\Validator;
+use App\Models\ReserveDate;
 use App\Rules\CheckReservationCount;
-use App\Http\Requests\ReserveRequest;
-
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Validator;
+use App\Models\User; // User モデルをインポート
+use Illuminate\Support\Facades\View;
 enum ReserveStatus : int
 {
     const Entry = 0; //  受付後、未確認
@@ -36,6 +37,51 @@ class ReserveController extends Controller
 {
     // routes\web.php から呼ばれる関数
 
+    //  店舗の新規登録
+    public function spcreate(Request $request) {
+        return view("Reserve.SpCreate");
+    }
+    //  店舗登録の確定    //  予約の編集
+    public function spedit(Reserve $reserve) {
+        //return view("Reserve.RUpdate",compact('reserve'));
+        return view("Reserve.SpEdit",compact('reserve'));
+    }
+    public function spupdate(Request $request, Reserve $reserve) {
+        //  入力の妥当性チェック
+        $validated = $request->validate([
+            //      required : 必須入力
+            //      max:nn : 最大文字列
+            //      'integer | between:0,150' : 数値 0～150 
+            //      ['max:1', 'regex:/^[男|女]+$/u'],
+            "SpNameKanji" =>  "required|max:20",
+            "SptNameKana"  =>  "required|max:20",
+            "SpAddrZip" =>  "",       //  郵便番号
+            "SpAddrPref" =>  "",      //  県名
+            "SpAddrCity" =>  "",      //  市町村名
+            "SpTel1" =>  "required|phone_number",          //  電話番号
+            "SpTel2" =>  "required|phone_number",          //  電話番号
+            "SpEMail" =>  "required|email",         //  メールアドレス
+            "SpResvType" =>  "",      //  予約タイプ	
+            "SpWaysPay" =>  "",       //  支払い方法
+            "MessageText" =>  ""      //  連絡
+            ],
+            [
+                //  エラーメッセージ記述
+                'SptNameKanji.max' => '漢字名は20文字以内。',
+                'SptNameKana.required' => 'カナは必須項目です。'
+            ]
+           
+        );
+        if($reserve->update($validated) == false) {
+            $request->session()->flush('message','更新に失敗しました');            
+        }
+        else {
+            //  処理後に一覧表示ページに戻る
+            return redirect()->route('reserve.index');
+        }
+    }
+    
+
     public function create(Request $request,$ReqDate='',$ReqType=0) {  //  新規投稿
 
         if(strlen($ReqDate) > 0) {
@@ -44,8 +90,10 @@ class ReserveController extends Controller
         else {
             $DestDate = date('Y-m-d 07:00');
         }
-
-        return view("Reserve.RCreate",compact('DestDate','ReqType'));
+        $ShopID = session('ShopID'); // キーに対応する値を取得
+        $user = User::find($ShopID);
+        return view("Reserve.RCreate",compact('user', 'DestDate','ReqType'));
+        //return view("Reserve.RCreate")->with('DestDate', $DestDate)->with('ReqType', $ReqType);
 
         // makeメソッドでインスタンスを作成（データベースには保存しない）
         //$reserve = Reserve::make([
@@ -183,9 +231,10 @@ class ReserveController extends Controller
         } 
         else {
             // レコードが見つからなかった場合の処理
-            $request->session()->flash('message','確認が見つかりません');
+            $request->session()->flash('message','予約が見つかりません');
         }
     }
+    //  予約の確定
     public function fixed(Request $request,$id=0,$KeyStr="") {
         $result = Reserve::where('id', $request->id)
                             ->where('KeyStr', $request->KeyStr)
@@ -201,14 +250,35 @@ class ReserveController extends Controller
             $request->session()->flash('message','確認が見つかりません');
         }
     }
+    //  予約の照会
     public function show($id) {
         $reserve = Reserve::find($id);
         return view("Reserve.RShow", compact('reserve'));
     }
-    public function index() {
-        $reserve = Reserve::all();   //  予約データの一括読み込み
+    //  予約の照会
+    public function telnoinput(Request $request) {
+        return view("Reserve.RTelNoinput");
+    }
+    //  管理画面　予約一覧の表示
+    //  管理画面から呼ばれた場合はViewに対して全データ、電話番号画面から呼ばれた場合は抽出後のデータを渡す
+    public function index(Request $request,$CliTel1 = "") {
+        $reserve = null;
+        if($request->CliTel1 == "") {
+            $reserve = Reserve::all();   //  予約データの一括読み込み
+        }
+        else {
+            //  指定した電話番号だけを抽出
+            $reserve = Reserve::where('CliTel1', $request->CliTel1)->get();
+
+            if ((!$reserve) || ($reserve->count() <= 0)) {
+                // レコードが見つからなかった場合の処理
+                $request->session()->flash('message','指定された電話番号での予約は見つかりません');
+                return view("Reserve.RTelNoinput");
+            }
+        }
         return view("Reserve.RIndex",compact('reserve'));
     }
+    //  予約の編集
     public function edit(Reserve $reserve) {
         //return view("Reserve.RUpdate",compact('reserve'));
         return view("Reserve.REdit",compact('reserve'));
@@ -258,16 +328,43 @@ class ReserveController extends Controller
         return redirect()->route('reserve.index');
     }
     
+    //  店舗の情報と予約情報を表示
+    public function shopsel(Request $request,$id = 0,$month = "") {
 
-    public function calender(Request $request,$month = "") {
+        if($id == 0) {
+            return redirect()->route('profile.homelist');
+        }
+        $ShopInf = User::find($id); // 指定されたIDの予約データを取得
+        if(!$ShopInf) {
+            return redirect()->route('profile.homelist');
+        }
+        session(['ShopID' => $id]); // 選択された店舗のIDを保存
+        if($month == "") {
+            $month = date('Y-m-d');
+        }
+
+        return view("Reserve.RCalender",compact('month','ShopInf'));
+    }
+
+    
+    public function calender(Request $request,$month = "",$user = null) {
 
         if($month == "") {
             $month = date('Y-m-d');
         }
-        return view("Reserve.RCalender",compact('month'));
+        $ShopID = session(['ShopID']);
+        $ShopInf = User::find($ShopID);
+        if(!$ShopInf) {
+            return redirect()->route('profile.homelist');
+        }
+
+        $ProductID  = session(['ProductID']);
+
+        return view("Reserve.RCalender",compact('month','ShopInf'));
     }
 
-    public function calenderGet(Request $request,$month = "") {
+    //  指定月のカレンダー情報を読み込むバックエンド処理
+    public function calenderGet(Request $request,$id=0,$month = "") {
 
         $month = $request->month;
 
@@ -276,7 +373,9 @@ class ReserveController extends Controller
         $lastDay = date('Y-m-t', strtotime($month));
 
         // 指定月の範囲内のデータを取得
-        $reservations = Reserve::whereBetween('ReserveDate', [$firstDay, $lastDay])->orderBy('ReserveDate')->get();
+        $reservations = Reserve::whereBetween('ReserveDate', [$firstDay, $lastDay])
+            ->where('Baseid', $request->id)
+            ->orderBy('ReserveDate')->get();
         $dcnt = count($reservations);
         $dix = 0;
         $resvDate = 99;
@@ -284,6 +383,11 @@ class ReserveController extends Controller
             $resv = $reservations[$dix];    //  年月日の日の部分だけを切り出し
             $resvDate = substr($resv->ReserveDate,8,2);
         }
+
+        // 日付情報を読み込み
+        $reserveDates = ReserveDate::whereBetween('destDate', [$firstDay, $lastDay])->orderBy('destDate')->get();
+        $infoIx = 0;
+        $infoCnt = $reserveDates->count();
 
         //  日数を取得
         $dateCnt = date('t',strtotime($lastDay));
@@ -300,6 +404,7 @@ class ReserveController extends Controller
         $json_string = '[{"name": "Alice", "age": 30}, {"name": "Bob", "age": 25}]';
         $data = json_decode($json_string, true);
 
+        $DateIx = 0;
         for ($day = 1; $day <= $dateCnt; $day ++) {
             //  日を配列に埋め込み
 
@@ -320,6 +425,13 @@ class ReserveController extends Controller
                 }
                 //$resvDate = $resv['ReserveDate']->date;
             }
+            if($infoIx < $infoCnt) {
+                $destDate = substr($reserveDates[$infoIx]->destDate, 8, 2);
+                if($day == $destDate) {     //  同じ日付ならば 反映して次のデータへ
+                    $week[$posX]['operating'] = $reserveDates[$infoIx]->operating;
+                    $infoIx++;
+                }
+            } 
             $week[$posX]['totalCnt'] = $totalCnt;
 
             if(++$posX > 6) {   //  週が終わったら
@@ -335,7 +447,6 @@ class ReserveController extends Controller
 
         return response()->json($calender);
     }
-
     public function GetCustmerData(Request $request,$tel = "") {
 
         $type = $request->type;

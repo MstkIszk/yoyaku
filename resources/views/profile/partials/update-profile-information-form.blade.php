@@ -1,53 +1,89 @@
+<!--「resources\views\profile\partials\update-profile-information-form.blade.php」---START -->
 <section>
     <header>
-        <h2 class="text-lg font-medium text-gray-900">
-            {{ __('Profile Information') }}
-        </h2>
-
-        <p class="mt-1 text-sm text-gray-600">
-            {{ __("Update your account's profile information and email address.") }}
-        </p>
+        <x-article-title caption="{{ __('Profile Information') }}" />
     </header>
-
-    <form id="send-verification" method="post" action="{{ route('verification.send') }}">
-        @csrf
-    </form>
 
     <form method="post" action="{{ route('profile.update') }}" class="mt-6 space-y-6">
         @csrf
         @method('patch')
 
-        <div>
-            <x-input-label for="name" :value="__('Name')" />
-            <x-text-input id="name" name="name" type="text" class="mt-1 block w-full" :value="old('name', $user->name)" required autofocus autocomplete="name" />
-            <x-input-error class="mt-2" :messages="$errors->get('name')" />
-        </div>
+        <!-- Name -->
+        No. {{ Auth::user()->id }}
 
-        <div>
-            <x-input-label for="email" :value="__('Email')" />
-            <x-text-input id="email" name="email" type="email" class="mt-1 block w-full" :value="old('email', $user->email)" required autocomplete="username" />
-            <x-input-error class="mt-2" :messages="$errors->get('email')" />
+        <style>
+            .textLink {
+                text-decoration: underline;
+                font-size: 0.875rem; /* 14px */
+                line-height: 1.25rem; /* 20px */
+                color: #71717a;
+            }
+            .textLink::hover {
+                color: red; /* 文字色を赤くする */
+                background-color: red; /* 背景色を赤くする */
+                border-color: red; /* 枠線を赤くする */
+            }
 
-            @if ($user instanceof \Illuminate\Contracts\Auth\MustVerifyEmail && ! $user->hasVerifiedEmail())
-                <div>
-                    <p class="text-sm mt-2 text-gray-800">
-                        {{ __('Your email address is unverified.') }}
+            .inputBoxArea {
+                display: flex; /* Flexbox を有効にする */
+                flex-direction: column; /* デフォルトは縦並び */
+            }
 
-                        <button form="send-verification" class="underline text-sm text-gray-600 hover:text-gray-900 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
-                            {{ __('Click here to re-send the verification email.') }}
-                        </button>
-                    </p>
+            /* 画面幅が 800px 以上の場合 */
+            @media (min-width: 1000px) {
+                .inputBoxArea {
+                    flex-direction: row; /* 横並びにする */
+                    align-items: center; /* 垂直方向に中央揃え */
+                }
 
-                    @if (session('status') === 'verification-link-sent')
-                        <p class="mt-2 font-medium text-sm text-green-600">
-                            {{ __('A new verification link has been sent to your email address.') }}
-                        </p>
-                    @endif
-                </div>
-            @endif
-        </div>
+                .inputBoxArea label {
+                    width: 8em;
+                    margin-right: 10px; /* ラベルとテキストボックスの間に間隔を作る */
+                }
+            }            
+        </style>
+
+        <hr>
+        <script src="https://yubinbango.github.io/yubinbango/yubinbango.js" charset="UTF-8"></script>
+
+        <x-input-error :messages="$errors->get('baseNameKanji')" class="mt-2" />
+        <x-rTextbox name="baseNameKanji" required value="{{Auth::user()->spName}}">{{ __('Shop name') }}</x-rTextbox>
+
+        <x-input-error :messages="$errors->get('baseNameKana')" class="mt-2" />
+        <x-rTextbox name="baseNameKana" required value="{{Auth::user()->spNameKana}}">{{ __('Shop name') }}{{ __('(KANA)') }}</x-rTextbox>
+        
+        <label>{{ __('validation.attributes.address') }}</label>
+        <span class="p-country-name" style="display:none;">Japan</span>
+
+        <x-input-error :messages="$errors->get('baseAddrZip')" class="mt-2" />
+        <x-rTextbox class="p-postal-code " name="baseAddrZip" required value="{{Auth::user()->spAddrZip}}">{{ __('postal code') }}:</x-rTextbox>
+
+        <x-input-error :messages="$errors->get('baseAddrPref')" class="mt-2" />
+        <x-rTextbox name="baseAddrPref" class="p-region " required value="{{Auth::user()->spAddrPref}}">{{ __('province') }}:</x-rTextbox>
+
+        <x-input-error :messages="$errors->get('baseAddrCity')" class="mt-2" />
+        <x-rTextbox name="baseAddrCity" class="p-locality "  required value="{{Auth::user()->spAddrCity}}">{{ __('municipality') }}:</x-rTextbox>
+
+        <x-input-error :messages="$errors->get('baseAddrOther')" class="mt-2" />
+        <x-rTextbox name="baseAddrOther" class="p-street-address p-extended-address "  required value="{{Auth::user()->spAddrOther}}">{{ __('village') }}:</x-rTextbox>
+
+        <x-input-error :messages="$errors->get('baseTel1')" class="mt-2" />
+        <x-rTextbox name="baseTel1" type="tel" value="{{Auth::user()->spTel1}}">{{ __('phone') }}1:</x-rTextbox>
+
+        <x-input-error :messages="$errors->get('baseTel2')" class="mt-2" />
+        <x-rTextbox name="baseTel2" type="tel" value="{{Auth::user()->spTel2}}">{{ __('phone') }}2:</x-rTextbox>
+
+        <x-input-error :messages="$errors->get('baseEMail')" class="mt-2" />
+        <x-rTextbox name="baseEMail" type="email" required value="{{Auth::user()->spEMail}}">{{ __('Email') }}:</x-rTextbox>
+
+        <x-input-error :messages="$errors->get('baseURL')" class="mt-2" />
+        <x-rTextbox name="baseURL" type="url" required value="{{Auth::user()->spURL}}">URL:</x-rTextbox>
+
+        <label for="MessageText">{{ __('validation.attributes.guide_text') }}:</label><br>
+        <textarea id="MessageText" name="MessageText" >{{Auth::user()->spMsgText}}</textarea><br>
 
         <div class="flex items-center gap-4">
+            <!-- 保存ボタンを追加 -->
             <x-primary-button>{{ __('Save') }}</x-primary-button>
 
             @if (session('status') === 'profile-updated')
@@ -62,3 +98,4 @@
         </div>
     </form>
 </section>
+<!--「resources\views\profile\partials\update-profile-information-form.blade.php」---END -->

@@ -14,6 +14,8 @@ return new class extends Migration
         Schema::create('reserv', function (Blueprint $table) {
             $table->id();
             $table->integer('OrderNo')->comment('予約番号');
+            $table->integer('Baseid')->comment('予約先店コード');
+            $table->integer('Productid')->comment('予約商品');
             $table->string('KeyStr')->comment('照会時に比較する');	
             $table->dateTime('ReqDate')->comment('予約日時');	
             $table->dateTime('ReserveDate')->comment('予約日	');

@@ -8,7 +8,8 @@ use App\Providers\RouteServiceProvider;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\View\View;
+use Illuminate\View\View;   
+use App\Http\Controllers\ReserveController;
 
 class AuthenticatedSessionController extends Controller
 {
@@ -23,13 +24,14 @@ class AuthenticatedSessionController extends Controller
     /**
      * Handle an incoming authentication request.
      */
-    public function store(LoginRequest $request): RedirectResponse
+    public function store(LoginRequest $request): View
     {
         $request->authenticate();
 
         $request->session()->regenerate();
 
-        return redirect()->intended(RouteServiceProvider::HOME);
+        $controller = new ReserveController();
+        return $controller->shopsel($request,Auth::user()->id);       
     }
 
     /**

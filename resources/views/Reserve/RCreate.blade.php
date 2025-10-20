@@ -1,11 +1,12 @@
 <x-app-layout>
+    Date {{ $DestDate }}
+
     <x-slot name="header">
-        <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-            {{ __('Dashboard') }}
-        </h2>
+        <x-article-title caption="{{ __('New Resavation Entry') }}" />
     </x-slot>
 
     <div class="py-12">
+
         <x-message :message="session('message')" />
         <script src="https://yubinbango.github.io/yubinbango/yubinbango.js" charset="UTF-8"></script>
 
@@ -15,19 +16,17 @@
                 @csrf
                 <span class="p-country-name" style="display:none;">Japan</span>
                 <x-input-error :messages="$errors->get('CliTel1')" class="mt-2" />
-                <x-rtextbox name="CliTel1" type="tel" value="{{old('CliTel1')}}">電話番号:</x-rtextbox>
+                <x-rTextbox name="CliTel1" type="tel" value="{{old('CliTel1')}}">電話番号:</x-rTextbox>
                 <input type="button" id="refTelButton" value="　検索　" />
 						<Label id="RefMessage">過去にご予約頂いた方は、最終予約情報から住所氏名等を引用します。</Label>
 					';
 
-                    
-
                 <x-input-error :messages="$errors->get('ReserveDate')" class="mt-2" />
-                <x-rtextbox name="ReserveDate" type="datetime-local" 
-                    value="{{old('ReserveDate', $DestDate) }}" required>予約日:</x-rtextbox>
+                <x-rTextbox name="ReserveDate" type="datetime-local" 
+                    value="{{old('ReserveDate', $DestDate) }}" required>予約日:</x-rTextbox>
 
                 <x-input-error :messages="$errors->get('CliResvCnt')" class="mt-2" />
-                <x-rtextbox name="CliResvCnt" type="number"  value="{{old('CliResvCnt',1)}}" required>予約人数:</x-rtextbox>
+                <x-rTextbox name="CliResvCnt" type="number"  value="{{old('CliResvCnt',1)}}" required>予約人数:</x-rTextbox>
 
                 <label for="CliResvType">予約タイプ:</label>
                 <select id="CliResvType" name="CliResvType" required>
@@ -40,25 +39,27 @@
                 <input type="text" id="ClitNameKanji" name="ClitNameKanji" required><br-->
 
                 <x-input-error :messages="$errors->get('ClitNameKanji')" class="mt-2" />
-                <x-rtextbox name="ClitNameKanji" required value="{{old('ClitNameKanji')}}">氏名（漢字）</x-rtextbox>
+                <x-rTextbox name="ClitNameKanji" required value="{{old('ClitNameKanji')}}">氏名（漢字）</x-rTextbox>
+
                 <x-input-error :messages="$errors->get('ClitNameKana')" class="mt-2" />
-                <x-rtextbox name="ClitNameKana" required value="{{old('ClitNameKana')}}">カナ氏名:</x-rtextbox>
+                <x-rTextbox name="ClitNameKana" required value="{{old('ClitNameKana')}}">カナ氏名:</x-rTextbox>
+
                 <x-input-error :messages="$errors->get('CliAddrZip')" class="mt-2" />
-                <x-rtextbox class="p-postal-code " name="CliAddrZip" required value="{{old('CliAddrZip')}}">郵便番号:</x-rtextbox>
+                <x-rTextbox class="p-postal-code " name="CliAddrZip" required value="{{old('CliAddrZip')}}">郵便番号:</x-rTextbox>
 
                 <label>住所</label>
                 <!--input type="text" class="p-region p-locality p-street-address p-extended-address" /-->
                 <x-input-error :messages="$errors->get('CliAddrPref')" class="mt-2" />
-                <x-rtextbox name="CliAddrPref" class="p-region " required value="{{old('CliAddrPref')}}">県名:</x-rtextbox>
+                <x-rTextbox name="CliAddrPref" class="p-region " required value="{{old('CliAddrPref')}}">県名:</x-rTextbox>
 
                 <x-input-error :messages="$errors->get('CliAddrCity')" class="mt-2" />
-                <x-rtextbox name="CliAddrCity" class="p-locality "  required value="{{old('CliAddrCity')}}">市町村名:</x-rtextbox>
+                <x-rTextbox name="CliAddrCity" class="p-locality "  required value="{{old('CliAddrCity')}}">市町村名:</x-rTextbox>
 
                 <x-input-error :messages="$errors->get('CliAddrOther')" class="mt-2" />
-                <x-rtextbox name="CliAddrOther" class="p-street-address p-extended-address "  required value="{{old('CliAddrOther')}}">地域名:</x-rtextbox>
+                <x-rTextbox name="CliAddrOther" class="p-street-address p-extended-address "  required value="{{old('CliAddrOther')}}">地域名:</x-rTextbox>
 
                 <x-input-error :messages="$errors->get('CliEMail')" class="mt-2" />
-                <x-rtextbox name="CliEMail" type="email" required value="{{old('CliEMail')}}">メールアドレス:</x-rtextbox>
+                <x-rTextbox name="CliEMail" type="email" required value="{{old('CliEMail')}}">メールアドレス:</x-rTextbox>
 
                 <fieldset id="WayPay">
                     <legend>支払方法</legend>
@@ -137,9 +138,6 @@
                 </script>
 
             </form>
-
-
-
        </div>
     </div>
 </x-app-layout>

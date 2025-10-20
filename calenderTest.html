@@ -9,6 +9,34 @@
         a {
             text-decoration: none;
         }
+
+
+		.header{
+		  display:flex;
+		}
+		.header-nav{
+		  display:flex;
+		  margin-left:auto;
+		}
+		.key{
+		  height:100px;
+		  display:flex;
+		  justify-content: center;
+		  align-items: center;
+		}
+		.column{
+		  display: flex;
+		  flex-wrap: wrap;
+		  align-content: space-around;
+		}
+		.col{
+		  width:30%;
+		}
+
+
+
+
+		/* カレンダー用CSS */
 		.calendar-wrap {
 			width:58rem;
 			background: #eee;
@@ -89,20 +117,20 @@
 	</style>    
 </head>
 <body>
+
+	<div class="header">
+		<img src="resources/images/head_mounten.png" width="100%" height=400>
+	</div>
+	
+
+
     <table class="calender">
 		<tr>
 			<th>日</th>	<th>月</th><th>火</th><th>水</th><th>木</th><th>金</th><th>土</th>
 		</tr>
-	<tr><td></td><td></td><td>
-        <div class="area">
-            <div class="day">1</div>
-            <div class="cnt">15</div>
-        </div>
-        <div class="names" >おれおれ<br>だれ1<br>だれ２<br>だれ３<br>だれ４</div>
-
-
-        
-    </td><td>2</td><td>3</td><td>4</td><td>5<br><a href="/?mode=sales_detail&OrderNo=120&KeyStr=er345fkopa">居安　健司</a><br><a href="/?mode=sales_detail&OrderNo=113&KeyStr=4d5g7w8er3">鈴木　浩之</a><br><a href="/?mode=sales_detail&OrderNo=119&KeyStr=d5g7w8er34">依田　浩二</a></td></tr>
+		<tr><td></td><td></td><td><div class="area"><div class="day">1</div><div class="cnt">15</div></div>
+		<div class="names" >おれおれ<br>だれ1<br>だれ２<br>だれ３<br>だれ４</div>
+		    </td><td>2</td><td>3</td><td>4</td><td>5<br><a href="/?mode=sales_detail&OrderNo=120&KeyStr=er345fkopa">居安　健司</a><br><a href="/?mode=sales_detail&OrderNo=113&KeyStr=4d5g7w8er3">鈴木　浩之</a><br><a href="/?mode=sales_detail&OrderNo=119&KeyStr=d5g7w8er34">依田　浩二</a></td></tr>
 			<tr><td>6</td><td>7<br><a href="/?mode=sales_detail&OrderNo=127&KeyStr=g434d5g7w8">千葉　修平</a></td><td>8</td><td>9</td><td>10</td><td>11</td><td>12</td></tr>
 			<tr><td>13</td><td>14</td><td>15</td><td>16</td><td class="today">17</td><td>18</td><td>19</td></tr>
 			<tr><td>20</td><td>21</td><td>22</td><td>23</td><td>24</td><td>25</td><td>26</td></tr>

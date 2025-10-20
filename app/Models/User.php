@@ -3,6 +3,7 @@
 namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
+use Auth;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -21,6 +22,18 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
+        'spName',
+        'spNameKana',
+        'spCode',
+        'spAddrZip',
+        'spAddrPref',
+        'spAddrCity',
+        'spAddrOther',
+        'spTel1',
+        'spTel2',
+        'spEMail',
+        'spURL',
+        'spMsgText',
     ];
 
     /**
@@ -45,5 +58,13 @@ class User extends Authenticatable
 
     function getAuthPasswordName() {
         return "undefine";
+    }
+    function isOwner($id) {
+        if (Auth::check()) {
+            if(Auth::user()->id == $id) {
+                return true;
+            }
+        }
+        return false;
     }
 }

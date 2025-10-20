@@ -15,6 +15,8 @@ class Reserve extends Model
     //  保存・更新したいカラムを設定
     protected $fillable = [
             'OrderNo',          //  予約番号
+            'Baseid',   
+            'Productid',
             'KeyStr',           //  照会時に比較する
             'ReqDate',          //  予約日時
             'ReserveDate',      //  予約日

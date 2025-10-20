@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+
+    <style>
+        a {
+            text-decoration: none;
+        }
+
+
+		.header{
+		  display:flex;
+		}
+		.header-nav{
+		  display:flex;
+		  margin-left:auto;
+		}
+		.key{
+		  height:100px;
+		  display:flex;
+		  justify-content: center;
+		  align-items: center;
+		}
+		.column{
+		  display: flex;
+		  flex-wrap: wrap;
+		  align-content: space-around;
+		}
+		.col{
+		  width:30%;
+		}
+
+
+
+
+		/* カレンダー用CSS */
+		.calendar-wrap {
+			width:58rem;
+			background: #eee;
+			color: #333;
+		}
+		.calender_head {
+			line-height: 60px;
+			text-align: center;
+			font-size: 2rem;
+		}
+		.calender_center {
+			width:40%;
+			text-align: center;
+			font-size: 3rem;
+			color:#408040;
+			font-weight: bold;
+			/*-webkit-text-stroke: 2px #FFF; 白抜き文字はもっと大きい文字が必要なのでヤメ
+			text-stroke: 1px #FFF;*/
+			text-shadow: 1px 1px 0 #333;
+		}
+		.calender_link {
+			display:static;
+			width:30%;
+			text-align: center;
+		}
+		.calender {
+			padding:10px;
+			font-size:1.2rem;
+		}
+		.calender th,td {
+			border:2px solid #408040;
+		}		
+        .calender th {
+            height: 30px;
+			width: 8rem;
+            text-align: center;
+        }
+        .calender td {
+            height: 6rem;
+			vertical-align: top;
+        }
+        .area {
+            display: flex;
+            justify-content: space-between;
+            flex-wrap: wrap;
+        }
+        .day {
+			width: 3rem;
+            text-align: center;
+			font-size:1.2rem;
+            background: rgb(157, 237, 200);
+        }
+        .cnt {
+			width: 2.5rem;
+            text-align: center;
+			font-size:1rem;
+            background: rgb(232, 206, 224);
+        }
+        .cnt::before {
+            content: "残";
+            font-size:0.5rem;
+        }
+        .names {
+			font-size:0.6rem;
+        }
+        .calender th:nth-of-type(1), td:nth-of-type(1) {
+			background: #fee;
+            color: red;
+        }
+        .calender th:nth-of-type(7), td:nth-of-type(7) {
+			background: #eef;
+            color: blue;
+        }
+        .today {
+            background: orange !important;
+        }
+
+	</style>    
+</head>
+<body>
+
+	<div class="header">
+		<img src="resources/images/head_mounten.png" width="100%" height=600>
+	</div>
+	
+
+
+    <table class="calender">
+		<tr>
+			<th>日</th>	<th>月</th><th>火</th><th>水</th><th>木</th><th>金</th><th>土</th>
+		</tr>
+		<tr><td></td><td></td><td><div class="area"><div class="day">1</div><div class="cnt">15</div></div>
+		<div class="names" >おれおれ<br>だれ1<br>だれ２<br>だれ３<br>だれ４</div>
+		    </td><td>2</td><td>3</td><td>4</td><td>5<br><a href="/?mode=sales_detail&OrderNo=120&KeyStr=er345fkopa">居安　健司</a><br><a href="/?mode=sales_detail&OrderNo=113&KeyStr=4d5g7w8er3">鈴木　浩之</a><br><a href="/?mode=sales_detail&OrderNo=119&KeyStr=d5g7w8er34">依田　浩二</a></td></tr>
+			<tr><td>6</td><td>7<br><a href="/?mode=sales_detail&OrderNo=127&KeyStr=g434d5g7w8">千葉　修平</a></td><td>8</td><td>9</td><td>10</td><td>11</td><td>12</td></tr>
+			<tr><td>13</td><td>14</td><td>15</td><td>16</td><td class="today">17</td><td>18</td><td>19</td></tr>
+			<tr><td>20</td><td>21</td><td>22</td><td>23</td><td>24</td><td>25</td><td>26</td></tr>
+			<tr><td>27</td><td>28</td><td>29</td><td>30</td><td>31</td><td></td><td></td></tr>
+			
+		</table>
+</body>
+</html>

@@ -18,3 +18,10 @@ function calendar_culc(String $baseYM,int $numMonth)
     $date->modify("$numMonth month");
     return $date->format('Y-m');
 }
+
+function getImagePath(String $fileName="")
+{
+    $filePath = resource_path('images');
+
+    return $filePath;
+}
