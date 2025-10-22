@@ -27,7 +27,7 @@ return new class extends Migration
             $table->string('spEMail')->comment('メールアドレス')->default("");
             $table->integer('spResvType')->comment('予約タイプ')->default(1);	
             $table->integer('spWaysPay')->comment('支払い方法')->default(1);	
-            $table->Text('spMsgText')->comment('連絡')->default("");
+            $table->Text('spMsgText')->comment('連絡')->nullable();
 
             $table->timestamps();
         });
