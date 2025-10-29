@@ -41,7 +41,7 @@ http://127.0.0.1/yoyaku/public/register
     <text id="myText" x="50%" y="50%" text-anchor="middle" font-size="20px">{{ Auth::user()->spName }}</text>
   @endauth
   @guest
-    <text id="myText" x="50%" y="50%" text-anchor="middle" font-size="20px">七二会森林クラブ</text>
+    <text id="myText" x="50%" y="50%" text-anchor="middle" font-size="20px">あちゃまＷＥＢ開発</text>
   @endguest
   <animate xlink:href="#myText" attributeName="font-size" from="10px" to="30px" dur="3s" fill="both" />
 </svg>
@@ -155,4 +155,20 @@ destroy(): 特定のリソースを削除
 PHP
 Route::resource('user_products', UserProductController::class);
 
+
+
+-----------------------------------------------------------
+
+Laravelで以下のテーブルを作成した
+
+        Schema::create('shop_calenders', function (Blueprint $table) {
+            $table->id();
+            $table->foreignId('dsShopId')->comment('店舗ID');       // userテーブルの id を参照
+            $table->foreignId('dsProduct')->comment('商品コード');  //user_productsテーブルの id を参照
+            $table->date('dsDate')->comment('対象日');
+            $table->integer('dsMax')->comment('参加最大人数');
+            $table->integer('dsCnt')->comment('実参加人数');
+            $table->Text('dsMemo')->comment('連絡')->nullable();
+            $table->timestamps();
+        });
 

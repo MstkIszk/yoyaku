@@ -22,9 +22,8 @@ class UserProductController extends Controller
      */
     public function create()
     {
-        $shopProducts = ShopProduct::all();
         $shopPaysWay = ShopWaysPay::all();
-        return view('user_products.create', compact('shopProducts','shopPaysWay'));
+        return view('user_products.create', compact('shopPaysWay'));
     }
 
     /**

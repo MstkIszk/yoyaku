@@ -3,6 +3,7 @@
     <head>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link href="{{ asset('css/chat.css') }}" rel="stylesheet">
 
         <title>トップページ</title>
     </head>
@@ -11,55 +12,84 @@
         <header>
             <style>
                 .head_frame {
-                width: 100%;
-                background-image: url('{{ asset('images/slide_back.jpg') }}');
-                background-size: repeat;
-                background-position: center;
-                position: relative;
+                    width: 100%;
+                    background-image: url('{{ asset('images/slide_back.jpg') }}');
+                    background-size: repeat;
+                    background-position: center;
                 }
 
                 .head_inbox {
-                position: relative;
-                /* head_image の配置基準にするため */
-                display: flex; /* Flexbox を使用して要素を配置 */
-                flex-direction: column; /* 縦方向に要素を並べる */
-                align-items: center; /* 横方向は中央揃え */
+                    position: relative;
+                    /* head_image の配置基準にするため */
+                    display: flex; /* Flexbox を使用して要素を配置 */
+                    flex-direction: column; /* 縦方向に要素を並べる */
+                    align-items: center; /* 横方向は中央揃え */
                 }
 
                 .head_image {
-                min-width: 200px; /* 最小高さ */
-                max-width: 600px; /* 最大高さ */
-                height: auto; /* 高さはコンテンツに合わせて伸縮 */
-                min-height: 200px; /* 最小幅 */
-                width: 100%; /* head_inbox の幅に合わせて伸縮 */
-                display: block;
-                margin: 0 auto;
+                    min-width: 200px; /* 最小高さ */
+                    max-width: 600px; /* 最大高さ */
+                    height: auto; /* 高さはコンテンツに合わせて伸縮 */
+                    min-height: 200px; /* 最小幅 */
+                    width: 100%; /* head_inbox の幅に合わせて伸縮 */
+                    display: block;
+                    margin: 0 auto;
                 }
 
                 .head_title {
-                position: absolute;
-                top: 4px;
-                left: 4px;
-                /* 必要に応じて textbox のスタイルを設定 */
-                background-color: rgba(255, 255, 255, 0.7); /* 例：半透明の白色背景 */
-                padding: 5px;
+                    position: absolute;
+                    top: 4px;
+                    left: 4px;
+                    /* 必要に応じて textbox のスタイルを設定 */
+                    background-color: rgba(255, 255, 255, 0.7); /* 例：半透明の白色背景 */
+                    padding: 5px;
+                    font-weight: bold; /* 見やすくするため追記 */
+                    z-index: 10; /* 画像の上に表示 */
+                }
+                /* 中央タイトル (新規追加) */
+                .head_center_title {
+                    position: absolute;
+                    top: 50%; /* 縦方向中央 */
+                    left: 50%; /* 横方向中央 */
+                    transform: translate(-50%, -50%); /* 要素自体のサイズを考慮して完全に中央に配置 */
+                    background-color: rgba(0, 0, 0, 0.6); /* 例：黒背景 */
+                    color: white; /* 文字色を白に */
+                    padding: 10px 20px;
+                    font-size: 1.5rem; /* 見やすくするため追記 */
+                    font-weight: bold;
+                    text-align: center;
+                    z-index: 10; /* 画像の上に表示 */
                 }
                 .head_unei {
-                position: absolute;
-                bottom: 4px;
-                right: 4px;
-                /* 必要に応じて textbox のスタイルを設定 */
-                background-color: rgba(255, 255, 255, 0.7); /* 例：半透明の白色背景 */
-                padding: 5px;
+                    position: absolute;
+                    bottom: 4px;
+                    right: 4px;
+                    background-color: rgba(255, 255, 255, 0.7); /* 例：半透明の白色背景 */
+                    padding: 5px;
                 }
             </style>
+
             <div class="head_frame">
                 <div class="head_inbox">
                     <img class="head_image" src="{{ asset('images/head_mounten.png') }}" alt="トップ画像">
+
                     <div class="head_title">総合予約システム</div>
-                    <div class="head_unei">運営：七二会森林クラブ</div>
+
+                    <div class="head_center_title">
+                        {{-- 認証済み（ログイン中）の場合 --}}
+                        @auth
+                            {{-- ログインユーザーの spName を表示 --}}
+                            {{ Auth::user()->spName ?? '店舗名未設定' }}
+                        @else
+                            {{-- 未ログインの場合 --}}
+                            予約トップ画面
+                        @endauth
+                    </div>
+
+                    <div class="head_unei">運営：あちゃまＷＥＢ開発</div>
                 </div>
             </div>
+
            <style>
                 .footerSmallBtns {
                     display: -webkit-box;
@@ -92,9 +122,6 @@
                         width: 31%;
                     }
                 }
-
-
-
             </style>
         </header>
         <x-owner-menu />
@@ -117,6 +144,7 @@
                     }
 
         </style>
+
         <h1> 登録店舗一覧</h1>
         <div class="shop_list">
             <table border="1">

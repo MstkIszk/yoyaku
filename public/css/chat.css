@@ -1,60 +1,195 @@
-.chat-container {
-    width: 100%;
-    height: 100%;
-  }
-  
-  .chat-card {
-    height: 67vh;
-    overflow: auto;
-  }
-  
-  .chat-area {
-    width: 70%;
-  }
-  
-  .comment-container {
-    position: fixed;
-    bottom: 20px;
-    text-align: center;
-    width: 100%;
-  }
-  
-  .comment-area {
-    width: 70%;
-  }
-  
-  .comment-btn {
-    margin: 0px 10px;
-  }
-  
-  .comment-body {
-    padding: 5px 30px 20px 30px;
-  }
-  
-  .comment-body:hover {
-    background-color: #dfdfdf;
-  }
-  
-  .comment-body-user {
-    font-weight: bold;
-    font-size: 20px;
-  }
-  
-  .comment-body-time {
-    font-size: 10px;
-    margin-top: 10px;
-    margin-left: 5px;
-    color: #a0a0a0;
-  }
+@charset "UTF-8";
 
-  
+.chat-container {
+  width: 100%;
+  height: 100%;
+}
+
+.chat-card {
+  height: 67vh;
+  overflow: auto;
+}
+
+.chat-area {
+  width: 70%;
+}
+
+.comment-container {
+  position: fixed;
+  bottom: 20px;
+  text-align: center;
+  width: 100%;
+}
+
+.comment-area {
+  width: 70%;
+}
+
+.comment-btn {
+  margin: 0px 10px;
+}
+
+.comment-body {
+  padding: 5px 30px 20px 30px;
+}
+
+.comment-body:hover {
+  background-color: #dfdfdf;
+}
+
+.comment-body-user {
+  font-weight: bold;
+  font-size: 20px;
+}
+
+.comment-body-time {
+  font-size: 10px;
+  margin-top: 10px;
+  margin-left: 5px;
+  color: #a0a0a0;
+}
+
+
 /*◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆
-//  -article-title style 定義 
-//    コントローラ: app\View\Components\ArticleTitle.php
-//    View;        resources\views\components\article-title.blade.php
+//  画面トップ 
+//
+┌─── head_frame ─────────────────────────────┐
+│   ┌─── head_box ───────────────────────┐   │
+│   │ ┌─── head_inbox ─────────────────┐ │   │
+│   │ │                                │ │   │
+│   │ │                                │ │   │
+│   │ │                                │ │   │
+│   │ │                                │ │   │
+│   │ └────────────────────────────────┘ │   │
+│   └────────────────────────────────────┘   │   
+└────────────────────────────────────────────┘
+//
+//◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆*/
+
+.head_frame {
+  margin-top: 40px;
+  margin-bottom: 12px;
+  width: 100%;
+  background-image: url(../images/slide_back.jpg);
+  background-size: repeat;
+  background-position: center;
+  position: relative; /* 必要に応じて残す。子要素の基準にする場合 */
+}
+
+.head_box {
+  display: block;
+  position: ; /* これが重要！子要素の絶対位置の基準となる */
+}
+
+/* 見出しの中にイメージと文字を入れる枠 */
+.head_inbox {
+  display: flex; /* Flexbox を使用して要素を配置 */
+  flex-direction: column; /* 縦方向に要素を並べる */
+  align-items: center; /* 横方向は中央揃え */
+}
+
+.head_image_wrap {
+  position: relative; /* ここを基準に絶対位置指定 */
+  width: 100%;
+  max-width: 1200px;
+}
+
+.head_image {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+.head_title {
+    position: absolute;
+    top: 60px;
+    left: 20px;
+    /* 必要に応じて textbox のスタイルを設定 */
+    background-color: rgba(255, 255, 255, 0.7); /* 例：半透明の白色背景 */
+    padding: 5px;
+    z-index: 1; /* 必要に応じて重ね順を調整 */
+}
+
+.head_auth_name {
+    /* 絶対位置で中央配置 */
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+
+    /* 文字スタイルとグラデーション */
+    font-weight: 900;
+    text-align: center;
+
+    /* グラデーション文字 */
+    background: linear-gradient(to bottom, #87CEEB, #A4C639); /* 水色から薄緑 */
+    -webkit-background-clip: text; /* Safari/Chrome */
+    background-clip: text;
+    color: transparent;
+  
+    /* 黒枠線（text-shadowで表現）*/
+    /* 上下左右と中央に影を入れることで太い枠のように見せる */
+    text-shadow: 
+        1px 1px 0 #000, -1px -1px 0 #000, 
+        1px -1px 0 #000, -1px 1px 0 #000, 
+        0 0 5px rgba(0, 0, 0, 0.8);
+
+    /* レスポンシブフォントサイズ */
+    /* 780px 未満 (モバイル) */
+    font-size: 24pt; 
+}
+
+/* 780px 以上のデバイス */
+@media (min-width: 780px) {
+    .head_auth_name {
+        font-size: 36pt;
+    }
+}
+
+.head_unei {
+    position: absolute;
+    bottom: 40px;
+    right: 40px;
+    /* 必要に応じて textbox のスタイルを設定 */
+    background-color: rgba(255, 255, 255, 0.7); /* 例：半透明の白色背景 */
+    padding: 5px;
+    z-index: 1; /* 必要に応じて重ね順を調整 */
+}
+
+/*◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆
+//  記事見出し 定義 
 //◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆*/
 
 .article_title {
+  background-color: #fff; /* または rgb(255, 255, 255) */
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px -1px rgba(0, 0, 0, 0.1);
+}
+
+.article_title_box {
+  max-width: 80rem; /* 1280px */
+  margin-left: auto;
+  margin-right: auto;
+  padding-top: 1.5rem; /* 24px */
+  padding-bottom: 1.5rem; /* 24px */
+  padding-left: 1rem; /* 16px */
+  padding-right: 1rem; /* 16px */
+}
+
+@media (min-width: 640px) {
+  .article_title_box  {
+    padding-left: 1.5rem; /* 24px */
+    padding-right: 1.5rem; /* 24px */
+  }
+}
+
+@media (min-width: 1024px) {
+  .article_title_box  {
+    padding-left: 2rem; /* 32px */
+    padding-right: 2rem; /* 32px */
+  }
+}
+
+.article_title_bar {
   margin: 20px 0 20px;
   background-image: radial-gradient(rgba(242, 244, 239, 0.3), rgba(105, 226, 67, 1));
   text-align: center;
@@ -69,17 +204,153 @@
   text-shadow: 2px 2px 10px #777, -2px 2px 10px #777, 2px -2px 10px #777, -2px -2px 10px #777;
 }
 
+
 /*◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆
-//  x-rTextbox style 定義 
-//    コントローラ: app\View\Components\RTextbox.php
-//    View;        resources\views\components\r-textbox.blade.php
+//  記事内容 定義 
+//◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆*/
+.main_frame {
+  /*position: relative;*/
+  display: flex;
+  flex-direction: row; /* 横並びにする */
+}
+.article_frame{
+  border: 3pt solid lightgreen; /* 3pt の実線、うす緑色の枠線 */
+  border-radius: 3pt;           /* 3pt の角丸 */
+  aborder:1px solid green;
+  background-color: lightyellow; /* 薄黄色の背景色 */
+  width : 95%;
+  padding: 10px;              /* 必要に応じて内側の余白を追加 */
+  display: block;
+  margin: 0 auto; /* これで左右中央揃え */
+}
+
+.article_frame input[type="submit"] {
+  background-color: #ff9900; /* オレンジ色 */
+  color: #ffffff; /* 文字色を白に */
+  font-weight: bold;
+  padding: 10px 20px; /* ボタンのサイズ調整 */
+  border: none;
+  border-radius: 5px; /* 角を丸く */
+  border: 4px outset #ff9900; /* borderをoutsetにして立体的に */
+  cursor: pointer; /* マウスカーソルをポインターに */
+  font-size: 16px;
+  transition: background-color 0.3s ease; /* ホバー時のアニメーション */
+  display: block; /* ブロック要素にして中央揃えを可能にする */
+  width: 6rem; /* 横幅を4remに設定 */
+  margin: 8px auto 0; /* 上の余白を8px、左右をautoにして中央揃え */
+  font-size: +1; /* 現在のフォントサイズより1px大きく */
+}
+
+/* ホバー時のスタイル */
+.article_frame input[type="submit"]:hover {
+  background-color: #e68a00; /* 少し濃いオレンジ色に */
+}
+
+/*◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆
+//  一覧表 定義 
+//◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆*/
+.list_table {
+  width: 100%;
+  border-collapse:separate;
+  border-spacing: 0;
+
+}
+
+.list_table  th:first-child{
+  border-radius: 5px 0 0 0;
+}
+
+.list_table  th:last-child{
+  border-radius: 0 5px 0 0;
+  border-right: 1px solid #3c6690;
+}
+
+.list_table  th{
+  text-align: center;
+  color:white;
+  background: linear-gradient(#829ebc,#225588);
+  border-left: 1px solid #3c6690;
+  border-top: 1px solid #3c6690;
+  border-bottom: 1px solid #3c6690;
+  box-shadow: 0px 1px 1px rgba(255,255,255,0.3) inset;
+  padding: 2px 0;
+}
+
+.list_table  td{
+  text-align: left;
+  border-left: 1px solid #a8b7c5;
+  border-bottom: 1px solid #a8b7c5;
+  border-top:none;
+  box-shadow: 0px -3px 5px 1px #eee inset;
+  padding: 2px 0;
+}
+
+.list_table  .ryokin{
+  width: 4rem;
+  text-align: right;
+}
+
+.list_table  .status{
+  text-align: center;
+}
+
+.list_table  td:last-child{
+  border-right: 1px solid #a8b7c5;
+}
+
+.list_table  tr:last-child td:first-child {
+  border-radius: 0 0 0 5px;
+}
+
+.list_table  tr:last-child td:last-child {
+  border-radius: 0 0 5px 0;
+}
+
+.list_table  .kana {
+  font-size: 0.55rem; 
+}
+
+/*◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆
+//  TABLE 
+//◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆*/
+.article_table {
+  border-collapse: collapse;
+  /*min-width: 700px;*/
+  font-weight: bold;
+  text-align: center;
+}
+.article_table th, .article_table td {
+  padding: .5em 1em;
+  border: 2px solid #4d9bc1;
+}
+.article_table th {
+  background: #4d9bc1;
+  color: #fff;
+  border-right: 2px solid #fff;
+  border-top: 2px solid #4d9bc1;
+}
+.article_table th:last-of-type {
+  border-right: 2px solid #4d9bc1;
+}
+
+
+/*◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆
+//  入力フォーム 
+//◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆*/
+
+
+/*◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆
+//  -article-title style 定義 
+//    コントローラ: app\View\Components\ArticleTitle.php
+//    View;        resources\views\components\article-title.blade.php
 //◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆*/
 
 .textLink {
     text-decoration: underline;
-    font-size: 0.875rem; /* 14px */
+    font-size: 1.2rem; /* 14px */
+    margin-left: 0.5rem;
     line-height: 1.25rem; /* 20px */
-    color: #71717a;
+    color: #204080;
 }
 .textLink::hover {
     color: red; /* 文字色を赤くする */
@@ -87,30 +358,149 @@
     border-color: red; /* 枠線を赤くする */
 }
 
+.classroom-box {
+  position: relative; 
+  margin-top: 0.5rem;
+  padding: 10px;
+  border: 1px solid #ccc; /* 枠線 */
+  box-shadow: inset 2px 2px 5px #aaa, /* 内側の影（右下） */
+              inset -2px -2px 5px #fff; /* 内側の影（左上） */
+}
+
+.classroom-label {
+  position: absolute; /* 絶対位置指定 */
+  top: -0.8rem;
+  left: 1rem;
+  padding: 0 5px; /* label の背景色を box と同じにする場合、テキスト周りのスペース */
+  background: lightyellow;
+  font-size: 1.2rem;
+}
+
+.tdIswide {
+  display: table-cell; /* デフォルトの表示 */
+}
+
+@media screen and (max-width:900px){
+  .tdIswide {
+      width: 0px;
+      display: none;
+  }
+}
+
+
+/*◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆
+//  x-rTextbox style 定義 
+//    コントローラ: app\View\Components\RTextbox.php
+//    View;        resources\views\components\r-textbox.blade.php
+//◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆*/
+
+
+/* 画面幅が 800px 未満の場合 @media (max-width: 799px) { */
+
+/* x-rTextbox の Lavel と TextBox等入力欄を囲む枠  */
+.inputBoxframe {
+  display: flex; /* Flexbox を有効にする */
+  flex-direction: column; /* 縦並び */
+}
 .inputBoxArea {
-    display: flex; /* Flexbox を有効にする */
-    flex-direction: column; /* デフォルトは縦並び */
+  display: flex; /* Flexbox を有効にする */
+  flex-direction: column; /* 横並び */
+}
+.inputBoxArea label {
+  width: auto;
+  margin-right: 10px; /* ラベルとテキストボックスの間に間隔を作る */
 }
 
 .Guidelabel {
+    width: 10em;
     text-align: left;
     font-size: 0.8rem;
     margin-top: 3px;
-    //font-weight: bold;
     padding: 2px 2px;
 }
+
+.InputBox_text {
+  margin: 2px; /* 8px */
+  padding-top: 0.5rem; /* 8px */
+  padding-bottom: 0.5rem; /* 8px */
+  border-width: 1px;
+  border-style: solid;
+  border-color: #d1d5db; /* Tailwind CSS の gray-300 の値 */
+  border-radius: 0.375rem; /* 6px */
+}
+
+.is-readonly {
+  background-color: transparent !important; /* 背景を透明にする */
+}
+
+.txtWidth_5 {  
+  width: 4.5em; /* フォントサイズを基準にする */
+}
+.txtWidth_6 {  
+  width: 6.2em; /* フォントサイズを基準にする */
+}
+.txtWidth_8 {  
+  width: 10em; /* フォントサイズを基準にする */
+}
+.txtWidth_9 {  
+  width: 11.5em; /* フォントサイズを基準にする */
+}
+.txtWidth_10 {  
+  width: 12em; /* フォントサイズを基準にする */
+}
+.txtWidth_11 {  
+  width: 13rem; /* フォントサイズを基準にする */
+}
+.txtWidth_15 {  
+  width: 16em; /* フォントサイズを基準にする */
+}
+.txtWidth_20 {  
+  width: 24em; /* フォントサイズを基準にする */
+}
+.txtWidth_30 {  
+  width: 36em; /* フォントサイズを基準にする */
+}
+.password-toggle {
+  cursor: pointer;
+}
+
+/* 入力欄の配置 */
+.form-row {
+  display: flex;
+  align-items: center;
+  margin-bottom: 0.5rem;
+}
+
+.form-row label {
+  width: 40rm;      /* ラベルの幅を調整 */
+  margin: 0.2rem;
+}
+
+.form-row input,
+.form-row textarea {
+  flex: 1;
+}
+
 /* 画面幅が 800px 以上の場合 */
 @media (min-width: 780px) {
-    .inputBoxArea {
-        flex-direction: row; /* 横並びにする */
-        align-items: center; /* 垂直方向に中央揃え */
-    }
 
-    .inputBoxArea label {
-        width: 40em;
-        margin-right: 10px; /* ラベルとテキストボックスの間に間隔を作る */
-    }
+  .inputBoxArea {
+      flex-direction: row; /* 横並びにする */
+      align-items: center; /* 垂直方向に中央揃え */
+  }
+
+  .inputBoxArea label {
+      width: 8em;
+      margin-right: 10px; /* ラベルとテキストボックスの間に間隔を作る */
+  }
+  .Guidelabel {
+    width: 10em;
+    font-size: 1.2rem;
+    padding: 4px 4px;
+  }  
 }
+
+
 .MemoArea {
   display: flex; /* Flexbox を有効にする */
   flex-direction: column; /* 横並びにする */
@@ -120,7 +510,38 @@
 
 }
 
+a[href^='mailto']::before {
+  content: '📧 ';
+}
+
+a[href^='tel']::before {
+  content: '📞 ';
+}
+
+.link-button {
+  /* 基本的な設定 */
+  display: inline-block;
+  padding: 10px 20px;
+  cursor: pointer;
+  text-align: center;
+  text-decoration: none;
+  border-width: 2px; /* 枠線の太さ */
+  border-style: solid;
+
+  /* 色と角丸の設定 */
+  background-color: #ffeb3b; /* 黄色背景 */
+  border-color: #4caf50; /* 緑枠 */
+  color: #1a237e; /* 濃い目の青文字 */
+  border-radius: 8px; /* 角丸の度合い */
+
+  /* transitionで変化を滑らかにする */
+  transition: background-color 0.3s, border-color 0.3s;
+}
+
+/* マウスオーバー時のスタイル */
+.link-button:hover {
+  background-color: #fff9c4; /* 背景を薄めの黄色に */
+  border-color: #f44336; /* 枠を赤に */
+}
 
 </style>
-
-  /*# sourceMappingURL=view.css.map */

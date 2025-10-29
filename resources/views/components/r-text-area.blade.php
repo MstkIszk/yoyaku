@@ -6,5 +6,5 @@
         id="{{ $name }}" 
         class="{{ $class }}"
         placeholder="{{ $placeholder }}" 
-    >{{ $value }}</textarea>
+    >{{ $msgText }}</textarea>  {{-- 要素の内容で指定された定義を展開 --}}
 </div>

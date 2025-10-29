@@ -15,39 +15,21 @@
                 <input type="hidden" name="baseCode" value="{{ Session::get('ShopID') }}">
                 <input type="hidden" name="productID" value="1">
 
-
-
-                <div>
-                    <label for="productName">商品名</label>
-                    <select name="productName" id="productName">
-                        @foreach ($shopProducts as $product)
-                            <option value="{{ $product->PrName }}">{{ $product->PrName }}</option>
-                        @endforeach
-                    </select>
-                </div>
-                <x-input-error :messages="$errors->get('DateStart')" class="mt-2" />
+                <x-rTextbox name="productName" type="text" 
+                    value="{{old('DateStart') }}" required>商品名:</x-rTextbox>
                 <x-rTextbox name="DateStart" type="date" 
                     value="{{old('DateStart') }}" required>営業開始日:</x-rTextbox>
-
-                <x-input-error :messages="$errors->get('DateEnd')" class="mt-2" />
                 <x-rTextbox name="DateEnd" type="date" 
                     value="{{old('DateEnd') }}" required>営業終了日:</x-rTextbox>
-
-                <x-input-error :messages="$errors->get('TimeStart')" class="mt-2" />
                 <x-rTextbox name="TimeStart" type="time" 
-                value="{{old('TimeStart') }}" required>開始時刻:</x-rTextbox>
-
-                <x-input-error :messages="$errors->get('TimeEnd')" class="mt-2" />
+                    value="{{old('TimeStart') }}" required>開始時刻:</x-rTextbox>
                 <x-rTextbox name="TimeEnd" type="time" 
                     value="{{old('TimeEnd') }}" required>終了時刻:</x-rTextbox>
-
-                <x-input-error :messages="$errors->get('capacity')" class="mt-2" />
                 <x-rTextbox name="capacity" type="number" 
-                    value="{{old('capacity', 15) }}" required>定員:</x-rTextbox>
-
-                <x-input-error :messages="$errors->get('price')" class="mt-2" />
+                    value="{{old('capacity', 10) }}" required>定員:</x-rTextbox>
                 <x-rTextbox name="price" type="number" 
-                    value="{{old('price', 15) }}" required>料金:</x-rTextbox>
+                    value="{{old('price', 1000) }}" required>料金:</x-rTextbox>
+
                 <style>
                 .box12{
                     margin: 2em 0;

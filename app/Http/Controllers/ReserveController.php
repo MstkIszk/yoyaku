@@ -183,7 +183,7 @@ class ReserveController extends Controller
             //$to = $_POST['to'];
             $to = $request->CliEMail;
             //$title = $_POST['title'];
-            $title = "【七二会森林クラブ】 お問い合わせありがとうございます。";
+            $title = "【あちゃまＷＥＢ開発】 お問い合わせありがとうございます。";
             $headers = "";	//"Content-Type:text/html;charset=UTF-8\r\n";
             $headers .= "Content-Type: text/plain \r\n";
             $headers .= "Return-Path: $InquiryMailAddr \r\n";
@@ -203,10 +203,10 @@ class ReserveController extends Controller
             $message .= "ご連絡先\r\n TEL:" . $request->CliTel1 . "\r\n";
             $message .= "MAIL:" . $request->CliEMail . "\r\n\r\n";
 
-            $message .= "------------------------\r\n連絡先: 七二会森林クラブ\r\n";
-            $message .= "長野県 長野市 七二会丁１９９３\r\n";
-            $message .= "TEL/FAX: 026-217-3878\r\n";
-            $message .= "E-Mail: maki+inquiry@hot-naniai.lix.jp\r\n";
+            $message .= "------------------------\r\n連絡先: あちゃまＷＥＢ開発\r\n";
+            $message .= "長野県 長野市 平林2-19-12-605\r\n";
+            $message .= "TEL: 090-3585-2572\r\n";
+            $message .= "E-Mail: info@kyum.chu.jp\r\n";
 
 
             if(mb_send_mail($to, $title, $message, $headers, $param)) {
