@@ -8,6 +8,8 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+
 
 class User extends Authenticatable
 {
@@ -66,5 +68,18 @@ class User extends Authenticatable
             }
         }
         return false;
+    }
+    
+    /**
+     * UserProduct (商品/サービス) との1対多のリレーションを定義します。
+     * 店舗 (User) は複数の商品 (UserProduct) を持ちます。
+     * 外部キーは user_products テーブルの 'baseCode' (店舗ID) です。
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function products(): HasMany  
+    {
+        // 'baseCode' が User モデルの 'id' を参照している場合
+        return $this->hasMany(UserProduct::class, 'baseCode', 'id');
     }
 }

@@ -18,6 +18,14 @@
                 background: #eee;
                 color: #333;
             }
+            @media (max-width: 1000px) {
+                .calendar-wrap {
+                    width: 100%;       /* 画面いっぱいに広げる */
+                    max-width: none;   /* 最大幅の制限を解除 */
+                    margin: 0;         /* 中央寄せを解除 */
+                }
+            }
+
             .calender_head {
                 line-height: 60px;
                 text-align: center;
@@ -41,6 +49,8 @@
             .calender {
                 padding:10px;
                 font-size:1.2rem;
+                width: 100%; /* 追加: 親要素の幅いっぱいに広げる */
+                table-layout: fixed; /* 追加: 列幅を固定してレスポンシブ時の崩れを防ぐ */            
             }
             .dateLink {
                 text-align: center;
@@ -51,12 +61,27 @@
             }		
             .calender th {
                 height: 30px;
-                width: 8rem;
+                min-width: 8rem;
                 text-align: center;
             }
             .calender td {
                 height: 6rem;
                 vertical-align: top;
+            }
+            @media (max-width: 780px) {
+                .calender {
+                    padding:4px;
+                    font-size:1.0rem;
+                }
+                .calender th {
+                    height: 20px;
+                    min-width: 6rem;
+                    text-align: center;
+                }
+                .calender td {
+                    height: 4rem;
+                    vertical-align: top;
+                }
             }
             .calender th:nth-of-type(1), td:nth-of-type(1) {    /* 日曜日 */
                 background: #fee;
@@ -82,11 +107,18 @@
             }
             .day {
                 grid-area: date;
-                width: 3rem;
+                /*width: 3rem;*/
+                width: 100%;
                 text-align: center;
                 font-size:1.2rem;
                 /*background: rgb(157, 237, 200);*/
                 background-image: linear-gradient(to right, rgb(157, 237, 200), rgb(255, 255, 255));
+            }
+            @media (max-width: 780px) {
+                .day {
+                    width: 2rem;
+                    font-size:0.8rem;
+                }
             }
             .day_today {
                 grid-area: date;
@@ -101,9 +133,17 @@
             }
             .edit_button {   /* 管理者用の編集ボタン */
                 grid-area: edit;
-                width: 3.rem;
+                width: 3rem;
                 text-align: center;
                 font-size:0.8rem;
+            }
+            @media (max-width: 780px) {
+                .edit_button {   /* 管理者用の編集ボタン */
+                    width: 100%;
+                    padding-left: 2px;
+                    padding-right: 2px;
+                    font-size:0.6rem;
+                }
             }
             .edit_button_normal {   /* 管理者用の編集ボタン */
                 background: rgb(128, 206, 128);
@@ -114,6 +154,8 @@
             .edit_button_private {   /* 管理者用の編集ボタン */
                 background: rgb(206, 206, 128);
             }
+
+
             .yoyaku_cnt {
                 grid-area: cnt;
                 width: 2.5rem;
@@ -209,7 +251,7 @@
             <div class="card-header" style="text-align: center;">
                 - {{ $ShopInf->spName }} 予約 -
             </div>
-            <!-- livewire:shopclosedmodal /-->
+            <!-- livewire:shopclosedmodal 'ShopInf','ProductInf'/-->
             @livewireScripts
             
             <div class="card-body">
@@ -328,7 +370,8 @@
                             url: '{{ route('reserve.calenderGet') }}', // リクエストを送るURL
                             type: 'GET',
                             data: {
-                                id    : {{ $ShopInf->id }},
+                                basecode  : {{ $ShopInf->id }},
+                                ProductID : {{ $ProductInf->id }},
                                 month   : reqYM
                             },                            
                             success: function(response) {
@@ -430,37 +473,53 @@
                     }
                     function openYoyakuInput(day) {
                         //  YYYY-MM-DD に編集
-                        var reqDate = CurrYM.substr(0,8) + ('00' + day).slice(-2);
+                        var reqDate = CurrYM.substr(0,8) + '-' + ('00' + day).slice(-2);
 
                         //  新規画面へのURL
-                        const newUrl = '{{ Route('reserve.create') }}/' + reqDate;
+                        const newUrl = '{{ Route('reserve.create') }}/{{ $ShopInf->id }}/{{ $ProductInf->id }}/' + reqDate ;
                         window.location.href = newUrl;            // リダイレクト
                     }
-                    function updateButtonColor(area,selIx) {
+                    function updateButtonColor(area,data) {
 
-                        const editButton = area.querySelector('.edit_button'); // area12 内の edit_button を取得
-                        const yoyakulabel = area.querySelector('.yoyaku_button'); // area12 内の edit_button を取得
-                        const daylabel = area.querySelector('.day'); // area12 内の edit_button を取得
-
+                        const selIx = Number(data.operating);
+                        const editButton = area.querySelector('.edit_button');      // area 内の edit_button を取得
+                        const yoyakulabel = area.querySelector("[id^='Yoyaku']");   // area 内の edit_button を取得
+                        const daylabel = area.querySelector('.day');                // area 内の edit_button を取得
+                        {{-- 既存の色クラスをすべて削除する --}}
+                        editButton.classList.remove('edit_button_normal', 'edit_button_horiday', 'edit_button_private');
+                        var newText = '未定義';
+                        
+                        // opetblから対応するエントリを探す
+                        const operation = opetbl.find(item => item.code === selIx);
+                        if (operation) {
+                            newText = operation.name;
+                        }
                         switch (selIx) {
                         case 1:
-                            editButton.style.backgroundColor = 'green';
+                            editButton.classList.add('edit_button_normal');
                             break;
                         case 2:
-                            editButton.style.backgroundColor = 'red';
+                            editButton.classList.add('edit_button_horiday');
                             break;
                         case 3:
-                            editButton.style.backgroundColor = 'blue'; // 例：貸し切りは青
+                            editButton.classList.add('edit_button_private');
                             break;
                         default:
                             editButton.style.backgroundColor = ''; // デフォルトの色をクリア
                         }
+                        // ボタンのテキストの置き換え
+                        editButton.textContent = newText;
 
-                        if((selIx == 1) && (todayDD > daylabel.textContent)) {
-                            yoyakulabel.style.visibility = ''; // または 'visible'
-                        } else {
-                            yoyakulabel.style.visibility = 'hidden';
+                        if (yoyakulabel) {
+                            if((selIx == 1) && (todayDD > daylabel.textContent)) {
+                                yoyakulabel.style.visibility = ''; // または 'visible'
+                            } else {
+                                yoyakulabel.style.visibility = 'hidden';
+                            }
                         }
+                        {{-- class名 yoyaku_cnt を探す --}}
+                        const yoyakuCntElement = area.querySelector('.yoyaku_cnt'); 
+                        yoyakuCntElement.textContent = data.yoyakusu;
                     }                                    
                     
                     </script>
@@ -558,16 +617,19 @@
                             reqDate = CurrYM.substr(0, 7) + '-' +  ('00' + strDate).slice(-2);
                             headDiv = document.getElementById('dateCaption');
                             headDiv.textContent = reqDate;
+                            document.getElementById('destDate').value = reqDate;
 
                             //  指定日の情報を読み取り
+                            {{-- app\Http\Controllers\ReserveDateController.php  readDateInfo() --}}
                             $.ajax({
                                 url: '{{ route('reserve.readDateInfo') }}', // リクエストを送るURL
                                 type: 'GET',
                                 data: {
-                                    type    : '1',
-                                    baseCode : {{ $ShopInf->id }},
+                                    type      : '1',
+                                    baseCode  : Number({{ $ShopInf->id }}),
+                                    productID : Number({{ $ProductInf->id }}),
                                     eigyotype : '1',
-                                    destDate : reqDate,
+                                    destDate  : reqDate,
                                 },
                                 success: function(response) {
                                     // サーバーから返ってきたデータの処理
@@ -575,14 +637,10 @@
                                     dateinfo = response;
 
                                     document.getElementById('id').value         = response.id;
-                                    document.getElementById('baseCode').value   = response.baseCode;
-                                    document.getElementById('eigyotype').value  = response.eigyotype;
-                                    document.getElementById('destDate').value   = response.destDate;
-                                    document.getElementById('operating').selectedIndex = response.operating;
+                                    document.getElementById('operating').value = response.operating;
                                     document.getElementById('capacity').value   = response.capacity;
                                     document.getElementById('yoyakusu').value   = response.yoyakusu;
                                     document.getElementById('memo').value       = response.memo;
-
                                 },
                                 error: function(error) {
                                     // エラーが発生した場合の処理
@@ -595,10 +653,11 @@
                         function writeDateInfo() {
                             const data = {
                                 id: document.getElementById('id').value,
-                                baseCode: document.getElementById('baseCode').value,
+                                baseCode: {{ $ShopInf->id }},
+                                productID: {{ $ProductInf->id }},
                                 eigyotype: document.getElementById('eigyotype').value,
                                 destDate: document.getElementById('destDate').value,
-                                operating: document.getElementById('operating').selectedIndex, // または .value で値を取得
+                                operating: document.getElementById('operating').value,
                                 capacity: document.getElementById('capacity').value,
                                 yoyakusu: document.getElementById('yoyakusu').value,
                                 memo: document.getElementById('memo').value
@@ -616,8 +675,7 @@
                                     console.log('Success:', responseData); // 成功時の処理
                                     const areaName =  'area' + document.getElementById('dayIx').value;
                                     const area = document.getElementById(areaName); // area12 の要素を取得
-                                    selIx = document.getElementById('operating').value;
-                                    updateButtonColor(area,selIx);
+                                    updateButtonColor(area,data);
                                 },
                                 error: function(xhr, status, error) {
                                     console.error('Error:', status, error); // エラー時の処理

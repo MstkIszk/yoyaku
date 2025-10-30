@@ -2,6 +2,7 @@
 <nav x-data="{ open: false }" class="bg-white border-b border-gray-100">
     <!--「resources\views\layouts\navigation.blade.php」 -->
     <!-- Primary Navigation Menu -->
+    <x-owner-menu />
     <div class="head_frame">
         <div class="head_inbox">
             <div class="head_image_wrap">
@@ -12,7 +13,6 @@
                         <x-application-logo  class="block h-9 w-auto fill-current text-gray-800" />
                     <!-- /a -->
                 </div>
-                <x-owner-menu />
 
                 <!--  app\View\Components\ShopMenu.php 店ごとのメニュー-->
                 <!--  └ resources\views\components\shop-menu.blade.php -->

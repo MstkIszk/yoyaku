@@ -1,4 +1,6 @@
 <x-app-layout>
+    <x-controltemfileio nameitem="productName" extension=".product"></x-controltemfileio>
+
     <x-slot name="header">
         <x-article-title caption="{{ __('Dashboard') }}" />
     </x-slot>
@@ -43,15 +45,16 @@
                     padding: 0;
                 }
                 </style>
-                <div class="box12">
-                    <label>支払い方法</label><br>
+
+                <x-rCheckbox name="WaysPay" caption="支払い方法">                
                     @foreach ($shopPaysWay as $way)
-                        <input type="checkbox" name="WaysPay[]" value="{{ $way->PrBit }}" id="WaysPay_{{ $loop->index }}">
+                        <input  type="checkbox" name="WaysPay[]" 
+                                value="{{ $way->PrBit }}" id="WaysPay_{{ $loop->index }}">
                         <label for="WaysPay_{{ $loop->index }}">{{ $way->PrName }}</label><br>
                     @endforeach
-                </div>
+                </x-rCheckbox>
 
-                <x-r-text-area name="MessageText" msgText="{{old('MessageText')}}">案内:</x-rTextbox>
+                <x-r-text-area name="memo" msgText="{{old('memo')}}">案内:</x-rTextbox>
 
                 <button type="submit">登録</button>
             </form>

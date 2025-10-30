@@ -107,4 +107,26 @@ class ProfileController extends Controller
         //    取得したデータをViewに渡す
         return view('welcome', compact('shops'));
     }
+
+    //  店舗の情報と予約情報を表示
+    public function shopsel(Request $request,$shop_id) {
+
+        if($shop_id == 0) {
+            return redirect()->route('profile.homelist');
+        }
+
+        // id = $shop_id のデータ（一般ユーザー、つまり店舗）を抽出し、
+        // 関連する商品データ (app\Models\User.php::products) も同時に取得する
+        $ShopInf = User::with('products')
+                        ->where('id',  $shop_id)
+                        ->first();
+
+        // データが見つからなかった場合の処理
+        if (!$ShopInf) {
+            //  404エラーを表示、またはリダイレクト
+            abort(404);
+        }                        
+        return view("auth.showuser",compact('ShopInf'));
+    }
+
 }

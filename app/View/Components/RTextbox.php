@@ -14,11 +14,12 @@ class RTextbox extends Component
     public $placeholder;
     public $width;
     public $class;
+    public $attr;
 
     /**
      * Create a new component instance.
      */
-    public function __construct($name, $type='text', $width = 10, $value = 'are', $placeholder = '入力してください',$class='')
+    public function __construct($name, $type='text', $width = 10, $value = 'are', $placeholder = '入力してください',$class='',$attr='')
     {
         $this->name=$name;
         $this->type=$type;
@@ -26,6 +27,7 @@ class RTextbox extends Component
         $this->placeholder=$placeholder;
         $this->width=$width;
         $this->class="py-2 ". $class . "border border-gray-300 rounded-md";
+        $this->attr=$attr;
     }
 
     /**
@@ -33,6 +35,10 @@ class RTextbox extends Component
      */
     public function render(): View|Closure|string
     {
+        if($this->type == "label") {
+            /* 表示 : resources\views\components\r-textbox.blade.php */
+            return view('components.r-labelbox');
+        }
         /* 表示 : resources\views\components\r-textbox.blade.php */
         return view('components.r-textbox');
     }

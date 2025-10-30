@@ -1,6 +1,7 @@
 <?php
-//  店舗と営業タイプについて日付毎の予約可能情報を登録するテーブル
-
+// 営業日テーブル 
+// 店舗とサービスについて日付毎の予約可能情報を登録するテーブル
+//  Model:
 
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
@@ -15,8 +16,10 @@ return new class extends Migration
     {
         Schema::create('reserv_date', function (Blueprint $table) {
             $table->increments('id');                //  自動加算のID
-            $table->integer('baseCode')->comment('店舗コード');   //  対象の店舗コード
+            $table->foreignId('baseCode')->comment('店舗ID');      // usersテーブルの id を参照
+            $table->foreignId('productID')->comment('商品名ID');  //  user_productsテーブルの id を参照
             $table->integer('eigyotype')->comment('営業タイプ');  //  営業タイプ
+
             $table->dateTime('destDate')->comment('対象日付');    //  対象日付
             $table->integer('operating')->comment('営業状態');    // 1:通常営業・2:休業・3:貸し切り
             $table->integer('capacity')->comment('定員');        //  定員

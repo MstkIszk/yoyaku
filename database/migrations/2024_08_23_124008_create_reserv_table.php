@@ -1,4 +1,7 @@
 <?php
+// 予約テーブル 
+// 店舗とサービスへの予約を登録するテーブル
+//  Model:app\Models\Reserve.php
 
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;

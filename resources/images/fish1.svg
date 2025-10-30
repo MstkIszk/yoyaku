@@ -1,0 +1,41 @@
+<svg width="60" height="30" viewBox="0 0 60 30" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="salmonBodyGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#FF8C69;stop-opacity:1" /> 
+      <stop offset="100%" style="stop-color:#FFDAB9;stop-opacity:1" /> 
+    </linearGradient>
+    <linearGradient id="salmonFinGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#FF6347;stop-opacity:1" /> 
+      <stop offset="100%" style="stop-color:#FFA07A;stop-opacity:1" /> 
+    </linearGradient>
+  </defs>
+
+  <path d="M4 15 
+           C 6 5, 20 2, 40 2 
+           L 55 2 
+           C 58 2, 59 8, 55 15 
+           C 59 22, 58 28, 55 28 
+           L 40 28 
+           C 20 28, 6 25, 4 15 Z" fill="url(#salmonBodyGradient)"/>
+
+  <path d="M57 15 
+           L 60 8 
+           L 58 13 
+           L 58 17 
+           L 60 22 
+           L 57 15 Z" fill="url(#salmonFinGradient)"/>
+
+  <path d="M30 2 L25 7 L35 7 Z" fill="url(#salmonFinGradient)"/>
+
+  <path d="M22 27 L28 27 L25 24 Z" fill="url(#salmonFinGradient)"/>
+
+  <circle cx="28" cy="7" r="0.5" fill="#333333"/>
+  <circle cx="35" cy="10" r="0.5" fill="#333333"/>
+  <circle cx="42" cy="13" r="0.5" fill="#333333"/>
+  <circle cx="48" cy="18" r="0.5" fill="#333333"/>
+
+  <circle cx="12" cy="10" r="2.5" fill="white"/>
+  <circle cx="12" cy="10" r="1" fill="black"/>
+</svg>
+
+

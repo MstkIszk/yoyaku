@@ -14,6 +14,7 @@ class ReserveDate extends Model
     //  保存・更新したいカラムを設定
     protected $fillable = [
         'baseCode',     //  対象の店舗コード
+        'productID',    //  商品コード
         'eigyotype',    //  営業タイプ
         'destDate',     //  対象日付
         'operating',    // 1:通常営業・2:休業・3:貸し切り
@@ -22,14 +23,16 @@ class ReserveDate extends Model
         'memo'          //  メモ書き
     ];
 
+    
     protected $casts = [
         'baseCode' => 'integer',     //  対象の店舗コード
+        'productID' => 'integer',    //  商品コード
         'eigyotype' => 'integer',    //  営業タイプ
-        'destDate' => 'datetime',     //  対象日付
+        'destDate' => 'datetime',    //  対象日付
         'operating' => 'integer',    // 1:通常営業・2:休業・3:貸し切り
         'capacity' => 'integer',     //  定員
         'yoyakusu' => 'integer',     //  ネット予約以外の予約人数
-        'memo' => 'string'          //  メモ書き
+        'memo' => 'string'           //  メモ書き
     ];
 
     

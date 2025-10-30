@@ -1,6 +1,3 @@
-<!-- 店舗登録画面 -->
-
-<!--  「resources\views\auth\edituser.blade php」 -- START  -->
 <x-guest-layout>
     <form class="h-adr" method="POST" action="{{ route('register') }}">
         @csrf

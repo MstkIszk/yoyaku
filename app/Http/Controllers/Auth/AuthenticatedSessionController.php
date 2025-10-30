@@ -10,6 +10,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\View\View;   
 use App\Http\Controllers\ReserveController;
+use App\Http\Controllers\ProfileController;
+
 
 class AuthenticatedSessionController extends Controller
 {
@@ -30,7 +32,8 @@ class AuthenticatedSessionController extends Controller
 
         $request->session()->regenerate();
 
-        $controller = new ReserveController();
+        //$controller = new ReserveController();
+        $controller = new ProfileController();
         return $controller->shopsel($request,Auth::user()->id);       
     }
 

@@ -11,7 +11,7 @@
 .headerAside {      /* メニューの枠 レスポンシブ部分 */
     position: absolute;
     //position: fixed;
-    top: 4px;
+    top: 96px;
     z-index: 999;
     display: flex;
     right: 40px;
@@ -152,6 +152,6 @@
         <li class="headerAside__item" ><a href="{{ route('reserve.index') }}" class="headerAside__link">予約リスト</a></li>
         <li class="headerAside__item"><a href="{{ route('reserve.create') }}" class="headerAside__link">予約登録</a></li>
         <li class="headerAside__item"><a href="{{ route('reserve.telnoinput') }}" class="headerAside__link">予約検索</a></li>
-        <li class="headerAside__item"><a href="{{ route('reserve.calender') }}" class="headerAside__link">カレンダー</a></li>
+        {{-- <li class="headerAside__item"><a href="{{ route('reserve.calender') }}" class="headerAside__link">カレンダー</a></li> --}}
     </ol>
 </div>

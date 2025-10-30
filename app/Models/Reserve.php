@@ -26,12 +26,14 @@ class Reserve extends Model
             'CliAddrZip',       //  郵便番号
             'CliAddrPref',      //  県名
             'CliAddrCity',      //  市町村名
+            'CliAddrOther',     //  地域名
             'CliTel1',          //  電話番号
             'CliEMail',         //  メールアドレス
             'CliResvType',      //  予約タイプ	
             'CliResvCnt',       //  予約人数
             'CliWaysPay',       //  支払い方法
             'MessageText',      //  連絡
+            'RandomNumber',     //  確認用の乱数
             'UpdateDate',       //  更新日
             'Status'            //  予約状態
     ];
@@ -59,7 +61,10 @@ class Reserve extends Model
         [   2  , '午後'    ],
         [   3  , '３時間'  ]
     ];
-    public static function GetYoyakuType() {
+    public static function GetYoyakuType($userId,$ProductIid) {
+
+
+
         return self::$YoyakuTypeList;
     }
 

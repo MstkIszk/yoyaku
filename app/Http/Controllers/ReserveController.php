@@ -5,10 +5,13 @@ namespace App\Http\Controllers;
 
 use App\Models\Reserve;
 use App\Models\ReserveDate;
+use Illuminate\Support\Facades\Session;
 use App\Rules\CheckReservationCount;
+use Illuminate\Validation\Rule;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use App\Models\User; // User モデルをインポート
+use App\Models\UserProduct;
 use Illuminate\Support\Facades\View;
 enum ReserveStatus : int
 {
@@ -81,8 +84,8 @@ class ReserveController extends Controller
         }
     }
     
-
-    public function create(Request $request,$ReqDate='',$ReqType=0) {  //  新規投稿
+    //  予約登録画面の表示
+    public function create(Request $request,$ShopID=0,$ProductID=0,$ReqDate="") {  //  新規投稿
 
         if(strlen($ReqDate) > 0) {
             $DestDate = $ReqDate . ' 07:00';
@@ -92,7 +95,9 @@ class ReserveController extends Controller
         }
         $ShopID = session('ShopID'); // キーに対応する値を取得
         $user = User::find($ShopID);
-        return view("Reserve.RCreate",compact('user', 'DestDate','ReqType'));
+        $Product = User::find($ProductID);
+        $ReqType = 1;
+        return view("Reserve.RCreate",compact('user','Product', 'DestDate','ReqType'));
         //return view("Reserve.RCreate")->with('DestDate', $DestDate)->with('ReqType', $ReqType);
 
         // makeメソッドでインスタンスを作成（データベースには保存しない）
@@ -103,7 +108,104 @@ class ReserveController extends Controller
         //return view("Reserve.REdit",compact('reserve'));
     }
     
+    //  予約の確認と確認コード入力画面
+    public function confirm(Request $request,$ShopID=0,$ProductID=0,$ReqDate="") {  //  新規投稿
+        // -----------------------------------------------------
+        // 1. バリデーションルールの定義
+        // -----------------------------------------------------
+        $rules = [
+            'ReserveDate'   => 'required|yoyaku_date', // 予約日
+            'ClitNameKanji' => 'required|string|max:100', // 氏名漢字
+            'ClitNameKana'  => 'required|string|max:100', // 氏名カナ
+            'CliAddrZip'    => 'required|postal_code', // 郵便番号
+            'CliAddrPref'   => 'required|string|max:50', // 県名
+            'CliAddrCity'   => 'required|string|max:50', // 市町村名
+            'CliAddrOther'  => 'required|string|max:100', // 地域名
+            'CliTel1'       => ['required', 'phone_number'], // 電話番号：配列形式に変更
+            'CliEMail'      => 'required|email|max:255', // メールアドレス
+            'CliResvType'   => 'required|integer', // 予約タイプ
+            'CliResvCnt'    => [
+                'required', 
+                'numeric', 
+                // 予約可能人数チェックのカスタムルールを適用
+                new CheckReservationCount(
+                    $request->ReserveDate, 
+                    $request->Baseid, 
+                    $request->Productid
+                )
+            ],
+            'CliWaysPay'    => 'required|integer', // 支払い方法
+            'MessageText'   => 'nullable|string|max:500', // 連絡事項 (nullableに変更)
+            'Baseid'        => 'required|integer',
+            'Productid'     => 'required|integer',
+        ];
+
+        $messages = [
+            'ReserveDate.required'      => '予約日を指定してください',
+            'ReserveDate.yoyaku_date'   => '予約日は明日以降としてください',
+            'ClitNameKanji.required'    => '氏名を入力してください',
+            'ClitNameKana.required'     => 'ヨミガナを入力してください',
+            'CliAddrZip.required'       => '郵便番号を入力してください',
+            'CliAddrZip.postal_code'    => '郵便番号の形式が不正です',
+            'CliAddrPref.required'      => '県名を入力してください',
+            'CliAddrCity.required'      => '市町村名を入力してください',
+            'CliAddrOther.required'     => '地域名を入力してください',
+            'CliTel1.required'          => '電話番号を指定してください',
+            'CliTel1.phone_number'      => '電話番号の形式が不正です',
+            'CliEMail.required'         => 'メールアドレスを指定してください',
+            'CliEMail.email'            => 'メールアドレスの形式が不正です',
+            'CliResvType.required'      => '予約タイプを指定してください',
+            'CliResvCnt.required'       => '予約人数を指定してください',
+            'CliResvCnt.numeric'        => '予約人数は数値で指定してください',
+            'CliWaysPay.required'       => 'お支払い方法を指定してください'
+        ];
+
+        // -----------------------------------------------------
+        // 2. 電話番号と日付の重複チェック（Reserveテーブル）
+        // -----------------------------------------------------
+        // 過去の同じ電話番号で、同じ予約日時に有効な予約がないか確認
+        $rules['CliTel1'][] = Rule::unique('reserv', 'CliTel1')->where(function ($query) use ($request) {
+            return $query->where('ReserveDate', $request->ReserveDate)
+                         ->where('Baseid', $request->Baseid)
+                         ->where('Productid', $request->Productid)
+                         ->where('Status', '!=', 9); // キャンセル/無効な予約を除外 (Status=9を仮定)
+        });
+        $messages['CliTel1.unique'] = 'この電話番号と予約日時の組み合わせは既に予約済みです。';
+
+
+        // -----------------------------------------------------
+        // 3. バリデーション実行
+        // -----------------------------------------------------
+        $validated = $request->validate($rules, $messages);
+        
+        // -----------------------------------------------------
+        // 4. バリデーションOKの場合: データをセッションに保存して確認画面へ
+        // -----------------------------------------------------
+        Session::flash('reservation_data', $validated);
+        
+        // 予約タイプ、支払方法の表示用テキストを取得し、セッションに追加
+        $reservationTypeArray = Reserve::GetYoyakuType($request->Baseid, $request->Productid);
+        $paymentWayArray = Reserve::GetPaysWay();
+
+        $validated['CliResvType_text'] = collect($reservationTypeArray)->firstWhere(0, $request->CliResvType)[1] ?? '不明';
+        $validated['CliWaysPay_text'] = collect($paymentWayArray)->firstWhere(0, $request->CliWaysPay)[1] ?? '不明';
+
+        Session::flash('reservation_display_data', $validated);
+
+        return view('Reserve.RConfirm', compact('validated'));
+    }
+    
+    //  予約の格納
     public function store(Request $request) {
+
+        // セッションから確認画面でPOSTされたデータを取得
+        $data = $request->session()->pull('reservation_data');
+
+        // セッションデータがない場合は、不正なアクセスまたはセッション切れとしてリダイレクト
+        if (empty($data)) {
+            return redirect()->route('reserve.index')->with('error', '予約データが取得できませんでした。最初からやり直してください。');
+        }
+
         //  ガード文字列
         //          0         1         2         3         4         5         6         
         $MasterKeyStr = 'AerD#$HjaiouAp@o|&YU%#jkTFG&Hiuwe)(aBng>OP_K&kljkA?OUf;=SgF:E%FdYBuY#Etx';
@@ -116,123 +218,87 @@ class ReserveController extends Controller
 
         $randomNumber = mt_rand(1000, 9999);
 
-        // バリデーションを通過した場合、予約処理を行う
-        if($request->validate([
-            'ReserveDate'   =>  'required|yoyaku_date',      //  予約日
-            'ClitNameKanji' =>  'required',    //  氏名漢字
-            'ClitNameKana'  =>  'required',     //  氏名カナ
-            'CliAddrZip'    =>  'required|postal_code',       //  郵便番号
-            'CliTel1'       =>  'required|phone_number',          //  電話番号
-            'CliEMail'      =>  'required|email',         //  メールアドレス
-            'CliResvType'   =>  'required',      //  予約タイプ
-            'CliResvCnt'    =>  ['required', 'numeric', new CheckReservationCount($request->ReserveDate, $request->CliResvCnt)],       //  予約人数
-            'CliWaysPay'    =>  'required'
-        ],
-        [
-            'ReserveDate.required'   =>  '予約日を指定してください',      //  予約日
-            'ReserveDate.yoyaku_date'   =>  '予約日は明日以降としてください',      //  予約日
-            'ClitNameKanji.required' =>  '氏名を入力してください',    //  氏名漢字
-            'ClitNameKana.required'  =>  'ヨミガナを入力してください',     //  氏名カナ
-            'CliAddrZip.required'    =>  '郵便番号を入力してください',       //  郵便番号
-            'CliAddrZip.postal_code'    =>  '郵便番号の形式が不正です',       //  郵便番号
-            'CliTel1.required'       =>  '電話番号を指定してください',          //  電話番号
-            'CliTel1.phone_number'       =>  '電話番号の形式が不正です',          //  電話番号
-            'CliEMail.required'      =>  'メールアドレスを指定してください',         //  メールアドレス
-            'CliEMail.email'      =>  'メールアドレスの形式が不正です',         //  メールアドレス
-            'CliResvType.required'   =>  '予約タイプを指定してください',      //  予約タイプ
-            'CliResvCnt.required'    =>  '予約人数を指定してください',
-            'CliResvCnt.numeric'    =>  '予約人数は数値で指定してください',
-            'CliWaysPay.required'    =>  '相払い方法を指定してください'
-        ]
-        )) {
+        // -----------------------------------------------------
+        // データベースへの保存
+        // -----------------------------------------------------
+        try {
             $reserve = Reserve::create([
-                'OrderNo'       =>  $newOrderNo,    //  予約番号
-                'KeyStr'        =>  $KeyStr,        //  照会時に比較する	
-                'ReqDate'       =>  $ReqDate,       //  予約日時	
-                'ReserveDate'   =>  $request->ReserveDate,      //  予約日
-                'ClitNo'        =>  1,                          //  変更数
-                'ClitNameKanji' =>  $request->ClitNameKanji,    //  氏名漢字
-                'ClitNameKana'  =>  $request->ClitNameKana,     //  氏名カナ
-                'CliAddrZip'    =>  $request->CliAddrZip,       //  郵便番号
-                'CliAddrPref'   =>  $request->CliAddrPref,      //  県名
-                'CliAddrCity'   =>  $request->CliAddrCity,      //  市町村名
-                'CliAddrOther'  =>  $request->CliAddrOther,      //  地域名
-                'CliTel1'       =>  $request->CliTel1,          //  電話番号
-                'CliEMail'      =>  $request->CliEMail,         //  メールアドレス
-                'CliResvType'   =>  $request->CliResvType,      //  予約タイプ
-                'CliResvCnt'    =>  $request->CliResvCnt,       //  予約人数
-                'CliWaysPay'    =>  $request->CliWaysPay,       //  支払い方法
-                'MessageText'   =>  $request->MessageText,      //  連絡
-                'UpdateDate'    =>  $today,                     //  更新日
-                'RandomNumber'  =>  $randomNumber,              //  確認用の乱数
-                'Status'        =>  ReserveStatus::Entry        //  予約状態
+                'OrderNo'       => $newOrderNo, // 予約番号
+                'Baseid'        => $data['Baseid'], // 対象店舗
+                'Productid'     => $data['Productid'], // 対象商品
+                'KeyStr'        => $KeyStr, // 照会時に比較する 
+                'ReqDate'       => $ReqDate, // 予約受付日時 
+                'ReserveDate'   => $data['ReserveDate'], // 予約希望日時
+                'ClitNo'        => 1, // 変更数（初期は1）
+                'ClitNameKanji' => $data['ClitNameKanji'], // 氏名漢字
+                'ClitNameKana'  => $data['ClitNameKana'], // 氏名カナ
+                'CliAddrZip'    => $data['CliAddrZip'], // 郵便番号
+                'CliAddrPref'   => $data['CliAddrPref'], // 県名
+                'CliAddrCity'   => $data['CliAddrCity'], // 市町村名
+                'CliAddrOther'  => $data['CliAddrOther'], // 地域名
+                'CliTel1'       => $data['CliTel1'], // 電話番号
+                'CliEMail'      => $data['CliEMail'], // メールアドレス
+                'CliResvType'   => $data['CliResvType'], // 予約タイプ
+                'CliResvCnt'    => $data['CliResvCnt'], // 予約人数
+                'CliWaysPay'    => $data['CliWaysPay'], // 支払い方法
+                'MessageText'   => $data['MessageText'], // 連絡
+                'UpdateDate'    => $today, // 更新日
+                'RandomNumber'  => $randomNumber, // 確認用の乱数
+                'Status'        => ReserveStatus::Entry // 予約状態 (Enumを仮定)
             ]);
-
-
-            $OrderMailAddr		= "maki+order@hot-naniai.lix.jp";
-            $InquiryMailAddr	= "maki+inquiry@hot-naniai.lix.jp";
-            $OtherMailAddr		= "maki+other@hot-naniai.lix.jp";
-            $AdditMailFile		= public_path() . "/TextParam/managerList.txt";
-            $AdditMailAddr		= file_get_contents($AdditMailFile);
-            $FurikomiKFile		= public_path() . "/TextParam/BankInfo.txt";
-            $FurikomiKouza		= file_get_contents($FurikomiKFile);
-
-            mb_language("Japanese");
-            mb_internal_encoding("UTF-8");
-
-            //$to = $_POST['to'];
-            $to = $request->CliEMail;
-            //$title = $_POST['title'];
-            $title = "【あちゃまＷＥＢ開発】 お問い合わせありがとうございます。";
-            $headers = "";	//"Content-Type:text/html;charset=UTF-8\r\n";
-            $headers .= "Content-Type: text/plain \r\n";
-            $headers .= "Return-Path: $InquiryMailAddr \r\n";
-            $headers .=	"From: " . mb_encode_mimeheader("七二会森林クラブ　お問合せ係") . "<$InquiryMailAddr>\r\n";
-            $headers .= "Bcc:$AdditMailAddr \r\n";
-            $param = "-f $InquiryMailAddr";	//	サーバーによってはReturn-Path:を勝手に書き換えてしまうものもあるので、そのときは追加オプションのほうで -f を指定してあげます。
-
-            $message = "受付日時:\r\n$ReqDate\r\n\r\n";
-            $message .= "お名前:\r\n" .  $request->ClitNameKanji . "(" . $request->ClitNameKana . ")様\r\n";
-            $message .= "予約日:\r\n" .  $request->ReserveDate . "　(" . $request->CliResvCnt . "名)\r\n\r\n";
-
-            $message .= "予約確認番号:\r\n" .   $randomNumber . "\r\n\r\n";
-
-            $message .= "入力画面を再表示する場合は、以下のURLを開いてください:\r\n";
-            $message .= "{{ reserve.confirm }}?id=$newOrderNo&KeyStr='" . $KeyStr . "'&randomNumber='" . $randomNumber . "'\r\n";
-
-            $message .= "ご連絡先\r\n TEL:" . $request->CliTel1 . "\r\n";
-            $message .= "MAIL:" . $request->CliEMail . "\r\n\r\n";
-
-            $message .= "------------------------\r\n連絡先: あちゃまＷＥＢ開発\r\n";
-            $message .= "長野県 長野市 平林2-19-12-605\r\n";
-            $message .= "TEL: 090-3585-2572\r\n";
-            $message .= "E-Mail: info@kyum.chu.jp\r\n";
-
-
-            if(mb_send_mail($to, $title, $message, $headers, $param)) {
-                $request->session()->flash('message','確認メールを送信しました');
-            }
-            else {
-                $request->session()->flash('message','確認メールの送信に失敗しました');
-            }
-            //  一覧のページに戻る
-            return redirect()->route('reserve.index');
+        } catch (\Exception $e) {
+            Log::error('予約登録エラー: ' . $e->getMessage());
+            return redirect()->route('reserve.index')->with('error', '予約処理中にエラーが発生しました。再度お試しください。');
         }
-        return back();        
-    }
-    //  予約の確認と確認コード入力画面
-    public function confirm(Request $request,$id=0,$KeyStr="") {
-        $result = Reserve::where('id', $request->id)
-                            ->where('KeyStr', $request->KeyStr)
-                            ->first();
-        if ($result) {
-            $request->session()->flash('message','予約内容を確認してください');
-            return view("Reserve.RConfirm", compact('result'));
-        } 
+
+        $OrderMailAddr		= "maki+order@hot-naniai.lix.jp";
+        $InquiryMailAddr	= "maki+inquiry@hot-naniai.lix.jp";
+        $OtherMailAddr		= "maki+other@hot-naniai.lix.jp";
+        $AdditMailFile		= public_path() . "/TextParam/managerList.txt";
+        $AdditMailAddr		= file_get_contents($AdditMailFile);
+        $FurikomiKFile		= public_path() . "/TextParam/BankInfo.txt";
+        $FurikomiKouza		= file_get_contents($FurikomiKFile);
+
+        mb_language("Japanese");
+        mb_internal_encoding("UTF-8");
+
+        //$to = $_POST['to'];
+        $to = $request->CliEMail;
+        //$title = $_POST['title'];
+        $title = "【あちゃまＷＥＢ開発】 お問い合わせありがとうございます。";
+        $headers = "";	//"Content-Type:text/html;charset=UTF-8\r\n";
+        $headers .= "Content-Type: text/plain \r\n";
+        $headers .= "Return-Path: $InquiryMailAddr \r\n";
+        $headers .=	"From: " . mb_encode_mimeheader("七二会森林クラブ　お問合せ係") . "<$InquiryMailAddr>\r\n";
+        $headers .= "Bcc:$AdditMailAddr \r\n";
+        $param = "-f $InquiryMailAddr";	//	サーバーによってはReturn-Path:を勝手に書き換えてしまうものもあるので、そのときは追加オプションのほうで -f を指定してあげます。
+
+        $message = "受付日時:\r\n$ReqDate\r\n\r\n";
+        $message .= "お名前:\r\n" .  $request->ClitNameKanji . "(" . $request->ClitNameKana . ")様\r\n";
+        $message .= "予約日:\r\n" .  $request->ReserveDate . "　(" . $request->CliResvCnt . "名)\r\n\r\n";
+
+        $message .= "予約確認番号:\r\n" .   $randomNumber . "\r\n\r\n";
+
+        $message .= "入力画面を再表示する場合は、以下のURLを開いてください:\r\n";
+        $message .= "{{ reserve.confirm }}?id=$newOrderNo&KeyStr='" . $KeyStr . "'&randomNumber='" . $randomNumber . "'\r\n";
+
+        $message .= "ご連絡先\r\n TEL:" . $request->CliTel1 . "\r\n";
+        $message .= "MAIL:" . $request->CliEMail . "\r\n\r\n";
+
+        $message .= "------------------------\r\n連絡先: あちゃまＷＥＢ開発\r\n";
+        $message .= "長野県 長野市 平林2-19-12-605\r\n";
+        $message .= "TEL: 090-3585-2572\r\n";
+        $message .= "E-Mail: info@kyum.chu.jp\r\n";
+
+
+        if(mb_send_mail($to, $title, $message, $headers, $param)) {
+            $request->session()->flash('message','確認メールを送信しました');
+        }
         else {
-            // レコードが見つからなかった場合の処理
-            $request->session()->flash('message','予約が見つかりません');
+            $request->session()->flash('message','確認メールの送信に失敗しました');
         }
+        //  一覧のページに戻る
+        return redirect()->route('reserve.index');
     }
     //  予約の確定
     public function fixed(Request $request,$id=0,$KeyStr="") {
@@ -328,39 +394,51 @@ class ReserveController extends Controller
         return redirect()->route('reserve.index');
     }
     
-    //  店舗の情報と予約情報を表示
-    public function shopsel(Request $request,$id = 0,$month = "") {
+    /**
+     * 予約カレンダー表示
+     */
+    public function calender(Request $request, $user_id = null, $product_id = null)
+    {
+        // 1. パラメータをセッションに格納
+        if ($user_id !== null) {
+            $request->session()->put('ShopID', $user_id);
+        }
+        if ($product_id !== null) {
+            $request->session()->put('ProductID', $product_id);
+        }
+        $month = date('Y-m-d');
 
-        if($id == 0) {
+        // 2. セッションからIDを取得
+        $ShopID = $request->session()->get('ShopID');
+        $ProductID = $request->session()->get('ProductID');
+
+
+        // 3. 店舗情報と商品情報の取得
+        // $ShopIDが設定されていない場合はリダイレクト
+        if (!$ShopID) {
             return redirect()->route('profile.homelist');
         }
-        $ShopInf = User::find($id); // 指定されたIDの予約データを取得
-        if(!$ShopInf) {
-            return redirect()->route('profile.homelist');
-        }
-        session(['ShopID' => $id]); // 選択された店舗のIDを保存
-        if($month == "") {
-            $month = date('Y-m-d');
-        }
-
-        return view("Reserve.RCalender",compact('month','ShopInf'));
-    }
-
-    
-    public function calender(Request $request,$month = "",$user = null) {
-
-        if($month == "") {
-            $month = date('Y-m-d');
-        }
-        $ShopID = session(['ShopID']);
+        
         $ShopInf = User::find($ShopID);
+        $ProductInf = null;
+
+        if ($ProductID) {
+             // 商品IDが存在する場合、商品情報を取得
+             $ProductInf = UserProduct::find($ProductID);
+             // 取得できなかった場合も考慮
+             if (!$ProductInf) {
+                 // エラー処理またはリダイレクトを検討
+             }
+        }
+        
+        // 4. 不足しているチェック
         if(!$ShopInf) {
+            // $ShopIDがセッションにありながら無効な場合のリダイレクト
             return redirect()->route('profile.homelist');
         }
 
-        $ProductID  = session(['ProductID']);
-
-        return view("Reserve.RCalender",compact('month','ShopInf'));
+        // 今後、カレンダービューで $ShopInf と $ProductInf を利用できるように compact に追加
+        return view("Reserve.RCalender", compact('month', 'ShopInf', 'ProductInf'));
     }
 
     //  指定月のカレンダー情報を読み込むバックエンド処理
@@ -374,7 +452,8 @@ class ReserveController extends Controller
 
         // 指定月の範囲内のデータを取得
         $reservations = Reserve::whereBetween('ReserveDate', [$firstDay, $lastDay])
-            ->where('Baseid', $request->id)
+            ->where('Baseid', $request->basecode)
+            ->where('Productid', $request->ProductID)
             ->orderBy('ReserveDate')->get();
         $dcnt = count($reservations);
         $dix = 0;
@@ -385,7 +464,10 @@ class ReserveController extends Controller
         }
 
         // 日付情報を読み込み
-        $reserveDates = ReserveDate::whereBetween('destDate', [$firstDay, $lastDay])->orderBy('destDate')->get();
+        $reserveDates = ReserveDate::whereBetween('destDate', [$firstDay, $lastDay])
+                ->where('baseCode', $request->basecode)
+                ->where('productID', $request->ProductID)
+                ->orderBy('destDate')->get();
         $infoIx = 0;
         $infoCnt = $reserveDates->count();
 

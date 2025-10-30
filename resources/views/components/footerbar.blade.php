@@ -34,12 +34,12 @@
 <div class="footbox">
     <div class="footer-nav-wrapper">
         <div class="footer-nav-container ">
-            <div><h3>運営団体</h3>
+            <div><h3>運営</h3>
             <ul>
-                <li><a href="https://hot-naniai.lix.jp/">七二会森林クラブ</a></li>
-                <li>長野市七二会</li>
-                <li>TEL:026-</li>
-                <li>&copy; 2025/02/24 nanisi-sinrin-club</li>
+                <li><a href="https://kyum.chu.jp/wp/">あちゃまＷＥＢ開発</a></li>
+                <li>長野市平林2-19-12-605</li>
+                <li>mail:info@kyum.chu.jp</li>
+                <li>&copy; 2025/02/24 achama web</li>
             </ul>
             </div>
 

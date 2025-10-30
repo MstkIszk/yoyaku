@@ -9,6 +9,7 @@ use App\Http\Controllers\ReserveBaseController;
 use App\Http\Controllers\ShopClosedModalController;
 use App\Http\Controllers\ModalController;
 use App\Http\Controllers\UserProductController;
+use App\Http\Controllers\DashboardController;
 
 /*
 |--------------------------------------------------------------------------
@@ -30,11 +31,21 @@ Route::redirect('/', '/public');
 Route::get('/', [ProfileController::class, 'homelist']);
 Route::get('/home', [ProfileController::class, 'homelist'])->name('profile.homelist');
 
-Route::get('reserve/create/{ReqDate?}', [ReserveController::class,'create'])->name('reserve.create');
+// 店舗を選択して店舗情報を表示
+Route::get('/shopsel/{shop_id}', [ProfileController::class, 'shopsel'])->name('profile.shopsel');
 
-Route::get('/dashboard', function () {
-    return view('dashboard');   //  resources\views\dashboard.blade.php
-})->middleware(['auth', 'verified'])->name('dashboard');
+
+
+Route::get('reserve/create/{user_id}/{product_id}/{ReqDate}', [ReserveController::class,'create'])->name('reserve.create');
+
+//Route::get('/dashboard', function () {
+//    return view('dashboard');   //  resources\views\dashboard.blade.php
+//})->middleware(['auth', 'verified'])->name('dashboard');
+
+// コントローラを呼び出すように修正 (推奨)
+Route::get('/dashboard', [DashboardController::class, 'index'])
+    ->middleware(['auth', 'verified'])
+    ->name('dashboard');
 
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
@@ -58,6 +69,12 @@ Route::get('reservebase/edit/{ReserveBase}', [ReserveBaseController::class,'edit
 Route::get('/user_products/create', [UserProductController::class, 'create'])->name('user_products.create');
 
 Route::post('/user_products', [UserProductController::class, 'store'])->name('user_products.store');
+
+//  商品の編集
+Route::get('/user_products/{product}/edit', [UserProductController::class, 'edit'])->name('user_products.edit');
+
+// ★ 商品の編集結果保存 (PUT/PATCH /user_products/{product})
+Route::put('/user_products/{product}', [UserProductController::class, 'update'])->name('user_products.update');
 
 //------------------------------------------------------------
 //◆◆◆◆◆◆◆◆◆◆◆  予約登録関係  ◆◆◆◆◆◆◆◆◆◆◆◆◆◆
@@ -84,17 +101,14 @@ Route::patch('reserve/{reserve}', [ReserveController::class,'update'])->name('re
 Route::delete('reserve/{reserve}', [ReserveController::class,'destroy'])->name('reserve.destroy');
 
 //  指定日情報の読み込み (BackEND)
-Route::get('reserve/readDateInfo/{ReqDate?}', [ReserveDateController::class,'readDateInfo'])->name('reserve.readDateInfo');
+Route::get('reserve/readDateInfo', [ReserveDateController::class,'readDateInfo'])->name('reserve.readDateInfo');
 //  指定日情報の書き込み (BackEND)
 Route::post('reserve/writeDateInfo/{status?}', [ReserveDateController::class,'writeDateInfo'])->name('reserve.writeDateInfo');
 
 
 
-
-//  店舗と予約情報を表示
-Route::get('reserve/shopsel/{id}', [ReserveController::class,'shopsel'])->name('reserve.shopsel');
-//  予約カレンダー表示
-Route::get('reserve/calender/{month?,user?}', [ReserveController::class,'calender'])->name('reserve.calender');
+// 予約カレンダー表示 ★ 修正済み
+Route::get('reserve/calender/{user_id}/{product_id}', [ReserveController::class, 'calender'])->name('reserve.calender');
 //  カレンダーデータ読み込み (BackEND)
 Route::get('reserve/calenderGet/{id?,month?}', [ReserveController::class,'calenderGet'])->name('reserve.calenderGet');
 //  月間予約データ読み込み (BackEND)

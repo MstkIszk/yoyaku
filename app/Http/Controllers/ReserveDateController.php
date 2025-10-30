@@ -28,12 +28,14 @@ class ReserveDateController extends Controller
         ]
         )) {
             $reserve = ReserveDate::create([
-                'baseCode' =>  $request->baseCode,
+                'baseCode'  =>  $request->baseCode,
+                'productID' =>  $request->productID,
                 'eigyotype' =>  $request->eigyotype,
-                'destDate' =>  $request->ReserveDate,      //  予約日
-                'operating' => $request->operating,
-                'capacity' =>   $request->capacity,
-                'yoyakusu' =>  $request->yoyakusu
+                'destDate'  =>  $request->ReserveDate,      //  予約日
+                'operating' =>  $request->operating,
+                'capacity'  =>  $request->capacity,
+                'yoyakusu'  =>  $request->yoyakusu,
+                'memo'      =>  $request->memo
             ]);
 
 
@@ -43,7 +45,7 @@ class ReserveDateController extends Controller
     }
 
     
-    public function readDateInfo(Request $request,$ReqDate = "") {
+    public function readDateInfo(Request $request) {
 
         //$dcnt = count($reservations);
         $destDate = $request->destDate . " 00:00:00";
@@ -51,6 +53,7 @@ class ReserveDateController extends Controller
         $json_string = '{
                         "id":-1,
                         "baseCode": "' . $request->baseCode . '", 
+                        "productID": "' . $request->productID . '",
                         "eigyotype": "' . $request->eigyotype . '",
                         "destDate": "' . $request->destDate . '",
                         "operating": 0,
@@ -59,10 +62,13 @@ class ReserveDateController extends Controller
                         "memo": ""
                         }';
         $data = json_decode($json_string, true);
-        
-        // 指定月の範囲内のデータを取得
-        $reservations = ReserveDate::where('destDate', $destDate)->get()->first();
-        //$reservations = ReserveDate::where('id', 1);
+        $baseCode = (int)$request->baseCode;
+        $productID = (int)$request->productID;
+        // 指定された予約日、Base ID、Product IDに一致する予約可能情報を取得
+        $reservations = ReserveDate::whereRaw('DATE(destDate) = ?', [substr($destDate, 0, 10)])
+            ->where('baseCode', $baseCode )      // baseCodeの条件を追加
+            ->where('productID', $productID) // productIDの条件を追加
+            ->first();
 
         if($reservations) {
         //if($dcnt > 0) {
@@ -80,13 +86,14 @@ class ReserveDateController extends Controller
     public function writeDateInfo(Request $request,$status = null) {
             
         $data = [
-            'baseCode'  => $request->baseCode,
-            'eigyotype' => $request->eigyotype,
-            'destDate'  => $request->destDate,
-            'operating' => $request->operating,
-            'capacity'  => $request->capacity,
-            'yoyakusu'  => $request->yoyakusu,
-            'memo'      => $request->memo, // memo が存在する場合
+            'baseCode'   => $request->baseCode,
+            'productID'  => $request->productID,
+            'eigyotype'  => $request->eigyotype,
+            'destDate'   => $request->destDate,
+            'operating'  => $request->operating,
+            'capacity'   => $request->capacity,
+            'yoyakusu'   => $request->yoyakusu,
+            'memo'       => $request->memo, // memo が存在する場合
         ];
         $status = 0;
         if($request->id == "-1") {

@@ -14,6 +14,8 @@ class UserProduct extends Model
 
     //  保存・更新したいカラムを設定
     protected $fillable = [
+        'baseCode',
+        'productID',
         'productName',
         'DateStart',
         'DateEnd',
