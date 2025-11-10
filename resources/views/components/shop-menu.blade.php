@@ -9,12 +9,15 @@
 }
 
 .headerAside {      /* メニューの枠 レスポンシブ部分 */
-    position: absolute;
-    //position: fixed;
-    top: 96px;
+    position: absolute; /* head_image_wrap を基準に絶対位置指定 */
+    /* 下中央に配置するための修正 */
+    bottom: 0; /* 画像の下端に合わせる */
+    left: 50%; /* 左端から 50% の位置 */
+    transform: translateX(-50%); /* 要素の幅の半分だけ左に戻し、中央揃えを完了 */
+
     z-index: 999;
     display: flex;
-    right: 40px;
+    justify-content: center;
 }
 @media (max-width: 769px) {
     .headerAside {
@@ -22,15 +25,14 @@
         bottom: 30px;
         left: 17px;
         right: 17px;
+        transform: translateX(0);
     }
 }
 
 .headerAside__item {
     display: flex;
     width: 10rem;
-    /*height: 60px;*/
     list-style-type: none;
-    /*text-align: center;*/
     align-items: center; /* 垂直方向に中央揃え */
     justify-content: center; /* 水平方向に中央揃え */
 }
@@ -149,8 +151,8 @@
 </style>
 <div>
     <ol class="headerAside header-fadeInUp">
-        <li class="headerAside__item" ><a href="{{ route('reserve.index') }}" class="headerAside__link">予約リスト</a></li>
-        <li class="headerAside__item"><a href="{{ route('reserve.create') }}" class="headerAside__link">予約登録</a></li>
+        {{-- <li class="headerAside__item" ><a href="{{ route('reserve.index') }}" class="headerAside__link">予約リスト</a></li>--}}
+        {{-- <li class="headerAside__item"><a href="{{ route('reserve.create') }}" class="headerAside__link">予約登録A</a></li>--}}
         <li class="headerAside__item"><a href="{{ route('reserve.telnoinput') }}" class="headerAside__link">予約検索</a></li>
         {{-- <li class="headerAside__item"><a href="{{ route('reserve.calender') }}" class="headerAside__link">カレンダー</a></li> --}}
     </ol>

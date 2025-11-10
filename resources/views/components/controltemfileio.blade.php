@@ -28,20 +28,40 @@
                     var name = input.name;
 
                     if (name && (input.type != 'hidden')) {
-                        // 配列項目 (例: name="crName[]") の処理
-                        if (name.endsWith('[]')) {
+
+                        // チェックボックスの処理
+                        if (input.type === 'checkbox') {
+                            const isChecked = input.checked;
+                            // 配列項目 (例: name="ResvTypeBit[]") の処理
+                            if (name.endsWith('[]')) {
+                                const baseName = name.slice(0, -2); // "ResvTypeBit" を取得
+                                                        // 配列がない場合は初期化（ここではチェック状態とvalueをオブジェクトとして保存）
+                                if (!data[baseName]) {
+                                    data[baseName] = [];
+                                }
+                                                        // チェック状態と value をペアで保存
+                                data[baseName].push({
+                                    value: input.value,
+                                    checked: isChecked
+                                });
+                            } 
+                            // 通常のチェックボックス (例: name="IsEnabled") の処理
+                            else {
+                                data[name] = isChecked; // ON/OFFの状態（boolean）を保存
+                            }
+                        }
+                        // 配列項目 (例: name="crName[]") の処理 (テキスト/数値)
+                        else if (name.endsWith('[]')) {
                             const baseName = name.slice(0, -2); // "crName" を取得
-                            
                             // まだデータに配列がない場合は初期化
                             if (!data[baseName]) {
                                 data[baseName] = [];
                             }
-                            
                             // 配列に値を追加
                             data[baseName].push(input.value);
-                        } 
+                        }
                         // 通常の項目の処理
-                        else {
+                        else if (input.type !== 'checkbox') {
                             data[name] = input.value;
                         }                    
                     }
@@ -87,23 +107,52 @@
                         for (const name in data) {
                             const value = data[name];
                             
-                            // 配列として保存された項目（教室情報など）の処理
+                            // 配列として保存された項目（チェックボックスや繰り返し項目など）の処理
                             if (Array.isArray(value)) {
-                                // nameに[]を付加し、すべての該当するinput要素を取得
-                                const inputs = form.querySelectorAll(`[name="${name}[]"]`);
-                                
-                                value.forEach((val, index) => {
-                                    // 配列の順番とinput要素の順番を一致させて値をセット
-                                    if (inputs[index]) {
-                                        inputs[index].value = val;
-                                    }
-                                });
-                            } 
+                                // 配列項目（教室情報など）の処理（既存のテキスト/数値入力の処理）
+                                if (typeof value[0] !== 'object' || value[0].checked === undefined) {
+                                    // nameに[]を付加し、すべての該当するinput要素を取得
+                                    const inputs = form.querySelectorAll(`[name="${name}[]"]`);
+
+                                    value.forEach((val, index) => {
+                                        // 配列の順番とinput要素の順番を一致させて値をセット
+                                        if (inputs[index]) {
+                                            inputs[index].value = val;
+                                        }
+                                    });
+                                }
+                                else {
+                                    // 配列のチェックボックス (例: name="WaysPayBit[]") の処理
+                                    const checkboxName = `${name}[]`;
+                                    // フォーム内のすべての該当するチェックボックスのチェックを解除してから復元
+                                    const allCheckboxes = form.querySelectorAll(`input[type="checkbox"][name="${checkboxName}"]`);
+                                    allCheckboxes.forEach(cb => cb.checked = false);
+
+                                    // 保存されたデータに基づいてチェック状態を復元
+                                    value.forEach(item => {
+
+                                        if (item.checked) {
+                                            // valueとnameで要素を特定し、チェックを付ける
+                                            const input = form.querySelector(`input[type="checkbox"][name="${checkboxName}"][value="${item.value}"]`);
+                                            if (input) {
+                                                input.checked = true;
+                                            }
+                                        }
+                                    });
+
+                                }
+                            }
                             // 通常の項目の処理
                             else {
                                 const input = form.querySelector(`[name="${name}"]`);
                                 if (input) {
-                                    input.value = value;
+                                    if (input.type === 'checkbox') {
+                                        // 通常のチェックボックス (例: name="IsEnabled") の復元
+                                        input.checked = value;
+                                    } else {
+                                    // テキスト、数値、日付、時刻などの復元
+                                        input.value = value;
+                                    }
                                 }
                             }
                         }

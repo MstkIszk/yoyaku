@@ -9,14 +9,11 @@
 
             <form method="get" action="{{ route('reserve.index') }}">
                 @csrf
-                
-                <label for="tel">電話番号:</label>
-                <input type="tel" required id="CliTel1" name="CliTel1" required
-                    value="{{ old('CliTel1') }}"><br>
+                <input type="hidden" name="ShopID" value="{{ $ShopID }}">
+                <input type="hidden" name="ProductID" value="{{ $ProductID }}">
 
-                <x-primary-button class="mt-4">
-                    予約検索
-                </x-primary-button>
+                <x-rTextbox name="CliTel1" type="tel" value="{{old('CliTel1')}}">電話番号:</x-rTextbox>
+                <x-primary-button class="mt-4">予約検索</x-primary-button>
             </form>
        </div>
     </div>

@@ -1,43 +1,3 @@
-<style>
-    .head_frame {
-        position:relative;  /* 相対的位置指定。要素の元の位置を基準にして、top、right、bottom、leftプロパティで移動可 */
-        background-image: url('{{ asset('images/slide_back.jpg') }}');
-        background-repeat: repeat;
-    }
-    .head_inbox {
-        position:relative;
-        margin:0 auto;
-        overflow:hidden;
-        width:1000px;
-        height:200px;
-
-    }
-    .head_image {
-        display: block; 
-        position: absolute; 
-        min-width:400px;
-        max-width:1000px;
-        min-height:200px;
-        max-height:400px;
-        top: 2px;
-    }
-    .textbar {
-        position: relative;
-        top: 5px;
-        left: 5px;                    
-        width:90%;
-        font-size: 2rem;
-        opacity: 50%;
-        background-color: #C08880;
-        color: #337079;
-        text-align: center;
-    }                
-    .textbox {
-        color: #000000
-        ;
-        opacity: 100%;
-    }                
-</style>
 <!--
 app.blade.php<br>
 └「」
@@ -63,7 +23,11 @@ app.blade.php<br>
                     @endif
                 @endauth
             @else
-                <text class="textbox" id="shopname" text-anchor="middle" font-size="20px">{{ __('Resavation guide') }}</text>
+                @auth
+                    <text class="textbox" id="shopname" text-anchor="middle" font-size="20px">{{ Auth::user()->spName }}</text>
+                @else    
+                    <text class="textbox" id="shopname" text-anchor="middle" font-size="20px">{{ __('Resavation guide') }}</text>
+                @endauth
             @endisset
 
     

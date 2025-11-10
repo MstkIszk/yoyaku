@@ -10,65 +10,6 @@
 
     <body class="antialiased">
         <header>
-            <style>
-                .head_frame {
-                    width: 100%;
-                    background-image: url('{{ asset('images/slide_back.jpg') }}');
-                    background-size: repeat;
-                    background-position: center;
-                }
-
-                .head_inbox {
-                    position: relative;
-                    /* head_image の配置基準にするため */
-                    display: flex; /* Flexbox を使用して要素を配置 */
-                    flex-direction: column; /* 縦方向に要素を並べる */
-                    align-items: center; /* 横方向は中央揃え */
-                }
-
-                .head_image {
-                    min-width: 200px; /* 最小高さ */
-                    max-width: 600px; /* 最大高さ */
-                    height: auto; /* 高さはコンテンツに合わせて伸縮 */
-                    min-height: 200px; /* 最小幅 */
-                    width: 100%; /* head_inbox の幅に合わせて伸縮 */
-                    display: block;
-                    margin: 0 auto;
-                }
-
-                .head_title {
-                    position: absolute;
-                    top: 4px;
-                    left: 4px;
-                    /* 必要に応じて textbox のスタイルを設定 */
-                    background-color: rgba(255, 255, 255, 0.7); /* 例：半透明の白色背景 */
-                    padding: 5px;
-                    font-weight: bold; /* 見やすくするため追記 */
-                    z-index: 10; /* 画像の上に表示 */
-                }
-                /* 中央タイトル (新規追加) */
-                .head_center_title {
-                    position: absolute;
-                    top: 50%; /* 縦方向中央 */
-                    left: 50%; /* 横方向中央 */
-                    transform: translate(-50%, -50%); /* 要素自体のサイズを考慮して完全に中央に配置 */
-                    background-color: rgba(0, 0, 0, 0.6); /* 例：黒背景 */
-                    color: white; /* 文字色を白に */
-                    padding: 10px 20px;
-                    font-size: 1.5rem; /* 見やすくするため追記 */
-                    font-weight: bold;
-                    text-align: center;
-                    z-index: 10; /* 画像の上に表示 */
-                }
-                .head_unei {
-                    position: absolute;
-                    bottom: 4px;
-                    right: 4px;
-                    background-color: rgba(255, 255, 255, 0.7); /* 例：半透明の白色背景 */
-                    padding: 5px;
-                }
-            </style>
-
             <div class="head_frame">
                 <div class="head_inbox">
                     <img class="head_image" src="{{ asset('images/head_mounten.png') }}" alt="トップ画像">
@@ -150,6 +91,7 @@
                 display: flex;
                 flex-direction: column;
                 gap: 1.5rem; /* 店舗間のスペース */
+                width: 97%; /* 親領域全体を指す */
             }
             .shop_box {
                 border: 1px solid #e5e7eb; /* light gray */
@@ -159,6 +101,10 @@
                 box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06); /* shadow-md */
                 display: flex;
                 flex-direction: column; /* 中の要素は縦並び */
+
+                width: 96%;
+                margin-left: 0;
+                margin-right: auto;
             }
             .shop_line {
                 display: flex; /* 中の要素は横並び */
@@ -167,37 +113,46 @@
                 padding-bottom: 0.5rem;
                 margin-bottom: 0.5rem;
             }
-            .shop_product {
-                display: flex; /* 中の要素は横並び */
-                align-items: center;
-                padding-top: 0.3rem;
-                padding-bottom: 0.3rem;
-                border-left: 3px solid #6366f1; /* indigo-600 のような色 */
-                margin-left: 1rem; /* 商品リスト全体のインデント */
-                padding-left: 0.5rem;
-            }
             .shop_id {
                 width: 2rem;
-                border: 1px solid #d1d5db; /* border=1 */
                 text-align: right;
                 padding-right: 0.25rem;
             }
             .shop_name {
-                width: 12rem;
-                border: 1px solid #d1d5db; /* border=1 */
+                width: 30%;
                 text-align: left;
                 padding-left: 0.5rem;
                 line-height: 1.4;
             }
             .shop_msg {
                 flex-grow: 1; /* 幅残り全て */
-                border: 1px solid #d1d5db; /* border=1 */
                 text-align: left;
                 padding-left: 0.5rem;
             }
             /* 商品情報用のスタイル */
+            .shop_product {
+                display: flex; /* 中の要素は横並び */
+                align-items: center;
+                /* padding-top: 0.3rem; 
+                padding-bottom: 0.3rem; */
+                padding: 0.75rem 0.5rem; /* 上下のパディングを増やし、左右は維持 */
+                
+                /* 左ボーダーの強化と、背景、影、丸みを追加 */
+                border-left: 4px solid #4f46e5; /* indigo-700 のような濃い色、太さも増す */
+                background-color: #f9fafb; /* 非常に薄いグレーの背景 */
+                border-radius: 0.375rem; /* 角を少し丸く */
+                box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05); /* 軽い影 */
+                
+                margin-left: 1rem; /* 商品リスト全体のインデント */
+                /* padding-left: 0.5rem; は border-leftとbackground-colorで調整 */
+                margin-bottom: 0.75rem; /* 各商品アイテムの下にスペースを追加 */
+            }
+            /* .shop_product の最初の項目だけに適用される余白を調整 */
+            .shop_product:first-of-type {
+                margin-top: 0.5rem; /* リスト最初の要素と前のコンテンツの間に少しスペースを追加 */
+            }
             .product_id {
-                margin-left: 2.1rem; /* 左余白2.1rem (shop_idの幅とshop_lineのpaddingに合わせて調整) */
+                margin-left: 4.1rem; /* shop_idの幅3remとshop_lineのpaddingに合わせて調整（3rem + 1rem（shop_boxのpadding）- 0.5rem（padding-bottom）の調整を考慮して4.1remに */
                 width: 2rem;
                 text-align: right;
                 padding-right: 0.25rem;
@@ -219,7 +174,7 @@
 
         <h1> 登録店舗一覧</h1>
 
-        <div class="shop_list">
+        <div class="shop_list article_frame">
             @foreach ($shops as $shop)
                 <div class="shop_box">
                     <div class="shop_line">

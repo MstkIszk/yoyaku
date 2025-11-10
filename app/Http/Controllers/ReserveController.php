@@ -3,6 +3,7 @@
 
 namespace App\Http\Controllers;
 
+use Auth;
 use App\Models\Reserve;
 use App\Models\ReserveDate;
 use Illuminate\Support\Facades\Session;
@@ -12,7 +13,9 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use App\Models\User; // User モデルをインポート
 use App\Models\UserProduct;
+use App\Models\UserCalender;
 use Illuminate\Support\Facades\View;
+use App\Models\ShopWaysPay;
 enum ReserveStatus : int
 {
     const Entry = 0; //  受付後、未確認
@@ -42,7 +45,8 @@ class ReserveController extends Controller
 
     //  店舗の新規登録
     public function spcreate(Request $request) {
-        return view("Reserve.SpCreate");
+        $WaysPayList = ShopWaysPay::GetWaysPayList();
+        return view("Reserve.SpCreate",compact('WaysPayList'));
     }
     //  店舗登録の確定    //  予約の編集
     public function spedit(Reserve $reserve) {
@@ -95,9 +99,11 @@ class ReserveController extends Controller
         }
         $ShopID = session('ShopID'); // キーに対応する値を取得
         $user = User::find($ShopID);
-        $Product = User::find($ProductID);
+        $Product = UserProduct::find($ProductID);
         $ReqType = 1;
-        return view("Reserve.RCreate",compact('user','Product', 'DestDate','ReqType'));
+        $WaysPayList = ShopWaysPay::GetWaysPay($Product->WaysPayBit);
+
+        return view("Reserve.RCreate",compact('user','Product', 'DestDate','ReqType','WaysPayList'));
         //return view("Reserve.RCreate")->with('DestDate', $DestDate)->with('ReqType', $ReqType);
 
         // makeメソッドでインスタンスを作成（データベースには保存しない）
@@ -185,7 +191,7 @@ class ReserveController extends Controller
         
         // 予約タイプ、支払方法の表示用テキストを取得し、セッションに追加
         $reservationTypeArray = Reserve::GetYoyakuType($request->Baseid, $request->Productid);
-        $paymentWayArray = Reserve::GetPaysWay();
+        $paymentWayArray =  ShopWaysPay::GetPaysWay($request->WaysPayBit);
 
         $validated['CliResvType_text'] = collect($reservationTypeArray)->firstWhere(0, $request->CliResvType)[1] ?? '不明';
         $validated['CliWaysPay_text'] = collect($paymentWayArray)->firstWhere(0, $request->CliWaysPay)[1] ?? '不明';
@@ -323,27 +329,99 @@ class ReserveController extends Controller
     }
     //  予約の照会
     public function telnoinput(Request $request) {
-        return view("Reserve.RTelNoinput");
-    }
-    //  管理画面　予約一覧の表示
-    //  管理画面から呼ばれた場合はViewに対して全データ、電話番号画面から呼ばれた場合は抽出後のデータを渡す
-    public function index(Request $request,$CliTel1 = "") {
-        $reserve = null;
-        if($request->CliTel1 == "") {
-            $reserve = Reserve::all();   //  予約データの一括読み込み
-        }
-        else {
-            //  指定した電話番号だけを抽出
-            $reserve = Reserve::where('CliTel1', $request->CliTel1)->get();
+        // 2. セッションからIDを取得
+        $ShopID = $request->session()->get('ShopID',0);
+        $ProductID = $request->session()->get('ProductID',0);
 
-            if ((!$reserve) || ($reserve->count() <= 0)) {
-                // レコードが見つからなかった場合の処理
-                $request->session()->flash('message','指定された電話番号での予約は見つかりません');
-                return view("Reserve.RTelNoinput");
-            }
-        }
-        return view("Reserve.RIndex",compact('reserve'));
+        return view("Reserve.RTelNoinput",compact('ShopID','ProductID'));
     }
+    //  電話番号画面から呼ばれた場合はReserv->CliTel1,Baseid,$ShopID,Productidで抽出後のデータを渡す
+    public function index(Request $request,$CliTel1,$ShopID=0,$ProductID=0) {
+
+        // **クエリの構築**
+        $query = Reserve::query();
+
+        // 1. 電話番号 (CliTel1) で絞り込み
+        if ($CliTel1) {
+            $query->where('CliTel1', $CliTel1);
+        }
+
+        // 2. 店舗ID (Baseid) で絞り込み
+        if ($ShopID) {
+            $query->where('Baseid', $ShopID);
+        }
+
+        // 3. 商品ID (Productid) で絞り込み
+        if ($ProductID > 0) {
+            $query->where('Productid', $ProductID);
+        }
+
+        // **ソートとページネーション**
+        $reserve = $query->orderBy('ReserveDate', 'desc') // ReserveDate 降順
+                         ->paginate(50); // 50件/ページとする
+
+        if ((!$reserve) || ($reserve->count() <= 0)) {
+            // レコードが見つからなかった場合の処理
+            $request->session()->flash('message','指定された電話番号での予約は見つかりません');
+            return view("Reserve.RTelNoinput");
+        }
+        $products = "";
+ 
+        return view("Reserve.RIndex",compact('reserve','products'));
+    }
+
+    /**
+     * 予約一覧データをJSON形式で返す (Ajax用) バックエンド処理
+     * @param Request $request GETリクエストからの絞り込みパラメータを含む
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function reserveIndex(Request $request)
+    {
+        // 1. 検索条件の取得 (クエリパラメータから直接取得)
+        $filterCliTel1 = $request->query('CliTel1');
+        $BaseShopID = $request->query('baseID');
+        $filterProductID = (int) $request->query('ProductID', 0);
+        $filterDateStart = $request->query('DateStart');
+        $filterDateEnd = $request->query('DateEnd');
+        $page = (int) $request->query('page', 1); // ページ番号を取得
+
+        // 2. クエリの構築と絞り込み
+        $query = Reserve::query();
+        $query->where('Baseid', $BaseShopID); // ログインユーザーの店舗データに限定
+
+        // 電話番号での絞り込み
+        if ($filterCliTel1) {
+            $query->where('CliTel1', $filterCliTel1);
+        }
+
+        // 商品IDでの絞り込み
+        if ($filterProductID > 0) {
+            $query->where('Productid', $filterProductID);
+        }
+
+        // 予約日 (ReserveDate) の範囲で絞り込み
+        if ($filterDateStart) {
+            $query->where('ReserveDate', '>=', $filterDateStart . ' 00:00:00');
+        }
+        if ($filterDateEnd) {
+            $query->where('ReserveDate', '<=', $filterDateEnd . ' 23:59:59');
+        }
+
+        // 4. ソートとページネーション
+        $reserveData = $query->orderBy('ReserveDate', 'desc')
+                            ->paginate(50, ['*'], 'page', $page);
+                            
+        // 5. 商品リストの取得 (ドロップダウン用 - 初回ページロード時にのみ使用)
+        // 通常のAPIコールではこの情報は不要だが、今回は統合的な処理として含める。
+        // ただし、この関数はAjaxでのデータ取得専用となるため、productsリストの取得は不要。
+        // productsリストの取得は、Viewを表示する別の関数で行うか、今回の処理では省略する。
+
+        // **電話番号検索後の処理 (RTelNoinputへリダイレクト) は、このJSONエンドポイントでは行わない。**
+
+        // 6. JSON形式でデータを返す
+        return response()->json($reserveData);
+    }    
+
     //  予約の編集
     public function edit(Reserve $reserve) {
         //return view("Reserve.RUpdate",compact('reserve'));
@@ -422,15 +500,36 @@ class ReserveController extends Controller
         $ShopInf = User::find($ShopID);
         $ProductInf = null;
 
-        if ($ProductID) {
-             // 商品IDが存在する場合、商品情報を取得
-             $ProductInf = UserProduct::find($ProductID);
-             // 取得できなかった場合も考慮
-             if (!$ProductInf) {
-                 // エラー処理またはリダイレクトを検討
-             }
+        //if ($ProductID) {
+        //     // 商品IDが存在する場合、商品情報を取得
+        //     $ProductInf = UserProduct::find($ProductID);
+        //     // 取得できなかった場合も考慮
+        //     if (!$ProductInf) {
+        //         // エラー処理またはリダイレクトを検討
+        //     }
+        //}
+
+        // ----------------------------------------------------------------
+        // 【修正点1】baseCode = user_id での商品リスト抽出
+        // ----------------------------------------------------------------
+        // baseCodeが$ShopID (user_id)に一致する全ての商品を取得し、$ProductListに格納
+        $ProductList = UserProduct::where('baseCode', $ShopID)->get();
+        // ----------------------------------------------------------------
+
+        // 選択中のProductIDが存在しない、または無効な場合、リストの最初の要素を選択する
+        if (!$ProductID || $ProductList->where('id', $ProductID)->isEmpty()) {
+            if ($ProductList->isNotEmpty()) {
+                // リストの最初の商品のIDをProductIDとする
+                $ProductID = $ProductList->first()->id;
+                $request->session()->put('ProductID', $ProductID);
+            } else {
+                // 商品リストが空の場合、ProductIDをクリアする
+                $ProductID = null;
+                $request->session()->forget('ProductID');
+            }
         }
         
+
         // 4. 不足しているチェック
         if(!$ShopInf) {
             // $ShopIDがセッションにありながら無効な場合のリダイレクト
@@ -438,7 +537,8 @@ class ReserveController extends Controller
         }
 
         // 今後、カレンダービューで $ShopInf と $ProductInf を利用できるように compact に追加
-        return view("Reserve.RCalender", compact('month', 'ShopInf', 'ProductInf'));
+        //return view("Reserve.RCalender", compact('month', 'ShopInf', 'ProductInf'));
+        return view("Reserve.RCalender", compact('month', 'ShopInf', 'ProductList', 'ProductID'));
     }
 
     //  指定月のカレンダー情報を読み込むバックエンド処理
@@ -463,6 +563,22 @@ class ReserveController extends Controller
             $resvDate = substr($resv->ReserveDate,8,2);
         }
 
+        // ----------------------------------------------------
+        // 【追加された処理】UserCalenderから祭日データを読み込む
+        // ----------------------------------------------------
+        // UserCalenderから指定月の祭日(datetype = 3)を取得し、日付をキーとする連想配列に変換
+        // destDateが'Y-m-d H:i:s'形式の場合も'Y-m-d'形式のキーでアクセスできるようにします。
+        $holidays = UserCalender::whereBetween('destDate', [$firstDay, $lastDay])
+            ->where('datetype', 3) // datetype: 3 (祭日)
+            // baseCodeによる絞り込みが必要な場合は、以下の行をコメントアウト解除してください
+            // ->where('baseCode', $request->basecode) 
+            ->get()
+            ->mapWithKeys(function ($item) {
+                // キーを 'Y-m-d' 形式の文字列（例: '2025-11-07'）に統一してマッピングする
+                return [date('Y-m-d', strtotime($item->destDate)) => $item->memo];
+            });
+        // ----------------------------------------------------
+
         // 日付情報を読み込み
         $reserveDates = ReserveDate::whereBetween('destDate', [$firstDay, $lastDay])
                 ->where('baseCode', $request->basecode)
@@ -479,16 +595,19 @@ class ReserveController extends Controller
 
         $calender = [];
         //$week = ['','','','','','',''];
-        $json_week = '[{"day":"0"},{"day":"0"},{"day":"0"},{"day":"0"},{"day":"0"},{"day":"0"},{"day":"0"}]';
+        $json_week = '[{"day":"0","type":"0","name":""},{"day":"0","type":"0","name":""},{"day":"0","type":"0","name":""},{"day":"0","type":"0","name":""},{"day":"0","type":"0","name":""},{"day":"0","type":"0","name":""},{"day":"0","type":"0","name":""}]';
         //$week = collect(json_decode($json_week, true));
         $week = json_decode($json_week, true);
 
         $json_string = '[{"name": "Alice", "age": 30}, {"name": "Bob", "age": 25}]';
         $data = json_decode($json_string, true);
 
+        $currentMonth = date('Y-m', strtotime($firstDay)); // YYYY-MM形式
+
         $DateIx = 0;
         for ($day = 1; $day <= $dateCnt; $day ++) {
-            //  日を配列に埋め込み
+            // 現在の日付（'Y-m-d'形式）を作成
+            $currentDate = sprintf('%s-%02d', $currentMonth, $day);            //  日を配列に埋め込み
 
             $week[$posX]['day'] = $day; 
             $totalCnt = 0;
@@ -507,6 +626,17 @@ class ReserveController extends Controller
                 }
                 //$resvDate = $resv['ReserveDate']->date;
             }
+
+           // ----------------------------------------------------
+            // 【追加された処理】祭日情報の追加
+            // ----------------------------------------------------
+            if (isset($holidays[$currentDate])) {
+                // 祭日情報を 'DayName' として追加
+                $week[$posX]['DayName'] = $holidays[$currentDate];
+            }
+            // ----------------------------------------------------
+
+
             if($infoIx < $infoCnt) {
                 $destDate = substr($reserveDates[$infoIx]->destDate, 8, 2);
                 if($day == $destDate) {     //  同じ日付ならば 反映して次のデータへ

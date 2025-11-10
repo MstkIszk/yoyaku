@@ -21,21 +21,12 @@
                     <input type="hidden" name="baseCode" value="{{ $user->id }}">
                     <input type="hidden" name="productID" value="{{ $product->productID }}">
 
+                    <x-rTextbox name="IsEnabled" type="checkbox" 
+                    value="{{old('IsEnabled',$product->IsEnabled) }}" required>{{ __('IsEnabled') }}</x-rTextbox>
+
                     <x-rTextbox name="productName" type="text" 
                         value="{{ old('productName', $product->productName) }}" required>商品名:</x-rTextbox>
                     
-                    <!-- 有効/無効の切り替え -->
-                    <div class="mb-4">
-                        <label class="block font-medium text-sm text-gray-700">状態:</label>
-                        <select name="IsEnabled" class="mt-1 block w-full rounded-md shadow-sm border-gray-300 focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
-                            <option value="1" {{ old('IsEnabled', $product->IsEnabled) == 1 ? 'selected' : '' }}>有効</option>
-                            <option value="0" {{ old('IsEnabled', $product->IsEnabled) == 0 ? 'selected' : '' }}>無効</option>
-                        </select>
-                        @error('IsEnabled')
-                            <p class="text-sm text-red-600">{{ $message }}</p>
-                        @enderror
-                    </div>
-
                     <x-rTextbox name="DateStart" type="date" 
                         value="{{ old('DateStart', $product->DateStart) }}" required>営業開始日:</x-rTextbox>
                     <x-rTextbox name="DateEnd" type="date" 
@@ -46,52 +37,58 @@
                         value="{{ old('TimeEnd', $product->TimeEnd) }}" required>終了時刻:</x-rTextbox>
                     <x-rTextbox name="capacity" type="number" 
                         value="{{ old('capacity', $product->capacity) }}" required>定員:</x-rTextbox>
-                    <x-rTextbox name="price" type="number" 
-                        value="{{ old('price', $product->price) }}" required>料金:</x-rTextbox>
-
-                    <style>
-                    .box12{
-                        margin: 2em 0;
-                        color: 0;
-                        background: #c6ffe4;
-                        border-bottom: solid 6px #aac5de;
-                        border-radius: 9px;
-                    }
-                    .box12 label {
-                        margin: 0; 
-                        padding: 0;
-                    }
-                    </style>
-
-                    <x-rCheckbox name="WaysPay" caption="支払い方法">
-                        <!-- productのWaysPayをビット値として利用し、チェックボックスの状態を決定 -->
+                    <x-rTextbox name="WeekdayPrice" type="number" 
+                        value="{{ old('WeekdayPrice', $product->WeekdayPrice) }}" required>{{ __('weekday price') }}</x-rTextbox>
+                    <x-rTextbox name="WeekendPrice" type="number" 
+                        value="{{ old('WeekendPrice', $product->WeekendPrice) }}" required>{{ __('weekend price') }}</x-rTextbox>
+                    <x-rTextbox name="AddtionalName" type="text" 
+                        value="{{ old('AddtionalName', $product->AddtionalName) }}">{{ __('additional name') }}</x-rTextbox>
+                    <x-rTextbox name="AddtionalPrice" type="number" 
+                        value="{{ old('AddtionalPrice', $product->AddtionalPrice) }}" required>{{ __('additional price') }}</x-rTextbox>
+                    
+                    <x-rCheckbox name="ResvTypeBit" caption="予約タイプ"> 
                         @php
-                            $currentWaysPay = old('WaysPay') !== null ? array_sum(old('WaysPay')) : $product->WaysPay;
+                            $currentResvTypeBit = old('ResvTypeBit') !== null ? array_sum(old('ResvTypeBit')) : $product->ResvTypeBit;
+                        @endphp
+
+                        @foreach ($shopReservTypes as $type)
+                            <div class="checkbox-line">
+                                {{-- ResvTypeBitはRtBitを参照 --}}
+                                <input type="checkbox" name="ResvTypeBit[]" 
+                                    value="{{ $type->RtBit }}" id="ResvType_{{ $loop->index }}"
+                                    @if (($currentResvTypeBit & $type->RtBit) === $type->RtBit) checked @endif
+                                    >
+                                <label for="ResvType_{{ $loop->index }}">{{ $type->RtName }}</label>
+                            </div>
+                        @endforeach
+                    </x-rCheckbox>
+
+                    <x-rCheckbox name="WaysPayBit" caption="支払い方法">                
+                        @php
+                            $currentWaysPay = old('WaysPayBit') !== null ? array_sum(old('WaysPayBit')) : $product->WaysPayBit;
                         @endphp
 
                         @foreach ($shopPaysWay as $way)
-                            <input type="checkbox" name="WaysPay[]" 
-                                value="{{ $way->PrBit }}" id="WaysPay_{{ $loop->index }}"
-                                @if (($currentWaysPay & $way->PrBit) === $way->PrBit) checked @endif>
-                            <label for="WaysPay_{{ $loop->index }}">{{ $way->PrName }}</label><br>
+                        <div class="checkbox-line">
+                            <input type="checkbox" name="WaysPayBit[]" 
+                                    value="{{ $way->PrBit }}" id="WaysPayBit_{{ $loop->index }}"
+                                    @if (($currentWaysPay & $way->PrBit) === $way->PrBit) checked @endif
+                            >
+                            <label for="WaysPayBit_{{ $loop->index }}">{{ $way->PrName }}</label><br>
+                            </div>
                         @endforeach
                     </x-rCheckbox>
-                    
-                    <!-- x-r-text-area コンポーネントの定義が不明なため、ここでは標準の textarea を使用して old/productの値を適用 -->
-                    <div class="mb-4">
-                        <label for="memo" class="block font-medium text-sm text-gray-700">案内 (メモ):</label>
-                        <textarea name="memo" id="memo" rows="4" class="mt-1 block w-full rounded-md shadow-sm border-gray-300 focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">{{ old('memo', $product->memo) }}</textarea>
-                        @error('memo')
-                            <p class="text-sm text-red-600">{{ $message }}</p>
-                        @enderror
-                    </div>
 
-                    <button type="submit" class="inline-flex items-center px-4 py-2 bg-indigo-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-indigo-500 focus:bg-indigo-500 active:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition ease-in-out duration-150">
+                    <x-r-text-area name="memo" msgText="{{old('memo',$product->memo)}}">案内:</x-rTextbox>
+
+
+                    <button type="submit" class="register-button">
                         更新
                     </button>
-                    <a href="{{ route('dashboard') }}" class="ml-4 inline-flex items-center px-4 py-2 bg-gray-200 border border-transparent rounded-md font-semibold text-xs text-gray-800 uppercase tracking-widest hover:bg-gray-300 transition ease-in-out duration-150">
-                        キャンセル
+                    <a href="{{ url('dashboard') }}" class="back-button">
+                        {{ __('Cancel') }}
                     </a>
+
                 </form>
             </div>
         </div>

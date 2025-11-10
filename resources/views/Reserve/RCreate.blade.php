@@ -23,7 +23,7 @@
                 <x-rTextbox name="CliTel1" type="tel" value="{{old('CliTel1')}}">電話番号:</x-rTextbox>
                 <input type="button" id="refTelButton" value="　検索　" />
 						<Label id="RefMessage">過去にご予約頂いた方は、最終予約情報から住所氏名等を引用します。</Label>
-					';
+
                 <x-rTextbox name="ReserveDate" type="datetime-local" 
                     value="{{old('ReserveDate', $DestDate) }}" required>予約日:</x-rTextbox>
                 <x-rTextbox name="CliResvCnt" type="number"  value="{{old('CliResvCnt',1)}}" required>予約人数:</x-rTextbox>
@@ -47,9 +47,9 @@
                 <fieldset id="WayPay">
                     <legend>支払方法</legend>
 
-                    @foreach ( \App\Models\Reserve::GetPaysWay() as $item) 
+                    @foreach ( $WaysPayList as $item) 
                         <input type="radio" id="CliWaysPay{{ $loop->index }}" name="CliWaysPay" value="{{ $item[0] }}" />
-                        <label for="CliWaysPay{{ $loop->index }}">{{ $item[1] }}</label>
+                        <label for="CliWaysPay{{ $loop->index }}">{{ $item[2] }}</label>
                     @endforeach
                 </fieldset>
 

@@ -37,16 +37,16 @@
         <hr>
         <x-rTextbox name="baseNameKanji" type="label" value="{{ $ShopInf->spName }}">{{ __('Shop name') }}</x-rTextbox>
         <x-rTextbox name="baseNameKana"  type="label" value="{{ $ShopInf->spNameKana }}">{{ __('Shop name') }}{{ __('(KANA)') }}</x-rTextbox>
-        <x-rTextbox name="baseAddrZip"   type="label" value="{{ $ShopInf->spAddrZip }}">{{ __('postal code') }}:</x-rTextbox>
-        <x-rTextbox name="baseAddrPref"  type="label" value="{{ $ShopInf->spAddrPref }}">{{ __('province') }}:</x-rTextbox>
-        <x-rTextbox name="baseAddrCity"  type="label" value="{{ $ShopInf->spAddrCity }}">{{ __('municipality') }}:</x-rTextbox>
-        <x-rTextbox name="baseAddrOther" type="label" value="{{ $ShopInf->spAddrOther }}">{{ __('village') }}:</x-rTextbox>
-        <x-rTextbox name="baseTel1"      type="label" value="{{ $ShopInf->spTel1 }}">{{ __('phone') }}1:</x-rTextbox>
-        <x-rTextbox name="baseTel2"      type="label" value="{{ $ShopInf->spTel2 }}">{{ __('phone') }}2:</x-rTextbox>
-        <x-rTextbox name="baseEMail"     type="label" value="{{ $ShopInf->spEMail }}">{{ __('Email') }}:</x-rTextbox>
-        <x-rTextArea id="MessageText" name="MessageText" value="{{ $ShopInf->spMsgText }}"></x-rTextArea><br>
+        <x-rTextbox name="baseAddrZip"   type="label" value="{{ $ShopInf->spAddrZip }}">{{ __('postal code') }}</x-rTextbox>
+        <x-rTextbox name="baseAddrPref"  type="label" value="{{ $ShopInf->spAddrPref }}">{{ __('province') }}</x-rTextbox>
+        <x-rTextbox name="baseAddrCity"  type="label" value="{{ $ShopInf->spAddrCity }}">{{ __('municipality') }}</x-rTextbox>
+        <x-rTextbox name="baseAddrOther" type="label" value="{{ $ShopInf->spAddrOther }}">{{ __('village') }}</x-rTextbox>
+        <x-rTextbox name="baseTel1"      type="label" value="{{ $ShopInf->spTel1 }}">{{ __('phone') }}1</x-rTextbox>
+        <x-rTextbox name="baseTel2"      type="label" value="{{ $ShopInf->spTel2 }}">{{ __('phone') }}2</x-rTextbox>
+        <x-rTextbox name="baseEMail"     type="label" value="{{ $ShopInf->spEMail }}">{{ __('Email') }}</x-rTextbox>
+        <x-rTextbox name="baseURL"       type="label" value="{{ $ShopInf->spURL }}">{{ __('home URL') }}</x-rTextbox>
+        <x-rTextArea id="MessageText"    attr="label" name="MessageText" value="{{ $ShopInf->spMsgText }}">{{ __('memo') }}</x-rTextArea><br>
 
-        
         <!-- 商品一覧 -->
         @if ($ShopInf->products->count() > 0)
             <h4 class="text-lg font-bold mt-6 mb-3 border-b-2 pb-1 border-indigo-400 text-indigo-700">提供サービス/商品一覧</h4>
@@ -106,6 +106,63 @@
         @endif
 
 
+        <!-- アクセサリー一覧 (accessories) ここから追加 -->
+        @if ($ShopInf->accessories->count() > 0)
+            <h4 class="text-lg font-bold mt-10 mb-3 border-b-2 pb-1 border-indigo-400 text-indigo-700">追加オプション/アクセサリー一覧</h4>
+            
+            <table class="list_table">
+                <thead>
+                    <tr class="bg-yellow-100">
+                        <th class="product">アクセサリー名</th>
+                        <th class="ryokin">料金</th>
+                        <th class="product">状態</th>
+                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider" colspan="2">
+                            メモ
+                        </th>
+                        <th class="seqNo">コードID</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-200">
+                    @foreach ($ShopInf->accessories as $accessory)
+                        {{-- IsEnabled が 1 のもののみ表示する場合は、ここでフィルタリングロジックを追加できます --}}
+                        {{-- @if ($accessory->IsEnabled == 1) --}} 
+                            <tr class="hover:bg-gray-50 transition duration-150">
+                                {{-- アクセサリー名 --}}
+                                <td class="product font-semibold text-base text-gray-800">
+                                    {{ $accessory->productName }}
+                                </td>
+
+                                {{-- 料金 --}}
+                                <td class="ryokin text-green-700 font-medium">
+                                    ¥{{ number_format($accessory->price) }}
+                                </td>
+
+                                {{-- 状態 (IsEnabled) --}}
+                                <td class="product text-sm">
+                                    @if ($accessory->IsEnabled == 1)
+                                        <span class="text-green-600">有効</span>
+                                    @else
+                                        <span class="text-red-600">無効</span>
+                                    @endif
+                                </td>
+
+                                {{-- メモ --}}
+                                <td class="px-4 py-4 text-sm text-gray-600 max-w-xs truncate" colspan="2">
+                                    {{ $accessory->memo }}
+                                </td>
+                                
+                                {{-- 商品名コード (productID) --}}
+                                <td class="seqNo text-xs text-gray-500"> {{ $accessory->productID }}</td>
+                            </tr>
+                        {{-- @endif --}}
+                    @endforeach
+                </tbody>
+            </table>
+
+        @else
+            <p class="text-md text-gray-500 mt-10 p-4 bg-gray-50 border border-gray-200 rounded-lg">この店舗には現在、追加オプション/アクセサリーは登録されていません。</p>
+        @endif
+        <!-- アクセサリー一覧 (accessories) ここまで追加 -->
 
     </div>
 </x-guest-layout>

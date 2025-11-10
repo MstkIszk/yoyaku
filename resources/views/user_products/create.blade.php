@@ -2,7 +2,7 @@
     <x-controltemfileio nameitem="productName" extension=".product"></x-controltemfileio>
 
     <x-slot name="header">
-        <x-article-title caption="{{ __('Dashboard') }}" />
+        <x-article-title caption="{{ __('new product') }}" />
     </x-slot>
 
     <div class="py-12">
@@ -17,46 +17,59 @@
                 <input type="hidden" name="baseCode" value="{{ Session::get('ShopID') }}">
                 <input type="hidden" name="productID" value="1">
 
+                <x-rTextbox name="IsEnabled" type="checkbox" 
+                    value="{{old('IsEnabled', 'checked') }}" required>{{ __('IsEnabled') }}</x-rTextbox>
                 <x-rTextbox name="productName" type="text" 
-                    value="{{old('DateStart') }}" required>商品名:</x-rTextbox>
+                    value="{{old('productName') }}" required>{{ __('product name') }}</x-rTextbox>
                 <x-rTextbox name="DateStart" type="date" 
-                    value="{{old('DateStart') }}" required>営業開始日:</x-rTextbox>
+                    value="{{old('DateStart') }}" required>{{ __('business start date') }}</x-rTextbox>
                 <x-rTextbox name="DateEnd" type="date" 
-                    value="{{old('DateEnd') }}" required>営業終了日:</x-rTextbox>
+                    value="{{old('DateEnd') }}" required>{{ __('business end date') }}:</x-rTextbox>
                 <x-rTextbox name="TimeStart" type="time" 
-                    value="{{old('TimeStart') }}" required>開始時刻:</x-rTextbox>
+                    value="{{old('TimeStart') }}" required>{{ __('start time') }}:</x-rTextbox>
                 <x-rTextbox name="TimeEnd" type="time" 
-                    value="{{old('TimeEnd') }}" required>終了時刻:</x-rTextbox>
+                    value="{{old('TimeEnd') }}" required>{{ __('end time') }}:</x-rTextbox>
                 <x-rTextbox name="capacity" type="number" 
-                    value="{{old('capacity', 10) }}" required>定員:</x-rTextbox>
-                <x-rTextbox name="price" type="number" 
-                    value="{{old('price', 1000) }}" required>料金:</x-rTextbox>
+                    value="{{old('capacity', 10) }}" required>{{ __('capacity') }}:</x-rTextbox>
+                <x-rTextbox name="WeekdayPrice" type="number" 
+                    value="{{ old('WeekdayPrice', 0) }}" required>{{ __('weekday price') }}</x-rTextbox>
+                <x-rTextbox name="WeekendPrice" type="number" 
+                    value="{{ old('WeekendPrice', 0) }}" required>{{ __('weekend price') }}</x-rTextbox>
+                <x-rTextbox name="AddtionalName" type="text" 
+                    value="{{ old('AddtionalName', '') }}">{{ __('additional name') }}</x-rTextbox>
+                <x-rTextbox name="AddtionalPrice" type="number" 
+                    value="{{ old('AddtionalPrice', 0) }}" required>{{ __('additional price') }}</x-rTextbox>
+                
+                <x-rCheckbox name="ResvTypeBit" caption="予約タイプ"> 
+                    @foreach ($shopReservTypes as $type)
+                        <div class="checkbox-line">
+                            {{-- ResvTypeBitはRtBitを参照 --}}
+                            <input type="checkbox" name="ResvTypeBit[]" 
+                                value="{{ $type->RtBit }}" id="ResvType_{{ $loop->index }}"
+                                {{-- old() の値に応じてチェック状態を復元 --}}
+                                @checked(is_array(old('ResvTypeBit')) && in_array($type->RtBit, old('ResvTypeBit')))
+                            >
+                            <label for="ResvType_{{ $loop->index }}">{{ $type->RtName }}</label>
+                        </div>
+                    @endforeach
+                </x-rCheckbox>
 
-                <style>
-                .box12{
-                    margin: 2em 0;
-                    color: 0;
-                    background: #c6ffe4;
-                    border-bottom: solid 6px #aac5de;
-                    border-radius: 9px;
-                }
-                .box12 label {
-                    margin: 0; 
-                    padding: 0;
-                }
-                </style>
-
-                <x-rCheckbox name="WaysPay" caption="支払い方法">                
+                <x-rCheckbox name="WaysPayBit" caption="支払い方法">                
                     @foreach ($shopPaysWay as $way)
-                        <input  type="checkbox" name="WaysPay[]" 
-                                value="{{ $way->PrBit }}" id="WaysPay_{{ $loop->index }}">
-                        <label for="WaysPay_{{ $loop->index }}">{{ $way->PrName }}</label><br>
+                    <div class="checkbox-line">
+                        <input type="checkbox" name="WaysPayBit[]" 
+                                    value="{{ $way->PrBit }}" id="WaysPayBit_{{ $loop->index }}"
+                                    {{-- old() の値に応じてチェック状態を復元 --}}
+                                    @checked(is_array(old('WaysPayBit')) && in_array($way->PrBit, old('WaysPayBit')))
+                            >
+                            <label for="WaysPayBit_{{ $loop->index }}">{{ $way->PrName }}</label><br>
+                            </div>
                     @endforeach
                 </x-rCheckbox>
 
                 <x-r-text-area name="memo" msgText="{{old('memo')}}">案内:</x-rTextbox>
 
-                <button type="submit">登録</button>
+                <button type="submit" class="register-button">登録</button>
             </form>
        </div>
     </div>

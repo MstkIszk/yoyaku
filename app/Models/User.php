@@ -82,4 +82,16 @@ class User extends Authenticatable
         // 'baseCode' が User モデルの 'id' を参照している場合
         return $this->hasMany(UserProduct::class, 'baseCode', 'id');
     }
+
+    /**
+     * ユーザーが持つ UserAccessory リレーションを取得します。
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function accessories(): HasMany
+    {
+        // UserAccessory の 'baseCode' が User の 'id' を参照
+        return $this->hasMany(UserAccessory::class, 'baseCode', 'id');
+    }
+
 }

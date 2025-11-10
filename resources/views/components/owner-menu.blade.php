@@ -173,14 +173,14 @@
             <div class="nav_topbar">{{ Auth::user()->spName }}</div>
         @endauth
 
-
         <!-- loginというルート要素があれば -->
         <div class="menu">
             @auth
                 <!-- ログインしていれば -->
-                <li class="nav_item"></li><a href="{{ url('/dashboard') }}" class="menu_item">Dashboard</a></li>
-                <li class="nav_item"></li><a href="{{ url('/userinfedit') }}" class="menu_item">{{ __('Edit profile') }}</a></li>
-                <li class="nav_item"></li><a href="{{ url('/logout') }}" class="menu_item">{{ __('logout') }}</a></li>
+                <li class="nav_item"></li><a href="{{ url('/dayinfo') }}" class="menu_item">{{ __('reserve Today') }}</a></li>
+                <li class="nav_item"></li><a href="{{ url('/shopcalender') }}" class="menu_item">{{ __('Shop Calender') }}</a></li>
+                <li class="nav_item"></li><a href="{{ url('/reservelist') }}" class="menu_item">{{ __('Reserve list') }}</a></li>
+                <li class="nav_item"></li><a href="{{ url('/dashboard') }}" class="menu_item">{{ __('Dashboard') }}</a></li>
             @else
                 <!-- ログインしていない -->
                 <li class="nav_item"></li><a href="{{ route('login') }}" class="menu_item">Log in</a></li>

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\ResvType;
 use App\Models\ShopProduct;
 use App\Models\ShopWaysPay;
 use App\Models\UserProduct;
@@ -24,8 +25,10 @@ class UserProductController extends Controller
      */
     public function create()
     {
+        $shopReservTypes = ResvType::all();
+        //dd($shopReservTypes);
         $shopPaysWay = ShopWaysPay::all();
-        return view('user_products.create', compact('shopPaysWay'));
+        return view('user_products.create', compact('shopReservTypes','shopPaysWay'));
     }
 
     /**
@@ -36,13 +39,18 @@ class UserProductController extends Controller
         $request->validate([
             'baseCode' => 'required',
             'productName' => 'required',
+            'IsEnabled' => 'required',
             'DateStart' => 'required|date|before:DateEnd',
             'DateEnd' => 'required|date',
             'TimeStart' => 'required|date_format:H:i|before:TimeEnd',
             'TimeEnd' => 'required|date_format:H:i',
             'capacity' => 'required|integer|min:0|max:99',
-            'price' => 'required|integer',
-            'WaysPay' => 'required|array',
+            'WeekdayPrice' => 'required|integer|min:0',
+            'WeekendPrice' => 'required|integer|min:0',
+            'AddtionalName' => 'nullable|string|max:255',
+            'AddtionalPrice' => 'required|integer|min:0',
+            'ResvTypeBit' => 'required|array',
+            'WaysPayBit' => 'required|array',
             'memo' => 'nullable|string',
         ]);
 
@@ -50,19 +58,24 @@ class UserProductController extends Controller
         $maxProductID = UserProduct::where('baseCode', $currentBaseCode)
                                 ->max('productID');
         $newProductID = ($maxProductID ?? 0) + 1;
+        $resvTypeBitSum = array_sum($request->ResvTypeBit); // 予約タイプBitの合計値を計算
 
         UserProduct::create([
             'baseCode' => $request->baseCode,
             'productID' => $newProductID,
             'productName' => $request->productName,
-            'IsEnabled' => 1,
+            'IsEnabled' => $request->IsEnabled,
             'DateStart' => $request->DateStart,
             'DateEnd' => $request->DateEnd,
             'TimeStart' => $request->TimeStart,
             'TimeEnd' => $request->TimeEnd,
             'capacity' => $request->capacity,
-            'price' => $request->price,
-            'WaysPay' => array_sum($request->WaysPay),
+            'WeekdayPrice' => $request->WeekdayPrice,
+            'WeekendPrice' => $request->WeekendPrice,
+            'AddtionalName' => $request->AddtionalName ?? '', // null の場合は空文字列を保存
+            'AddtionalPrice' => $request->AddtionalPrice,
+            'ResvTypeBit' => $resvTypeBitSum, // ビット合計値を保存
+            'WaysPayBit' => array_sum($request->WaysPayBit),
             'memo' => $request->memo,
         ]);
 
@@ -93,6 +106,8 @@ class UserProductController extends Controller
             abort(403, $pid . 'Unauthorized action. This product does not belong to your shop.');
         }
 
+        $shopReservTypes = ResvType::all();
+
         // 支払い方法のオプションを取得 (create関数と同じロジックを想定)
         // 支払い方法テーブルが不明なため、ShopPaysWayモデルを仮定
         $shopPaysWay = ShopWaysPay::all();
@@ -100,6 +115,7 @@ class UserProductController extends Controller
         return view('user_products.edit', [
             'user' => $user,
             'product' => $product,
+            'shopReservTypes' => $shopReservTypes,
             'shopPaysWay' => $shopPaysWay,
         ]);
     }
@@ -130,12 +146,18 @@ class UserProductController extends Controller
             'TimeStart' => 'required|date_format:H:i|before:TimeEnd',
             'TimeEnd' => 'required|date_format:H:i|after:TimeStart',
             'capacity' => 'required|integer|min:0|max:99',
-            'price' => 'required|integer|min:0',
-            'WaysPay' => 'required|array',
+            'WeekdayPrice' => 'required|integer|min:0',
+            'WeekendPrice' => 'required|integer|min:0',
+            'AddtionalName' => 'nullable|string|max:255',
+            'AddtionalPrice' => 'required|integer|min:0',
+            'ResvTypeBit' => 'required|array',
+            'WaysPayBit' => 'required|array',
             'IsEnabled' => 'required|boolean',
             'memo' => 'nullable|string|max:1000',
         ]);
 
+        // 予約タイプのビット和を計算
+        $resvTypeBitSum = array_sum($request->ResvTypeBit); 
         // 支払い方法のビット和を計算
         $waysPaySum = array_sum($request->WaysPay);
 
@@ -148,7 +170,8 @@ class UserProductController extends Controller
             'TimeEnd' => $request->TimeEnd,
             'capacity' => $request->capacity,
             'price' => $request->price,
-            'WaysPay' => $waysPaySum,
+            'ResvTypeBit' => $resvTypeBitSum,
+            'WaysPayBit' => $waysPaySum,
             'IsEnabled' => $request->IsEnabled,
             'memo' => $request->memo,
             // baseCode と productID は変更しない

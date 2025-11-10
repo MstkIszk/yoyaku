@@ -1,3 +1,71 @@
+#以下の関数で 
+             $ProductInf = UserProduct::find($ProductID);
+
+となっているところを 
+baseCode = user_id での抽出にし、$ProductList　に格納
+
+#View表示は
+return view("Reserve.RCalender", compact('month', 'ShopInf', 'ProductInf'));
+から
+return view("Reserve.RCalender", compact('month', 'ShopInf', 'ProductList','ProductID'));
+に変更
+
+
+    /**
+     * 予約カレンダー表示
+     */
+    public function calender(Request $request, $user_id = null, $product_id = null)
+    {
+        // 1. パラメータをセッションに格納
+        if ($user_id !== null) {
+            $request->session()->put('ShopID', $user_id);
+        }
+        if ($product_id !== null) {
+            $request->session()->put('ProductID', $product_id);
+        }
+        $month = date('Y-m-d');
+
+        // 2. セッションからIDを取得
+        $ShopID = $request->session()->get('ShopID');
+        $ProductID = $request->session()->get('ProductID');
+
+
+        // 3. 店舗情報と商品情報の取得
+        // $ShopIDが設定されていない場合はリダイレクト
+        if (!$ShopID) {
+            return redirect()->route('profile.homelist');
+        }
+        
+        $ShopInf = User::find($ShopID);
+        $ProductInf = null;
+
+        if ($ProductID) {
+             // 商品IDが存在する場合、商品情報を取得
+             $ProductInf = UserProduct::find($ProductID);
+             // 取得できなかった場合も考慮
+             if (!$ProductInf) {
+                 // エラー処理またはリダイレクトを検討
+             }
+        }
+        
+        // 4. 不足しているチェック
+        if(!$ShopInf) {
+            // $ShopIDがセッションにありながら無効な場合のリダイレクト
+            return redirect()->route('profile.homelist');
+        }
+
+        // 今後、カレンダービューで $ShopInf と $ProductInf を利用できるように compact に追加
+        return view("Reserve.RCalender", compact('month', 'ShopInf', 'ProductInf'));
+    }
+
+
+
+
+
+
+
+#以下のViewに対して ProductInf 処理を変更
+
 <x-app-layout :ShopInf="$ShopInf" >
     <x-slot name="header">
         <x-article-title caption="{{ __('Shop Calender') }}" />
@@ -8,27 +76,13 @@
     <!-- p>現在のフォルダ: {{ getcwd() }}<br>
             URL:{{ Request::url() }}<br>
             asset:{{ asset('images/backimage1.jpg') }}</p-->
-
-    {{-- JavaScriptに渡すための JSONを作成 --}}
-    @php
-        $productListJson = json_encode($ProductList);
-    @endphp
-
     <div class="py-12">
 
         @livewireStyles
 
         <div class="card">
             <div class="card-header" style="text-align: center;">
-                - {{ $ShopInf->spName }}：
-                <select id="productSelector" onchange="changeProduct()">
-                    @foreach ($ProductList as $product)
-                        <option value="{{ $product->id }}" {{ $product->id == $ProductID ? 'selected' : '' }}>
-                            {{ $product->productName }}
-                        </option>
-                    @endforeach
-                </select>
-                予約 -
+                - {{ $ShopInf->spName }}：{{ $ProductInf->productName }} 予約 -
             </div>
             <!-- livewire:shopclosedmodal 'ShopInf','ProductInf'/-->
             @livewireScripts
@@ -80,61 +134,10 @@
 
                     <script>
                     var CurrYM = '{{ $month }}';
-
-                    //  PHPから商品リストデータをJSON形式で受け取る
-                    //  実際にはPHPの実行結果であるJSON文字列が埋め込まれます。
-                    //  const productList = JSON.parse('< ?= $productListJson ?? "[]" ?>--}}');
-                    const productList = @json($ProductList );
-
-                    const today   = new Date();
+                    const today= new Date();
                     const todayYY = today.getFullYear();
                     const todayMM = ('0' + (today.getMonth() + 1)).slice(-2); // 月は0から始まるため+1し、桁数を2桁に調整
                     const todayDD = ('0' + today.getDate()).slice(-2);
-                    // 現在選択中の商品IDを取得する関数を定義
-                    function getCurrentProductID() {
-                        const selector = document.getElementById('productSelector');
-                        return selector ? selector.value : null;
-                    }
-                    // 現在選択中の商品のキャパシティを取得する関数
-                    function getCurrentProductCapacity() {
-                        const selectedId = getCurrentProductID();
-                        if (!selectedId) {
-                            console.warn("商品セレクターが見つからないか、IDが選択されていません。");
-                            return 0; // 安全なデフォルト値
-                        }
-
-                        // productListから、IDが一致する商品を見つける
-                        const selectedProduct = productList.find(p => p.id === Number(selectedId));
-
-                        // 商品が見つかればその capacity を返し、見つからなければ 0 を返す
-                        return selectedProduct ? selectedProduct.capacity : 0;
-                    }
-
-
-                    // 商品選択ドロップダウンが変更されたときの処理
-                    function changeProduct() {
-                        // 選択された商品IDをセッションに反映させるために、URLをリダイレクトする
-                        const currentProductID = getCurrentProductID();
-                        if (currentProductID) {
-
-                            // 1. サーバー側（Blade）で必須パラメータ（user_id）を渡し、
-                            //    動的なパラメータ（product_id）にプレースホルダーを使用する。
-                            //    これによりLaravelのエラーを回避し、完全なURLパスを生成させます。
-                            const baseRoute = '{{ route('reserve.calender', [
-                                'user_id' => $ShopInf->id,
-                                'product_id' => 'TEMP_PRODUCT_ID' // プレースホルダー
-                            ]) }}';
-
-                            // 2. JavaScriptでプレースホルダーを現在の選択値に置き換える。
-                            const currentProductID = getCurrentProductID(); // ユーザーの既存の関数
-                            const newUrl = baseRoute.replace('TEMP_PRODUCT_ID', currentProductID);
-
-                            // URLのルート名と必要なパラメータに基づいてリダイレクトURLを生成
-                            // コントローラーのcalenderメソッドの引数に合わせてURLを再構築します
-                            {{--const newUrl = '{{ route('reserve.calender') }}/{{ $ShopInf->id }}/' + currentProductID;--}}
-                            window.location.href = newUrl;
-                        }
-                    }
 
                     var opetbl = [];
                     @foreach ( \App\Models\ReserveDate::GetOperating() as $item) 
@@ -195,21 +198,13 @@
                         let clsAry = ["sun","mon","tue","wed","thu","fri","sat"];
                         var calendarDiv = document.getElementById('calenderTable');
                         /*  var calendarAry =  @#json($calender); 呼び出し元からのカレンダーデータ取得*/
-                        var maxYoyaku = getCurrentProductCapacity();
-
-                        // ProductIDをドロップダウンから取得
-                        const currentProductID = getCurrentProductID();
-                        if (!currentProductID) {
-                            console.error("ProductIDが設定されていません。");
-                            return;
-                        }
-
+                        const maxYoyaku = 16;
                         $.ajax({
                             url: '{{ route('reserve.calenderGet') }}', // リクエストを送るURL
                             type: 'GET',
                             data: {
                                 basecode  : {{ $ShopInf->id }},
-                                ProductID : currentProductID,
+                                ProductID : {{ $ProductInf->id }},
                                 month   : reqYM
                             },                            
                             success: function(response) {
@@ -313,12 +308,8 @@
                         //  YYYY-MM-DD に編集
                         var reqDate = CurrYM.substr(0,8) + '-' + ('00' + day).slice(-2);
 
-                        // ProductIDをドロップダウンから取得
-                        const productIDForReserve = getCurrentProductID();
-
                         //  新規画面へのURL
-                        {{--//const newUrl = '{{ Route('reserve.create') }}/{{ $ShopInf->id }}/{{ $ProductInf->id }}/' + reqDate ;--}}
-                        const newUrl = '{{ Route('reserve.create') }}/{{ $ShopInf->id }}/' + productIDForReserve + '/' + reqDate ;
+                        const newUrl = '{{ Route('reserve.create') }}/{{ $ShopInf->id }}/{{ $ProductInf->id }}/' + reqDate ;
                         window.location.href = newUrl;            // リダイレクト
                     }
                     function updateButtonColor(area,data) {
@@ -393,87 +384,90 @@
                         </div>
                     </div>
 
-                    <script>
-                        const editModal = document.getElementById('easyModal');
-                        function openEditModal(dayIx,strDate) {
-                            //  設定対象の日付枠
-                            document.getElementById('dayIx').value         = dayIx;
-                            //  対象日付の表示
-                            reqDate = CurrYM.substr(0, 7) + '-' +  ('00' + strDate).slice(-2);
-                            headDiv = document.getElementById('dateCaption');
-                            headDiv.textContent = reqDate;
-                            document.getElementById('destDate').value = reqDate;
-
-                            //  指定日の情報を読み取り
-                            {{-- app\Http\Controllers\ReserveDateController.php  readDateInfo() --}}
-                            $.ajax({
-                                url: '{{ route('reserve.readDateInfo') }}', // リクエストを送るURL
-                                type: 'GET',
-                                data: {
-                                    type      : '1',
-                                    baseCode  : Number({{ $ShopInf->id }}),
-                                    productID : Number( currentProductID ),
-                                    eigyotype : '1',
-                                    destDate  : reqDate,
-                                },
-                                success: function(response) {
-                                    // サーバーから返ってきたデータの処理
-                                    console.log(response);
-                                    dateinfo = response;
-
-                                    document.getElementById('id').value         = response.id;
-                                    document.getElementById('operating').value = response.operating;
-                                    document.getElementById('capacity').value   = response.capacity;
-                                    document.getElementById('yoyakusu').value   = response.yoyakusu;
-                                    document.getElementById('memo').value       = response.memo;
-                                },
-                                error: function(error) {
-                                    // エラーが発生した場合の処理
-                                    console.error(error);
-                                }
-                            });
-                            editModal.style.display = 'block';
-                        }
-                        //  指定日の情報を書き込む
-                        function writeDateInfo() {
-                            const data = {
-                                id: document.getElementById('id').value,
-                                baseCode: {{ $ShopInf->id }},
-                                productID: currentProductID,
-                                eigyotype: document.getElementById('eigyotype').value,
-                                destDate: document.getElementById('destDate').value,
-                                operating: document.getElementById('operating').value,
-                                capacity: document.getElementById('capacity').value,
-                                yoyakusu: document.getElementById('yoyakusu').value,
-                                memo: document.getElementById('memo').value
-                            };
-                            $.ajax({
-                                url: '{{ route('reserve.writeDateInfo') }}', // リクエストを送るURL
-                                type: 'POST',
-                                dataType: 'json', // JSON 形式でレスポンスを受け取る
-                                data: JSON.stringify(data), // データを JSON 文字列に変換して送信
-                                contentType: 'application/json', // JSON 形式で送信
-                                headers: {
-                                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') // CSRF トークン
-                                },
-                                success: function(responseData) {
-                                    console.log('Success:', responseData); // 成功時の処理
-                                    const areaName =  'area' + document.getElementById('dayIx').value;
-                                    const area = document.getElementById(areaName); // area12 の要素を取得
-                                    updateButtonColor(area,data);
-                                },
-                                error: function(xhr, status, error) {
-                                    console.error('Error:', status, error); // エラー時の処理
-                                }
-                            });
-                            modalClose();
-                        }        
-                        function modalClose() {
-                            editModal.style.display = 'none';
-                        }            
-                    </script>
                 </div>
             </div>
         </div>
     </div>
 </x-app-layout>
+
+
+#spName と productName 表示を
+            <div class="card-header" style="text-align: center;">
+                - {{ $ShopInf->spName }}：{{ $ProductInf->productName }} 予約 -
+            </div>
+
+ProductList のドロップダウンとし、 productNameを選択するドロップダウンに変更
+ProductIDで選択されているproductNameをディフォルト選択とする
+
+
+#ajaxの ProductIDを ドロップダウンで選択されている ProductIDに変更
+$.ajax({
+    url: '{{ route('reserve.calenderGet') }}', // リクエストを送るURL
+    type: 'GET',
+    data: {
+        basecode  : {{ $ShopInf->id }},
+        ProductID : {{ $ProductInf->id }},
+        month   : reqYM
+    },                            
+
+
+                   const productList = JSON.parse('
+
+
+[
+	{	"id":3,"baseCode":5,
+		"productID":1,
+		"productName":"\u30ef\u30ab\u30b5\u30ae\u5927\u30dc\u30fc\u30c8",
+		"IsEnabled":1,
+		"DateStart":"2025-11-01",
+		"DateEnd":"2026-03-31",
+		"TimeStart":"07:00:00",
+		"TimeEnd":"16:00:00",
+		"capacity":25,
+		"WeekdayPrice":4700,
+		"WeekendPrice":4700,
+		"AddtionalName":"\u904a\u6f01\u5238",
+		"AddtionalPrice":1000,
+		"ResvTypeBit":1,
+		"WaysPayBit":5,
+		"memo":"\u8cb8\u7aff\u624b\u5dfb\u304d\u30ea\u30fc\u30eb\u3000\uffe51000\r\n\u8cb8\u7aff\u96fb\u52d5\u30ea\u30fc\u30eb\u3000\u3000\uffe52000\r\n\u990c(\u767d\u30b5\u30b7)\u3000\u3000\u3000\u3000\uffe5300",
+		"created_at":"2025-11-04T17:50:35.000000Z",
+		"updated_at":"2025-11-04T17:50:35.000000Z"
+	},
+	{
+		"id":4,
+		"baseCode":5,
+		"productID":2,
+		"productName":"\u30ef\u30ab\u30b5\u30ae\u5c0f\u30dc\u30fc\u30c8",
+		"IsEnabled":1,
+		"DateStart":"2025-11-03",
+		"DateEnd":"2026-03-27",
+		"TimeStart":"09:00:00",
+		"TimeEnd":"15:00:00",
+		"capacity":10,
+		"WeekdayPrice":24000,
+		"WeekendPrice":28000,
+		"AddtionalName":"\u30c1\u30c3\u30d7",
+		"AddtionalPrice":200,
+		"ResvTypeBit":3,
+		"WaysPayBit":1,
+		"memo":"\u30b0\u30eb\u30fc\u30d7\u4e88\u7d04\u5c02\u7528",
+		"created_at":"2025-11-07T01:47:52.000000Z",
+		"updated_at":"2025-11-07T01:47:52.000000Z"
+	}
+]
+');
+VM42806:1 Uncaught SyntaxError: Bad control character in string literal in JSON at position 318 (line 1 column 319)
+    at JSON.parse (<anonymous>)
+    at 3:581:46
+
+
+<script>
+    // PHP/Laravelで取得した $product_list 変数（配列またはコレクション）を直接使用
+    // @jsonディレクティブが、自動で全ての特殊文字（改行を含む）をエスケープ処理します。
+    const productList = @json($product_list);
+
+    // これで productList はJavaScriptの配列オブジェクトとして扱えます
+    // 例: console.log(productList[0].memo);
+</script>
+

@@ -6,8 +6,6 @@
             $errorKey = str_replace(['[', ']'], ['.', ''], $name);
             // 先頭と末尾の不要なドットを削除
             $errorKey = trim($errorKey, '.');
-
-            //  
         @endphp
         <x-input-error :messages="$errors->get($errorKey)" class="mt-2" />
         <div class="inputBoxArea">

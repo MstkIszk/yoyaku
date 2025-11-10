@@ -42,23 +42,22 @@
 
 
 
-                <x-rTextbox name="CliTel1"       type="label" value="{{$data['CliTel1']}}">電話番号:</x-rTextbox>
-                <x-rTextbox name="ReserveDate"   type="label" value="{{$data['ReserveDate']}}">予約日:</x-rTextbox>
-                <x-rTextbox name="CliResvCnt"    type="label"  value="{{$data['CliResvCnt']}}" >予約人数:</x-rTextbox>
-                <x-rTextbox name="CliResvType"   type="label"  value="{{$data['CliResvType_text'] ?? $data['CliResvType']}}" >予約タイプ:</x-rTextbox>
-                <x-rTextbox name="ClitNameKanji" type="label" value="{{$data['ClitNameKanji']}}">氏名（漢字）</x-rTextbox>
-                <x-rTextbox name="ClitNameKana"  type="label" value="{{$data['ClitNameKana']}}">カナ氏名:</x-rTextbox>
-                <x-rTextbox name="CliAddrZip"    type="label" value="{{$data['CliAddrZip']}}">郵便番号:</x-rTextbox>
+                <x-rTextbox name="CliTel1"       type="label" value="{{$data['CliTel1']}}">{{ __('phone') }}</x-rTextbox>
+                <x-rTextbox name="ReserveDate"   type="label" value="{{$data['ReserveDate']}}">{{ __('Reserve date') }}</x-rTextbox>
+                <x-rTextbox name="CliResvCnt"    type="label"  value="{{$data['CliResvCnt']}}" >{{ __('Reserve count') }}</x-rTextbox>
+                <x-rTextbox name="CliResvType"   type="label"  value="{{$data['CliResvType_text'] ?? $data['CliResvType']}}" >{{ __('Reserve type') }}</x-rTextbox>
+                <x-rTextbox name="ClitNameKanji" type="label" value="{{$data['ClitNameKanji']}}">{{ __('Name Kanji') }}</x-rTextbox>
+                <x-rTextbox name="ClitNameKana"  type="label" value="{{$data['ClitNameKana']}}">{{ __('Name Kana') }}</x-rTextbox>
+                <x-rTextbox name="CliAddrZip"    type="label" value="{{$data['CliAddrZip']}}">{{ __('postal code') }}</x-rTextbox>
 
                 <label>住所</label>
-                <x-rTextbox name="CliAddrPref"   type="label"  value="{{$data['CliAddrPref']}}">県名:</x-rTextbox>
-                <x-rTextbox name="CliAddrCity"   type="label"  value="{{$data['CliAddrCity']}}">市町村名:</x-rTextbox>
-                <x-rTextbox name="CliAddrOther"  type="label"  value="{{$data['CliAddrOther']}}">地域名:</x-rTextbox>
-                <x-rTextbox name="CliEMail"      type="label" value="{{$data['CliEMail']}}">メールアドレス:</x-rTextbox>
-                <x-rTextbox name="CliWaysPay"    type="label" value="{{$data['CliWaysPay_text'] ?? $data['CliWaysPay']}}">支払方法:</x-rTextbox>
+                <x-rTextbox name="CliAddrPref"   type="label"  value="{{$data['CliAddrPref']}}">{{ __('province') }}</x-rTextbox>
+                <x-rTextbox name="CliAddrCity"   type="label"  value="{{$data['CliAddrCity']}}">{{  __('municipality')  }}:</x-rTextbox>
+                <x-rTextbox name="CliAddrOther"  type="label"  value="{{$data['CliAddrOther']}}">{{ __('village') }}</x-rTextbox>
+                <x-rTextbox name="CliEMail"      type="label" value="{{$data['CliEMail']}}">{{ __('Email') }}</x-rTextbox>
+                <x-rTextbox name="CliWaysPay"    type="label" value="{{$data['CliWaysPay_text'] ?? $data['CliWaysPay']}}">{{ __('WaysPay') }}</x-rTextbox>
 
-                <label for="MessageText">連絡事項:</label>
-                <textarea id="MessageText" name="MessageText" value="{{$data['MessageText']}}"></textarea><br>
+                <x-rTextarea id="MessageText" name="MessageText" value="{{$data['MessageText']}}">{{ __('MessageText') }}</x-rTextarea><br>
 
                 <!-- ----------------------------------------------------- -->
                 <!-- ボタンエリア -->

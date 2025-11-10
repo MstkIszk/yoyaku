@@ -31,7 +31,7 @@
         <x-rTextbox name="baseTel2" type="tel" value="{{old('baseTel2')}}">{{ __('phone') }}2:</x-rTextbox>
         <x-rTextbox name="baseEMail" type="email" required value="{{old('Email')}}">{{ __('Email') }}:</x-rTextbox>
         <x-rTextbox name="baseURL" type="url" value="{{old('baseURL')}}">URL:</x-rTextbox>
-        <x-rTextarea name="MessageText" msgText="{{old('Guide message')}}"></x-rTextarea><br>
+        <x-rTextarea name="MessageText" attr="label" msgText="{{old('Guide message')}}"></x-rTextarea><br>
 
         <div class="flex items-center justify-end mt-4">
 

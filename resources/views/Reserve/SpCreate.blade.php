@@ -1,7 +1,7 @@
 <!-- resources\views\Reserve\SpCreate.blade.php start -->
 <x-app-layout>
     <x-slot name="header">
-        <x-article-title caption="{{ __('Dashboard') }}" />
+        <x-article-title caption="{{ __('New Shop Entry') }}" />
     </x-slot>
 
     <div class="py-12">
@@ -45,9 +45,9 @@
                 <fieldset id="WayPay">
                     <legend>支払方法</legend>
 
-                    @foreach ( \App\Models\Reserve::GetPaysWay() as $item) 
-                        <input type="checkbox" id="SpWaysPay{{ $loop->index }}" name="SpWaysPay" value="{{ $item[0] }}" />
-                        <label for="SpWaysPay{{ $loop->index }}">{{ $item[1] }}</label>
+                    @foreach ( $WaysPayList as $item) 
+                        <input type="checkbox" id="SpWaysPay{{ $loop->index }}" name="SpWaysPay" value="{{ $item->id }}" />
+                        <label for="SpWaysPay{{ $loop->index }}">{{ $item->PrName }}</label>
                     @endforeach
                 </fieldset>
 

@@ -104,7 +104,6 @@
     position: absolute;
     top: 60px;
     left: 20px;
-    /* 必要に応じて textbox のスタイルを設定 */
     background-color: rgba(255, 255, 255, 0.7); /* 例：半透明の白色背景 */
     padding: 5px;
     z-index: 1; /* 必要に応じて重ね順を調整 */
@@ -147,14 +146,33 @@
 }
 
 .head_unei {
-    position: absolute;
-    bottom: 40px;
-    right: 40px;
-    /* 必要に応じて textbox のスタイルを設定 */
-    background-color: rgba(255, 255, 255, 0.7); /* 例：半透明の白色背景 */
-    padding: 5px;
-    z-index: 1; /* 必要に応じて重ね順を調整 */
+  position: absolute;
+  bottom: 40px;
+  right: 40px;
+  /* 必要に応じて textbox のスタイルを設定 */
+  background-color: rgba(255, 255, 255, 0.7); /* 例：半透明の白色背景 */
+  padding: 5px;
+  z-index: 1; /* 必要に応じて重ね順を調整 */
 }
+.textbar {
+  position: absolute; /* head_image_wrap を基準に絶対位置指定 */
+  top: 4px; /* 上端から 4px 離す */
+  left: 50%; /* 左端から 50% の位置 */
+  transform: translateX(-50%); /* 要素の幅の半分だけ左に戻し、中央揃えを完了 */
+
+  width: 90%;
+  font-size: 2rem;
+  opacity: 50%;
+  background-color: #C08880;
+  color: #337079;
+  text-align: center;
+  z-index: 10; /* 他の要素の上に表示 */
+}                
+.textbox {
+  color: #000000;
+  opacity: 100%;
+}                
+
 
 /*◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆
 //  記事見出し 定義 
@@ -329,7 +347,6 @@
 }
 
 .list_table  td{
-  text-align: left;
   border-left: 1px solid #a8b7c5;
   border-bottom: 1px solid #a8b7c5;
   border-top:none;
@@ -338,27 +355,54 @@
 }
 
 .list_table  .seqNo{
+  margin: 4px;
   width: 2rem;
   text-align: center;
 }
 
 .list_table  .product{
+  margin: 4px;
   width: 8rem;
   text-align: left;
 }
 
+.list_table  .date_period{
+  width: 12rem;
+  text-align: center;
+}
+.list_table  .time_period{
+  width: 7rem;
+  text-align: center;
+}
+@media (max-width: 640px) {
+  .list_table  .date_period{
+    width: 5rem;
+  }
+  .list_table  .time_period{
+    width: 4rem;
+  }
+}
+
 .list_table  .ryokin{
-  width: 6rem;
+  margin: 4px;
+  width: 4.5rem;
   text-align: right;
   padding-right: 4px;
 }
 
 .list_table  .status{
+  width: 4rem;
   text-align: center;
 }
 
 .list_table  .count{
+  width: 2rem;
   text-align: center;
+}
+
+.list_table  .memo{
+  margin: 4px;
+  text-align: left;
 }
 
 .list_table  td:last-child{
@@ -375,6 +419,26 @@
 
 .list_table  .kana {
   font-size: 0.55rem; 
+}
+
+.list_table  .innerText {
+  margin:4px;
+  border-color: #d1d5db;	/*境界線の色 (灰色 300)*/
+  border-radius: 0.375rem;	/*角丸のサイズ (6px)*/
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);	/*小さな影を付ける*/
+  font-size: 0.75rem; line-height: 1rem;	/*フォントサイズ (12px)*/
+  background-color: #f3f4f6;
+}
+
+.list_table  .innerLabel {
+  margin:4px;
+  border: none !important; /* 枠線を完全に削除 */
+  border-radius: 0.375rem !important; /* 角丸のサイズ (6px) */
+  background-color: #f3f4f6 !important; /* 背景色 */
+  font-size: 0.75rem !important; /* フォントサイズ (12px) */
+  line-height: 1rem !important;
+  padding: 0.25rem !important; /* 上下左右のパディング (p-1に相当) */
+  font-weight: 600 !important; /* 太字 */
 }
 
 /*◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆
@@ -400,6 +464,19 @@
   border-right: 2px solid #4d9bc1;
 }
 
+.memo-header {
+  padding-left: 0.75rem;
+  padding-right: 0.75rem;
+  padding-top: 0.75rem;
+  padding-bottom: 0.75rem;
+  text-align: left;
+  font-size: 0.75rem; /* text-xs */
+  line-height: 1rem;
+  font-weight: 500; /* font-medium */
+  color: #6b7280; /* text-gray-500 */
+  text-transform: uppercase;
+  letter-spacing: 0.05em; /* tracking-wider */
+}
 
 /*◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆
 //  入力フォーム 
@@ -496,37 +573,35 @@
   border-radius: 0.375rem; /* 6px */
 }
 
+.InputBox_Label {
+  font-size: medium;
+  border: none;
+  background-color: rgba(255, 255, 255, 0.8); /* 透明度80%の白 */
+  resize: none; /* リサイズ禁止 */
+  cursor: default; /* カーソルをデフォルトに */
+  padding: 10px;
+}
+
 .is-readonly {
   background-color: transparent !important; /* 背景を透明にする */
 }
 
-.txtWidth_5 {  
-  width: 4.5em; /* フォントサイズを基準にする */
-}
-.txtWidth_6 {  
-  width: 6.2em; /* フォントサイズを基準にする */
-}
-.txtWidth_8 {  
-  width: 10em; /* フォントサイズを基準にする */
-}
-.txtWidth_9 {  
-  width: 11.5em; /* フォントサイズを基準にする */
-}
-.txtWidth_10 {  
-  width: 12em; /* フォントサイズを基準にする */
-}
-.txtWidth_11 {  
-  width: 13rem; /* フォントサイズを基準にする */
-}
-.txtWidth_15 {  
-  width: 16em; /* フォントサイズを基準にする */
-}
-.txtWidth_20 {  
-  width: 24em; /* フォントサイズを基準にする */
-}
-.txtWidth_30 {  
-  width: 36em; /* フォントサイズを基準にする */
-}
+.txtWidth_2    { width: 2.5em;  }
+.txtWidth_5    { width: 4.5em;  }
+.txtWidth_6    { width: 6.2em;  }
+.txtWidth_8    { width: 10em;   }
+.txtWidth_9    { width: 11.5em; }
+.txtWidth_10   { width: 12em;   }
+.txtWidth_11   { width: 13rem;  }
+.txtWidth_15   { width: 16em;   }
+.txtWidth_20   { width: 24em;   }
+.txtWidth_30   { width: 36em;   }
+.txtWidth_30pc { width: 30%;    }
+.txtWidth_80pc { width: 80%;    }
+.txtWidth_90pc { width: 90%;    }
+.txtWidth_96pc { width: 96%;    }
+.txtWidth_auto { width: auto;    }
+
 .password-toggle {
   cursor: pointer;
 }
@@ -572,9 +647,9 @@
   display: flex; /* Flexbox を有効にする */
   flex-direction: column; /* 横並びにする */
 }
-.MemoArea textarea {
-  width: 100%;
 
+.MemoArea textarea {
+  height:4rem;
 }
 
 a[href^='mailto']::before {
@@ -603,6 +678,11 @@ a[href^='tel']::before {
 
   /* transitionで変化を滑らかにする */
   transition: background-color 0.3s, border-color 0.3s;
+}
+
+.table-link-button {
+  padding: 4px 6px;
+  margin-left: 4px;
 }
 
 .register-button {
@@ -685,6 +765,135 @@ a[href^='tel']::before {
 .link-button:hover {
   background-color: #fff9c4; /* 背景を薄めの黄色に */
   border-color: #f44336; /* 枠を赤に */
+}
+
+/*◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆
+//  x-rCheckbox style 定義 
+//    複数チェックボックスのボタン化スタイル
+//    コントローラ: app\View\Components\RCheckbox.php
+//    View;        resources\views\components\r-checkboxSingle.blade.php
+//◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆*/
+
+.checkBox-LineArea {
+  display: flex;
+  flex-wrap: wrap; /* 必要に応じて折り返し */
+  gap: 20px; /* 各チェックボックスグループ間の間隔 */
+}
+
+.checkbox-line {
+  display: flex; /* Flexコンテナにする */
+  align-items: center;
+  gap: 8px; /* チェックボックスとラベルの間隔を8pxにする */
+  margin-bottom: 5px; /* 各行の下に少しスペースを空ける */
+}
+
+/* --- チェックボックスのボタン化スタイル --- */
+/* チェックボックス要素自体を非表示にする */
+.checkbox-line input[type="checkbox"] {
+  display: none;
+}
+
+/* ラベルをボタンとしてスタイリング（OFF/無効: 赤枠） */
+.checkbox-line label {
+  display: inline-block;
+  cursor: pointer;
+  padding: 8px 8px; /* 枠のサイズを指定 */
+  border: 2px solid #ef4444; /* 赤枠 */
+  color: #ef4444; /* 赤文字 */
+  border-radius: 6px;
+  transition: all 0.2s ease;
+  font-weight: bold;
+  position: relative; /* ::after の基準点 */
+  overflow: hidden; 
+  line-height: 1; /* 行高を調整 */
+}
+
+/* 2. OFFの状態 - ラベルの中央に青いバツ印 (::afterを使用) */
+.checkbox-line input[type="checkbox"]:not(:checked) + label::after {
+  content: '\2715'; /* '×' (Times symbol) */
+  position: absolute;
+  top: 50%;
+  left: 2px; /* 左端から2pxの位置に配置 */
+  transform: translateY(-50%); /* 縦方向の中央揃えのみ維持 */
+  font-size: 1em; /* バツ印のサイズを調整 */
+  color: #3b82f6; /* 青色 (Tailwind blue-500相当) */
+  line-height: 1;
+  padding: 0;
+  background-color: transparent; /* 背景色を透明に戻す */
+  z-index: 10;
+  opacity: 1; /* 透過を削除し、はっきり表示 */
+}
+
+/* 3. ONの状態（チェックされた状態）: 緑枠 */
+.checkbox-line input[type="checkbox"]:checked + label {
+    border-color: #10b981; /* 緑枠 */
+    background-color: #10b981;
+    color: white; /* 白文字 */
+}
+
+/* ONの状態のとき、バツ印を非表示にする */
+.checkbox-line input[type="checkbox"]:checked + label::after {
+    display: none;
+}
+
+/*◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆
+//  x-rTextbox style 定義 
+//    単独チェックボックスのボタン化スタイル
+//    コントローラ: app\View\Components\RTextbox.php
+//    View;        resources\views\components\r-checkboxSingle.blade.php
+//◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆*/
+
+
+.checkbox-line-button {
+  display: flex;
+  align-items: center;
+  gap: 16px; /* ラベルとボタンの間隔 */
+  padding: 0 4px;
+}
+
+/* 1. チェックボックス要素自体を非表示にする */
+.checkbox-line-button input[type="checkbox"] {
+  display: none;
+}
+
+/* 2. トグルボタンを保持するコンテナ（ここでは入力フィールド全体） */
+.checkbox-button-container {
+  display: inline-block;
+  vertical-align: middle;
+}
+
+/* 3. ラベルをボタンとしてスタイリング（OFF/無効: 赤枠） */
+/* 隣接セレクタが使えるよう、inputの後にラベル要素を挿入する必要がある */
+.checkbox-button-container label.toggle-label {
+  display: inline-block;
+  cursor: pointer;
+  padding: 4px 8px; /* 枠のサイズを指定 */
+  border: 2px solid #ef4444; /* 赤枠 */
+  color: #ef4444;
+  border-radius: 4px;
+  transition: all 0.2s ease;
+  font-weight: bold;
+  min-width: 60px; /* テキストが短い場合でもボタンの幅を確保 */
+  text-align: center;
+}
+
+/* 4. ONの状態（チェックされた状態）: 緑枠 */
+.checkbox-button-container input[type="checkbox"]:checked + label.toggle-label {
+  border-color: #10b981; /* 緑枠 */
+  background-color: #10b981;
+  color: white;
+}
+
+/* 5. ON/OFFのテキスト表示の制御 */
+
+/* OFF時 (デフォルト) */
+.checkbox-button-container input[type="checkbox"] + label.toggle-label::after {
+  content: "無効";
+}
+
+/* ON時 */
+.checkbox-button-container input[type="checkbox"]:checked + label.toggle-label::after {
+  content: "有効";
 }
 
 </style>

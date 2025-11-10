@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\View\View;
 use App\Models\User; // User モデルをインポート
+use App\Models\UserProduct;
 
 class ProfileController extends Controller
 {
@@ -117,7 +118,7 @@ class ProfileController extends Controller
 
         // id = $shop_id のデータ（一般ユーザー、つまり店舗）を抽出し、
         // 関連する商品データ (app\Models\User.php::products) も同時に取得する
-        $ShopInf = User::with('products')
+        $ShopInf = User::with('products', 'accessories')
                         ->where('id',  $shop_id)
                         ->first();
 
@@ -126,7 +127,43 @@ class ProfileController extends Controller
             //  404エラーを表示、またはリダイレクト
             abort(404);
         }                        
+        session(['ShopID' => $shop_id]); // 選択された店舗のIDを保存
         return view("auth.showuser",compact('ShopInf'));
     }
+    /**
+     * Handle an incoming registration request.
+     *
+     * @throws \Illuminate\Validation\ValidationException
+     */
+    public function reserveList(Request $request):  RedirectResponse|View
+    {
+        // ログインチェック
+        if (!Auth::check()) {
+            return redirect('/login')->with('error', '予約一覧を表示するにはログインが必要です。');
+        }
 
+        $BaseShopID = Auth::id();
+
+        // 検索フォームの初期値設定
+        $filterCliTel1 = $request->old('CliTel1', '');
+        $filterProductID = (int) $request->old('ProductID', 0);
+        $filterDateStart = $request->old('DateStart');
+        $filterDateEnd = $request->old('DateEnd');
+
+        // 商品リストの取得 (ドロップダウン用)
+        $products = UserProduct::where('baseCode', $BaseShopID)
+                            ->where('IsEnabled', 1)
+                            ->orderBy('productID')
+                            ->get(['productID', 'productName']);
+
+        // Viewを返す。データはJavaScriptで取得するため、ここではデータは渡さない。
+        return view("Reserve.RIndex", compact(
+            'BaseShopID',
+            'products',
+            'filterCliTel1',
+            'filterProductID',
+            'filterDateStart',
+            'filterDateEnd'
+        ));
+    }
 }

@@ -388,7 +388,8 @@ make は Laravel フレームワークで提供されるコマンドラインツ
 <tr><td>php artisan make:test	    </td><td>テスト	</td><td>ユニットテストや機能テストを作成するためのクラス</td></tr>
 <tr><td>php artisan make:policy	    </td><td>ポリシー	</td>
     <td>認証処理を行うクラス<br>ユーザーが特定のリソースにアクセスできるかどうかを判断します。</td></tr>
-<tr><td>php artisan make:seeder	    </td><td>シード	</td><td>データベースに初期データを投入するためのクラス</td></tr>
+<tr><td>php artisan make:seeder	    </td><td>シード	</td><td>データベースに初期データを投入するためのクラス<br>
+                                                            >php artisan db:seed [--class=Seederファイル] </td></tr>
 <tr><td>php artisan make:command	</td><td>コマンド	</td><td>カスタムのコマンドを作成するためのクラス</td></tr>
 </table>
 

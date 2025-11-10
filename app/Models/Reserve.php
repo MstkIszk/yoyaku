@@ -68,14 +68,34 @@ class Reserve extends Model
         return self::$YoyakuTypeList;
     }
 
-    public static $PaysWayList = [
-        [   0  , '現金'    ],
-        [   1  , '銀行振込'  ],
-        [   2  , 'Paypay'    ],
-        [   3  , 'クレジットカード'  ]
-    ];
-    public static function GetPaysWay() {
-        return self::$PaysWayList;
+    /**
+     * Bit列で指定された支払い方法を取得し、配列として返します。
+     *
+     * @param int $WaysPayBit user_productsテーブルのWaysPayBitの値 (ビット列)
+     * @return array 選択された支払い方法のリスト (形式: [[PrBit, PrName], ...])
+     */
+    public function GetPaysWay(int $WaysPayBit): array
+    {
+        // 支払い方法テーブルからPrBitとPrNameをすべて取得
+        // データベースへの負荷を考慮し、必要なカラムのみ指定
+        $waysPays = ShopWaysPay::all(['PrBit', 'PrName']);
+
+        $PaysWayList = [];
+
+        // 取得した支払い方法をループ処理
+        foreach ($waysPays as $way) {
+            // ビットAND演算を実行: (テーブルのPrBit) & (引数の$WaysPayBit)
+            // 結果が0でなければ、その支払い方法が有効であることを示す
+            if (($way->PrBit & $WaysPayBit) !== 0) {
+                // 支払い方法を [PrBit, PrName] の形式でリストに追加
+                $PaysWayList[] = [
+                    $way->PrBit,
+                    $way->PrName
+                ];
+            }
+        }
+
+        return $PaysWayList;
     }
 
     protected static $ReserveStatusList = [

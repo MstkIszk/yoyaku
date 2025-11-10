@@ -9,6 +9,9 @@ use App\Http\Controllers\ReserveBaseController;
 use App\Http\Controllers\ShopClosedModalController;
 use App\Http\Controllers\ModalController;
 use App\Http\Controllers\UserProductController;
+use App\Http\Controllers\ReserveReceptionController;
+use App\Http\Controllers\UserAccessoryController;
+use App\Http\Controllers\UserCourseController;
 use App\Http\Controllers\DashboardController;
 
 /*
@@ -54,6 +57,9 @@ Route::middleware('auth')->group(function () {
 
     Route::get('userinfedit', [ProfileController::class, 'userinfedit'])->name('userinf.edit');
     Route::put('userinfupdate', [ProfileController::class, 'userinfupdate'])->name('userinf.update');
+
+    // 店舗別予約 View表示の初期画面ロード
+    Route::get('/reservelist', [ProfileController::class, 'reserveList'])->name('userinf.rindex');
 });
 
 //------------------------------------------------------------
@@ -68,13 +74,32 @@ Route::get('reservebase/edit/{ReserveBase}', [ReserveBaseController::class,'edit
 //  商品の登録
 Route::get('/user_products/create', [UserProductController::class, 'create'])->name('user_products.create');
 
+//  店舗カレンダー
+//Route::get('/shopcalender', [ReserveReceptionController::class, 'create'])->name('user_products.create');
+//  日付別予約表示
+//Route::get('/dayinfo/{reqdate?}', [ReserveReceptionController::class, 'create'])->name('user_products.create');
+
+
+//  付属商品の登録
+Route::get('/user_accessories/create', [UserAccessoryController::class, 'create'])->name('user_accesories.create');
+Route::post('/user_accessories/post', [UserAccessoryController::class, 'store'])->name('user_accesories.store');
+
+
 Route::post('/user_products', [UserProductController::class, 'store'])->name('user_products.store');
 
 //  商品の編集
 Route::get('/user_products/{product}/edit', [UserProductController::class, 'edit'])->name('user_products.edit');
+//  付属商品の編集
+Route::get('/user_products/{product}/edit', [UserProductController::class, 'edit'])->name('user_products.edit');
 
 // ★ 商品の編集結果保存 (PUT/PATCH /user_products/{product})
 Route::put('/user_products/{product}', [UserProductController::class, 'update'])->name('user_products.update');
+
+//  コースの編集
+Route::get('/user_courses/{product_id}', [UserCourseController::class, 'create'])->name('user_courses.create');
+Route::post('/user_courses', [UserCourseController::class, 'store'])->name('user_courses.store');
+
+
 
 //------------------------------------------------------------
 //◆◆◆◆◆◆◆◆◆◆◆  予約登録関係  ◆◆◆◆◆◆◆◆◆◆◆◆◆◆
@@ -128,5 +153,8 @@ Route::get('/modal', [ModalController::class, 'modal']);
 //Route::post('/chat/send' ,   [ChatController::class,'chatSend'])->name('chatSend');
 
 //Route::get('/result/ajax', 'HomeController@getData');
+
+// データをJSONで取得するエンドポイント (Ajax/API)
+Route::get('/reserve/reserveIndex', [ReserveController::class, 'reserveIndex'])->name('reserve.index');
 
 require __DIR__.'/auth.php';

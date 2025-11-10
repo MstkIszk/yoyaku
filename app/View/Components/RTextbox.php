@@ -26,7 +26,15 @@ class RTextbox extends Component
         $this->value=$value;
         $this->placeholder=$placeholder;
         $this->width=$width;
-        $this->class="py-2 ". $class . "border border-gray-300 rounded-md";
+        if($type == "label") {
+            $this->class="InputBox_Label txtWidth_90pc ". $class;
+        }
+        else if($type == "checkbox") {
+            $this->class="checkbox-line ". $class;
+        }
+        else {
+            $this->class="py-2 ". $class . "border border-gray-300 rounded-md";
+        }
         $this->attr=$attr;
     }
 
@@ -38,6 +46,9 @@ class RTextbox extends Component
         if($this->type == "label") {
             /* 表示 : resources\views\components\r-textbox.blade.php */
             return view('components.r-labelbox');
+        }
+        else if($this->type == "checkbox") {
+            return view('components.r-checkboxSingle');
         }
         /* 表示 : resources\views\components\r-textbox.blade.php */
         return view('components.r-textbox');
