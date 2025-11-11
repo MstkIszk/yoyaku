@@ -45,7 +45,7 @@
         <x-rTextbox name="baseTel2"      type="label" value="{{ $ShopInf->spTel2 }}">{{ __('phone') }}2</x-rTextbox>
         <x-rTextbox name="baseEMail"     type="label" value="{{ $ShopInf->spEMail }}">{{ __('Email') }}</x-rTextbox>
         <x-rTextbox name="baseURL"       type="label" value="{{ $ShopInf->spURL }}">{{ __('home URL') }}</x-rTextbox>
-        <x-rTextArea id="MessageText"    attr="label" name="MessageText" msgText="{{ $ShopInf->spMsgText }}">{{ __('memo') }}</x-rTextArea><br>
+        <x-rTextarea id="MessageText"    attr="label" name="MessageText" msgText="{{ $ShopInf->spMsgText }}">{{ __('memo') }}</x-rTextArea><br>
 
         <!-- 商品一覧 -->
         @if ($ShopInf->products->count() > 0)

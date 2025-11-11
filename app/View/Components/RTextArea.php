@@ -6,7 +6,7 @@ use Closure;
 use Illuminate\Contracts\View\View;
 use Illuminate\View\Component;
 
-class RTextArea extends Component
+class RTextarea extends Component
 {
     public $name;
     public $attr;
