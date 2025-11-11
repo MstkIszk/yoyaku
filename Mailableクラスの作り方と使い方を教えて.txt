@@ -1,0 +1,9 @@
+Mailableクラスの作り方と使い方を教えて
+メールの本文や宛先は外部から設定でき、複数のメール送信処理から共通で使用できるようにして
+
+>php artisan make:mail GenericNotificationMail
+
+app\Mail\GenericNotificationMail.php
+
+
+

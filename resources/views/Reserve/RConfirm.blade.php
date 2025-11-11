@@ -14,7 +14,7 @@
     Date {{ $data['ReserveDate'] }}
 
     <x-slot name="header">
-        <x-article-title caption="{{ __('Confirm Resavation Entry') }}" />
+        <x-article-title caption="{{ __('Confirm Resavation Entry' ) }}" />
     </x-slot>
 
     <div class="py-12">
@@ -45,20 +45,21 @@
                 <x-rTextbox name="CliTel1"       type="label" value="{{$data['CliTel1']}}">{{ __('phone') }}</x-rTextbox>
                 <x-rTextbox name="ReserveDate"   type="label" value="{{$data['ReserveDate']}}">{{ __('Reserve date') }}</x-rTextbox>
                 <x-rTextbox name="CliResvCnt"    type="label"  value="{{$data['CliResvCnt']}}" >{{ __('Reserve count') }}</x-rTextbox>
-                <x-rTextbox name="CliResvType"   type="label"  value="{{$data['CliResvType_text'] ?? $data['CliResvType']}}" >{{ __('Reserve type') }}</x-rTextbox>
+                <x-rTextbox name="CliResvTypeText"   type="label"  value="{{$data['CliResvType_text'] ?? $data['CliResvType']}}" >{{ __('Reserve type') }}</x-rTextbox>
+                <input type="hidden" name="CliResvType" value="{{ $data['CliWaysPay'] ?? '' }}">
                 <x-rTextbox name="ClitNameKanji" type="label" value="{{$data['ClitNameKanji']}}">{{ __('Name Kanji') }}</x-rTextbox>
                 <x-rTextbox name="ClitNameKana"  type="label" value="{{$data['ClitNameKana']}}">{{ __('Name Kana') }}</x-rTextbox>
-                <x-rTextbox name="CliAddrZip"    type="label" value="{{$data['CliAddrZip']}}">{{ __('postal code') }}</x-rTextbox>
-
                 <label>住所</label>
+                <x-rTextbox name="CliAddrZip"    type="label" value="{{$data['CliAddrZip']}}">{{ __('postal code') }}</x-rTextbox>
                 <x-rTextbox name="CliAddrPref"   type="label"  value="{{$data['CliAddrPref']}}">{{ __('province') }}</x-rTextbox>
                 <x-rTextbox name="CliAddrCity"   type="label"  value="{{$data['CliAddrCity']}}">{{  __('municipality')  }}:</x-rTextbox>
                 <x-rTextbox name="CliAddrOther"  type="label"  value="{{$data['CliAddrOther']}}">{{ __('village') }}</x-rTextbox>
                 <x-rTextbox name="CliEMail"      type="label" value="{{$data['CliEMail']}}">{{ __('Email') }}</x-rTextbox>
-                <x-rTextbox name="CliWaysPay"    type="label" value="{{$data['CliWaysPay_text'] ?? $data['CliWaysPay']}}">{{ __('WaysPay') }}</x-rTextbox>
+                <x-rTextbox name="CliWaysPayText"    type="label" value="{{$data['CliWaysPay_text'] ?? $data['CliWaysPay']}}">{{ __('WaysPay') }}</x-rTextbox>
+                <input type="hidden" name="CliWaysPay" value="{{ $data['CliWaysPay'] ?? '' }}">
 
-                <x-rTextarea id="MessageText" name="MessageText" value="{{$data['MessageText']}}">{{ __('MessageText') }}</x-rTextarea><br>
-
+                <x-rTextarea id="MessageText"    attr="label" name="MessageText" msgText="{{$data['MessageText']}}">{{ __('MessageText') }}</x-rTextarea><br>
+            
                 <!-- ----------------------------------------------------- -->
                 <!-- ボタンエリア -->
                 <!-- ----------------------------------------------------- -->

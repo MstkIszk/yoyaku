@@ -105,7 +105,7 @@ Route::post('/user_courses', [UserCourseController::class, 'store'])->name('user
 //◆◆◆◆◆◆◆◆◆◆◆  予約登録関係  ◆◆◆◆◆◆◆◆◆◆◆◆◆◆
 //------------------------------------------------------------
 //  予約入力画面
-Route::get('reserve/create/{ReqDate?}', [ReserveController::class,'create'])->name('reserve.create');
+Route::get('reserve/create/{ShopID?}/{ProductID?}/{ReqDate?}', [ReserveController::class,'create'])->name('reserve.create');
 //  予約の書き込み
 Route::post('reserve/post', [ReserveController::class,'store'])->name('reserve.store');
 //  予約の確認
@@ -132,7 +132,7 @@ Route::post('reserve/writeDateInfo/{status?}', [ReserveDateController::class,'wr
 
 
 
-// 予約カレンダー表示 ★ 修正済み
+// 予約カレンダー表示 
 Route::get('reserve/calender/{user_id}/{product_id}', [ReserveController::class, 'calender'])->name('reserve.calender');
 //  カレンダーデータ読み込み (BackEND)
 Route::get('reserve/calenderGet/{id?,month?}', [ReserveController::class,'calenderGet'])->name('reserve.calenderGet');

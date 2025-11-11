@@ -311,7 +311,7 @@
                     }
                     function openYoyakuInput(day) {
                         //  YYYY-MM-DD に編集
-                        var reqDate = CurrYM.substr(0,8) + '-' + ('00' + day).slice(-2);
+                        var reqDate = CurrYM.substr(0,7) + '-' + ('00' + day).slice(-2);
 
                         // ProductIDをドロップダウンから取得
                         const productIDForReserve = getCurrentProductID();

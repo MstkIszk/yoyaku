@@ -28,17 +28,46 @@
                     value="{{old('ReserveDate', $DestDate) }}" required>予約日:</x-rTextbox>
                 <x-rTextbox name="CliResvCnt" type="number"  value="{{old('CliResvCnt',1)}}" required>予約人数:</x-rTextbox>
 
-                <x-rSelect name="CliResvType" caption="予約タイプ"  attributes="required">
-                    @foreach ( \App\Models\Reserve::GetYoyakuType( $user->id,$Product->id) as $item) 
-                        <option value="{{ $item[0] }}"  {{ old('CliResvType') == $item[0] ? 'selected' : '' }}>{{ $item[1] }}</option>
-                    @endforeach
-                </x-rSelect><br>
+
+                <x-rSelect name="CliResvType" caption="{{ __('Reserve type') }}"  attributes="required">
+                @php
+                    // old値を取得
+                    $oldValue = old('CliResvType');
+                    // デフォルト選択値を設定（old値がなければ、最初の要素のIDをデフォルトとする）
+                    $defaultSelectedId = null;
+                    if ($YoyakuTypeList->isNotEmpty()) {
+                        $defaultSelectedId = $YoyakuTypeList->first()->id;
+                    }
+                @endphp
+
+                @foreach ($YoyakuTypeList as $item)
+                    {{-- 選択状態の判定ロジック --}}
+                    @php
+                        // 1. old値が設定されていればそれを優先
+                        // 2. old値が無く、かつ最初の要素であり、defaultSelectedIdが設定されていれば、それをデフォルトとして選択
+                        $isSelected = false;
+                        if ($oldValue !== null) {
+                            // old値が設定されている場合
+                            $isSelected = (string)$oldValue === (string)$item->id;
+                        } elseif ($item->id === $defaultSelectedId) {
+                            // old値が無く、現在のアイテムがリストの最初のアイテムである場合
+                            $isSelected = true;
+                        }
+                    @endphp
+
+                    <option 
+                        value="{{ $item->id }}" 
+                        {{ $isSelected ? 'selected' : '' }}
+                    >
+                        {{ $item->courseName }}
+                    </option>
+                @endforeach
+                </x-rSelect>
 
                 <x-rTextbox name="ClitNameKanji" required value="{{old('ClitNameKanji')}}">氏名（漢字）</x-rTextbox>
                 <x-rTextbox name="ClitNameKana" required value="{{old('ClitNameKana')}}">カナ氏名:</x-rTextbox>
-                <x-rTextbox class="p-postal-code " name="CliAddrZip" required value="{{old('CliAddrZip')}}">郵便番号:</x-rTextbox>
-
                 <label>住所</label>
+                <x-rTextbox class="p-postal-code " name="CliAddrZip" required value="{{old('CliAddrZip')}}">郵便番号:</x-rTextbox>
                 <x-rTextbox name="CliAddrPref" class="p-region " required value="{{old('CliAddrPref')}}">県名:</x-rTextbox>
                 <x-rTextbox name="CliAddrCity" class="p-locality "  required value="{{old('CliAddrCity')}}">市町村名:</x-rTextbox>
                 <x-rTextbox name="CliAddrOther" class="p-street-address p-extended-address "  required value="{{old('CliAddrOther')}}">地域名:</x-rTextbox>

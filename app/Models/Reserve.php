@@ -4,7 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-
+use App\Models\UserCourse;
 
 class Reserve extends Model
 {
@@ -17,6 +17,7 @@ class Reserve extends Model
             'OrderNo',          //  予約番号
             'Baseid',   
             'Productid',
+            'Courseid',         //  user_courseのID
             'KeyStr',           //  照会時に比較する
             'ReqDate',          //  予約日時
             'ReserveDate',      //  予約日
@@ -53,19 +54,6 @@ class Reserve extends Model
     ];
     function editValue($val) {
         return ' value="' . $val . '"';
-    }
-
-    public static $YoyakuTypeList = [
-        [   0  , '終日'    ],
-        [   1  , '午前中'  ],
-        [   2  , '午後'    ],
-        [   3  , '３時間'  ]
-    ];
-    public static function GetYoyakuType($userId,$ProductIid) {
-
-
-
-        return self::$YoyakuTypeList;
     }
 
     /**
