@@ -82,36 +82,47 @@ a {
     background: #eef;
     color: blue;
 }
-.today {
+.calender .today {
     background: orange !important;
 }
 /* ■■■■■ １日の枠 ■■■■■ */
-.area {
+.calender .area {
     display: grid;
     grid-template-areas:
         "date edit"
+        "dayname dayname"
         "names names"
         "cnt yoyaku";
     grid-gap: 10px;
     border: 1px solid #ccc;
     padding: 1px 1px 4px 1px;
 }
-.day {
+.calender .day {
     grid-area: date;
     /*width: 3rem;*/
     width: 100%;
     text-align: center;
     font-size:1.2rem;
-    /*background: rgb(157, 237, 200);*/
-    background-image: linear-gradient(to right, rgb(157, 237, 200), rgb(255, 255, 255));
+}
+.calender .dayname {
+    grid-area: dayname;
+    /*width: 3rem;*/
+    width: 100%;
+    text-align: left;
+    font-size:0.9rem;
+    color: rgb(180, 10, 100);;
+    margin-bottom:2px;
 }
 @media (max-width: 780px) {
-    .day {
+    .calender .day {
         width: 2rem;
         font-size:0.8rem;
     }
+    .calender .dayname {
+        font-size:0.7rem;
+    }
 }
-.day_today {
+.calender .day_today {
     grid-area: date;
     width: 3rem;
     text-align: center;
@@ -119,30 +130,30 @@ a {
     font-weight: bold;
     background: rgb(57, 137, 100);
 }
-.edit_dummy {   /* 管理者以外は編集ボタンを無効 */
+.calender .edit_dummy {   /* 管理者以外は編集ボタンを無効 */
     grid-area: edit;
 }
-.edit_button {   /* 管理者用の編集ボタン */
+.calender .edit_button {   /* 管理者用の編集ボタン */
     grid-area: edit;
     width: 3rem;
     text-align: center;
     font-size:0.8rem;
 }
 @media (max-width: 780px) {
-    .edit_button {   /* 管理者用の編集ボタン */
+    .calender .edit_button {   /* 管理者用の編集ボタン */
         width: 100%;
         padding-left: 2px;
         padding-right: 2px;
         font-size:0.6rem;
     }
 }
-.edit_button_normal {   /* 管理者用の編集ボタン */
+.calender .edit_button_normal {   /* 管理者用の編集ボタン */
     background: rgb(128, 206, 128);
 }
-.edit_button_horiday {   /* 管理者用の編集ボタン */
+.calender .edit_button_horiday {   /* 管理者用の編集ボタン */
     background: rgb(206, 128, 128);
 }
-.edit_button_private {   /* 管理者用の編集ボタン */
+.calender .edit_button_private {   /* 管理者用の編集ボタン */
     background: rgb(206, 206, 128);
 }
 

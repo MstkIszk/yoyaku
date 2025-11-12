@@ -262,8 +262,17 @@
                                                     editBtnDef = '<button ' + editBtnStyle + '" onclick=\'openEditModal(' + dayIx + ',"' + dayInfo.day + '")\'>' + getOpeName(operatingCode) + '</button>';
                                                 @endif
                                             @endauth
+                                            weekStr += editBtnDef;
 
-                                            weekStr += editBtnDef + '<div class="names">';   //  予約者リスト
+
+                                            if(dayInfo.DayName) {
+                                                weekStr += '<div class="dayname">' + dayInfo.DayName + '</div>'; //  祭日の名前
+                                            }
+                                            else {
+                                                weekStr += '<div class="dayname">　</div>'; //  祭日の名前
+                                            }
+
+                                            weekStr += '<div class="names">';   //  予約者リスト
                                             if(dayInfo.totalCnt > 0) {
                                                 //  予約者がいる場合、名前・人数とリンクを追加
                                                 var memCnt = 0;

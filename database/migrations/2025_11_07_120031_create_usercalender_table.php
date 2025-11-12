@@ -1,5 +1,9 @@
 <?php
 
+//  休日管理テーブル
+//  モデル名　app\Models\UserCalender.php
+//  全ユーザーを対象としたカレンダー表示のテーブル
+
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
