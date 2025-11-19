@@ -29,7 +29,12 @@ class DashboardController extends Controller
 ////                         ->toSql();
 
         $products = $user->products()
-                         ->with('allCoursesByProductId') // ★テスト用のリレーション名を使用
+                         ->with([
+                            'allCoursesByProductId' => function ($query) {
+                                // allCoursesByProductId（Courseモデル）から userCoursePrices をロード
+                                $query->with('userCoursePrices'); 
+                            }
+                        ]) // ★テスト用のリレーション名を使用
                          ->orderBy('productID', 'asc')
                          ->get();
 

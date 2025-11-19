@@ -6,6 +6,30 @@
         </h2>
     </x-slot>
 
+    <style>
+    .prise-edit-button {
+        /* 1. margin-leftの追加 */
+        margin-left: 2px;
+        
+        cursor: pointer;
+        padding: 2px 2px; /* 枠のサイズを指定 */
+
+        /* 2. 金色のボタン形状 */
+        /* 背景をグラデーションにして深みを出し、枠線も金色に */
+        background: linear-gradient(to bottom, #FFD700 0%, #FFC700 100%); /* Gold color */
+        border: 2px solid #DAA520; /* Darker gold border */
+        color: #333333; /* 文字色は視認性の高いダークグレーに */
+        
+        border-radius: 4px; /* 角を少し丸める */
+        width: 16px;
+        height: 18px;
+        
+        /* ホバー時のシャドウ変化のために初期のシャドウを透明で設定 */
+        box-shadow: 0 0 0 0px transparent;
+    }
+    </style>
+
+
 
     <div class="py-12">
         {{-- コントロールパネルのファイル入出力機能 (仮に予約コース用として表示) --}}
@@ -43,9 +67,10 @@
                                     <tr>
                                         <th class="txtWidth_2 text-center">{{ __('ID') }}</th>
                                         <th class="txtWidth_30pc text-left">{{ __('コース名') }}<span class="text-red-500">*</span></th>
-                                        <th class="txtWidth_8 text-right">{{ __('平日料金') }} (円)<span class="text-red-500">*</span></th>
-                                        <th class="txtWidth_8 text-right">{{ __('休日料金') }} (円)<span class="text-red-500">*</span></th>
-                                        <th class="txtWidth_5 text-center">{{ __('有効') }}</th>
+                                        <th class="txtWidth_11 text-right">{{ __('平日料金') }}／{{ __('休日料金') }}
+                                            <span class="text-red-500">*</span>
+                                        </th>
+                                        <th class="txtWidth_3 text-center">{{ __('有効') }}</th>
                                         <th class="txtWidth_auto text-left">{{ __('メモ') }}</th>
                                         <th class="txtWidth_3 text-center">{{ __('順序') }}</th>
                                     </tr>
@@ -77,19 +102,22 @@
                                                     class="innerLabel txtWidth_90pc" 
                                                     placeholder="{{ __('コース名') }}">
                                         </td>
-                                        {{-- 平日料金 (8rem幅, 右寄せ) --}}
-                                        <td class="weekdayPrice">
+                                        {{-- 平日料金 休日料金 --}}
+                                        <td class="price_group">
+                                            {{-- 平日料金 --}}
                                             <input type="number" name="courses[{{ $index }}][weekdayPrice]" 
                                                     value="{{ old('courses.' . $index . '.weekdayPrice', $course->weekdayPrice) }}"
-                                                    class="innerText text-right txtWidth_80pc" 
-                                                    placeholder="0" min="0" step="1" required>
-                                        </td>
-                                        {{-- 休日料金 (8rem幅, 右寄せ) --}}
-                                        <td class="weekendPrice">
+                                                    class="innerText ryokin" placeholder="0" min="0" step="1" required>／
+                                            {{-- 休日料金 --}}
                                             <input type="number" name="courses[{{ $index }}][weekendPrice]" 
                                                     value="{{ old('courses.' . $index . '.weekendPrice', $course->weekendPrice) }}"
-                                                    class="innerText text-right txtWidth_80pc" 
-                                                    placeholder="0" min="0" step="1" required>
+                                                    class="innerText ryokin" placeholder="0" min="0" step="1" required>
+
+                                            {{-- 料金変更ページへのリンク。courseIDとして $course->id を渡す --}}
+                                            <a href="{{ route('UserCoursePrice.create', ['course_id' => $course->id]) }}" 
+                                                class="prise-edit-button">
+                                                変更
+                                            </a>
                                         </td>
                                         {{-- 有効チェックボックス --}}
                                         <td class="text-center status">
@@ -117,10 +145,10 @@
 
                                         {{-- 行の入れ替えボタン --}}
                                         <td class="py-1 px-2 text-center row-controls">
-                                            <button type="button" class="move-up-btn text-blue-600 hover:text-blue-800 focus:outline-none text-xs mr-1 p-1 rounded-full bg-gray-100 hover:bg-gray-200" title="{{ __('上に移動') }}">
+                                            <button type="button" class="updown-button" title="{{ __('上に移動') }}">
                                                 <svg class="w-4 h-4 inline-block" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"></path></svg>
                                             </button>
-                                            <button type="button" class="move-down-btn text-blue-600 hover:text-blue-800 focus:outline-none text-xs p-1 rounded-full bg-gray-100 hover:bg-gray-200" title="{{ __('下に移動') }}">
+                                            <button type="button" class="updown-button" title="{{ __('下に移動') }}">
                                                 <svg class="w-4 h-4 inline-block" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
                                             </button>
                                         </td>
@@ -142,19 +170,15 @@
                                                     class="innerText txtWidth_90pc" 
                                                     placeholder="{{ __('コース名') }}">
                                         </td>
-                                        {{-- 平日料金 --}}
-                                        <td class="weekdayPrice">
+                                        <td class="price_group">
+                                            {{-- 平日料金 --}}
                                             <input type="number" name="courses[{{ $i }}][weekdayPrice]" 
                                                     value="{{ old('courses.' . $i . '.weekdayPrice') }}"
-                                                    class="innerText text-right txtWidth_80pc" 
-                                                    placeholder="0" min="0" step="1">
-                                        </td>
-                                        {{-- 休日料金 --}}
-                                        <td class="weekendPrice">
+                                                    class="innerText ryokin" placeholder="0" min="0" step="1">／
+                                            {{-- 休日料金 --}}
                                             <input type="number" name="courses[{{ $i }}][weekendPrice]" 
                                                     value="{{ old('courses.' . $i . '.weekendPrice') }}"
-                                                    class="innerText text-right txtWidth_80pc" 
-                                                    placeholder="0" min="0" step="1">
+                                                    class="innerText ryokin" placeholder="0" min="0" step="1">
                                         </td>
                                         {{-- 有効チェックボックス (デフォルトchecked) --}}
                                         <td class="text-center status">
@@ -177,10 +201,10 @@
 
                                         {{-- 行の入れ替えボタン --}}
                                         <td class="py-1 px-2 text-center row-controls">
-                                            <button type="button" class="move-up-btn text-blue-600 hover:text-blue-800 focus:outline-none text-xs mr-1 p-1 rounded-full bg-gray-100 hover:bg-gray-200" title="{{ __('上に移動') }}">
+                                            <button type="button" class="updown-button" title="{{ __('上に移動') }}">
                                                 <svg class="w-4 h-4 inline-block" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"></path></svg>
                                             </button>
-                                            <button type="button" class="move-down-btn text-blue-600 hover:text-blue-800 focus:outline-none text-xs p-1 rounded-full bg-gray-100 hover:bg-gray-200" title="{{ __('下に移動') }}">
+                                            <button type="button" class="updown-button" title="{{ __('下に移動') }}">
                                                 <svg class="w-4 h-4 inline-block" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
                                             </button>
                                         </td>
@@ -335,14 +359,12 @@
                                 class="innerText txtWidth_90pc" 
                                 placeholder="{{ __('コース名') }}">
                     </td>
-                    <td class="weekdayPrice">
+                    <td class="price_group">
                         <input type="number" name="courses[${index}][weekdayPrice]" 
-                                class="innerText text-right txtWidth_80pc" 
-                                placeholder="0" min="0" step="1">
-                    </td>
-                    <td class="weekendPrice">
+                                class="innerText ryokin" 
+                                placeholder="0" min="0" step="1">／
                         <input type="number" name="courses[${index}][weekendPrice]" 
-                                class="innerText text-right txtWidth_80pc" 
+                                class="innerText ryokin" 
                                 placeholder="0" min="0" step="1">
                     </td>
                     <td class="text-center status">
@@ -361,10 +383,10 @@
                                 placeholder="{{ __('備考/説明') }}">
                     </td>
                     <td class="py-1 px-2 text-center row-controls">
-                        <button type="button" class="move-up-btn text-blue-600 hover:text-blue-800 focus:outline-none text-xs mr-1 p-1 rounded-full bg-gray-100 hover:bg-gray-200" title="{{ __('上に移動') }}">
+                        <button type="button" class="updown-button" title="{{ __('上に移動') }}">
                             <svg class="w-4 h-4 inline-block" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"></path></svg>
                         </button>
-                        <button type="button" class="move-down-btn text-blue-600 hover:text-blue-800 focus:outline-none text-xs p-1 rounded-full bg-gray-100 hover:bg-gray-200" title="{{ __('下に移動') }}">
+                        <button type="button" class="updown-button" title="{{ __('下に移動') }}">
                             <svg class="w-4 h-4 inline-block" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
                         </button>
                     </td>

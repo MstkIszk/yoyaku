@@ -50,6 +50,13 @@ class UserProduct extends Model
                     // baseCodeも一致させることで、リレーションのスコープを現在の店舗に限定
                     ->where('baseCode', $this->baseCode); 
     }
+    // UserCourse モデルとのリレーションを追加
+    public function productCourses(): HasMany
+    {
+        return $this->hasMany(UserCourse::class, 'productID', 'productID');
+               //->where('baseCode', $this->baseCode); 
+    }
+    
     
     public function allCoursesByProductId(): HasMany
     {

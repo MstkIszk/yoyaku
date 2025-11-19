@@ -20,19 +20,21 @@ class ReserveDate extends Model
         'operating',    // 1:通常営業・2:休業・3:貸し切り
         'capacity',     //  定員
         'yoyakusu',     //  ネット予約以外の予約人数
+        'stars',        //  ★１～★５
         'memo'          //  メモ書き
     ];
 
     
     protected $casts = [
-        'baseCode' => 'integer',     //  対象の店舗コード
+        'baseCode'  => 'integer',     //  対象の店舗コード
         'productID' => 'integer',    //  商品コード
         'eigyotype' => 'integer',    //  営業タイプ
-        'destDate' => 'datetime',    //  対象日付
+        'destDate'  => 'datetime',    //  対象日付
         'operating' => 'integer',    // 1:通常営業・2:休業・3:貸し切り
-        'capacity' => 'integer',     //  定員
-        'yoyakusu' => 'integer',     //  ネット予約以外の予約人数
-        'memo' => 'string'           //  メモ書き
+        'capacity'  => 'integer',     //  定員
+        'yoyakusu'  => 'integer',     //  ネット予約以外の予約人数
+        'stars'     => 'integer',     //  
+        'memo'      => 'string'           //  メモ書き
     ];
 
     

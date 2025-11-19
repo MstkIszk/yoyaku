@@ -1,0 +1,101 @@
+##受付画面の表示
+
+##受付する予約を表示
+    public function create($reservID)
+    {
+    }
+
+
+###		Reserveテーブルから$reservIDに該当するデータを取得
+####Reserveテーブルの定義は以下
+    protected $fillable = [
+            'OrderNo',          //  予約番号
+            'Baseid',   
+            'Productid',
+            'Courseid',         //  user_courseのID
+            'KeyStr',           //  照会時に比較する
+            'ReqDate',          //  予約日時
+            'ReserveDate',      //  予約日
+            'ClitNo',           //  予約番号
+            'ClitNameKanji',    //  氏名漢字
+            'ClitNameKana',     //  氏名カナ
+            'CliAddrZip',       //  郵便番号
+            'CliAddrPref',      //  県名
+            'CliAddrCity',      //  市町村名
+            'CliAddrOther',     //  地域名
+            'CliTel1',          //  電話番号
+            'CliEMail',         //  メールアドレス
+            'CliResvType',      //  予約タイプ	
+            'CliResvCnt',       //  予約人数
+            'CliWaysPay',       //  支払い方法
+            'MessageText',      //  連絡
+            'RandomNumber',     //  確認用の乱数
+            'UpdateDate',       //  更新日
+            'Status'            //  予約状態
+    ];
+
+
+
+###		テーブル読み込み
+・UserモデルからBaseid で引用
+・UserAccessoryモデルからIsEnabledが０でないものをbaseCode で引用
+・UserProductモデルからProductid で引用
+・UserCourseモデルからCourseid で引用
+
+
+###View で 
+resources\views\Reserve\ReceptionAccept.blade.php
+を表示する
+
+
+##Viewの定義
+###見出し
+User::name
+UserProduct::productName
+
+###<table>開始
+####先頭行に UserCourseから読み込んだデータを         'courseName',   'weekdayPrice',weekendPrice',,memo, 数量入力欄,[+][-]ボタン,price×数量入力値
+####2行目以降にUserAccessoryから読んだリストを でproductName,price,memo, 数量入力欄,[+][-]ボタン,price×数量入力値
+####[+][-]ボタンで数量入力欄とprice×数量入力値欄を更新
+####price×数量入力値には 数量入力欄の積を表示
+####<table>の最下行には price×数量入力値に 合計値を計算してセット
+
+###登録ボタンと「キャンセルボタン」を表示
+
+####登録ボタンが押されたら
+Route::post('/reception', [ReserveReceptionController::class, 'store'])->name('ReserveReception.store');
+を呼ぶ
+
+
+##登録
+###store()では
+モデル app\Models\ReserveReception.php
+により格納
+
+###テーブル名と定義は以下
+        Schema::create('reserv_reception', function (Blueprint $table) {
+            $table->increments('id');               //  自動加算のID
+            $table->foreignId('ReserveID')->comment('予約ID');      // reservテーブルの id を参照
+			$table->integer('payType')->comment('料金タイプ');      // １:コース商品 / 2:オプション商品
+			$table->integer('index')->comment('対象商品コード');    // 
+
+            $table->integer('price')->comment('単価'); 	//  単価
+            $table->integer('count')->comment('数量');     //  数量
+            $table->string('memo')->comment('メモ');       //  メモ書き
+            $table->timestamps();
+        });
+
+
+
+app\Models\Reserve.php
+
+    public function accessories(): BelongsTo
+    {
+        return $this->belongsTo(UserAccessory::class, 'baseCode', 'id');
+    }    
+}
+
+
+ReserveReception.index
+
+

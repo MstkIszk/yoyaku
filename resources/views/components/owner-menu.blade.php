@@ -1,7 +1,28 @@
-<div class="image-container">
-
+<link href="{{ asset('css/bublemenu.css') }}" rel="stylesheet">
 
 <style> /* ハンバーガーメニュー */
+
+.image-container {
+    width: 100%;
+    height: 4rem;
+    /* 背景画像を横一杯に繰り返し表示 public\images\ */
+    background-image: url('{{ asset('images/menu_back_byfish.png') }}');
+    background-repeat: repeat-x; /* 横方向のみ繰り返し */
+    
+    /* スクロールのための設定 */
+    animation: scroll-bg 15s linear infinite; /* アニメーションの適用 */
+}
+
+/* アニメーションの定義 */
+@keyframes scroll-bg {
+    from {
+        background-position: 0 0; /* 開始位置: 左端 */
+    }
+    to {
+        background-position: 100% 0; /* 終了位置: 右端 */
+    }
+}
+
 .nav_item {
     list-style: none;
 }
@@ -71,8 +92,6 @@
     right: -11rem; /* 初期状態で画面外に配置 */
     width: 11rem; /* JSで変更する幅 */
     padding-top: 70px;
-    background: #fff;
-    color: #333;
     z-index: 2000;
     overflow-y: auto;
     transition: ease .4s;
@@ -81,7 +100,7 @@
 .header__nav.active {
     right: 0; /* 画面内にスライドイン */
 }
-/* メニューアイテムのコンテナ */
+/* メニューアイテムのコンテナ 
 .header__nav ul {
     list-style-type: none;
     margin: 0;
@@ -91,8 +110,9 @@
     line-height: 40px;
     font-size: 1rem;
     margin: 2px;
-    /* モバイルでは縦並びを維持 */
+    /* モバイルでは縦並びを維持 
 }
+*/
 
 /* ---------------------------------------------------------------------- */
 /* デスクトップ (780px 以上) - メディアクエリで上書き                         */
@@ -115,8 +135,6 @@
         height: auto;
         width: 100%;
         padding: 0;
-        background: aquamarine; /* nav_topbarの色を背景色に使う */
-        z-index: 1000;
         transform: none; /* JSによるスライド効果を無効化 */
     }
     
@@ -126,19 +144,18 @@
     }
 
     /* ul (nav__items) を横並びにする */
-    .header__nav ul {
-        display: flex; /* Flexboxで横並び */
-        justify-content: flex-end; /* 右寄せ */
-        align-items: center;
-        height: 40px; /* メニューバーの高さ */
-    }
+    //.header__nav ul {
+    //    display: flex; /* Flexboxで横並び */
+    //    justify-content: flex-end; /* 右寄せ */
+    //    align-items: center;
+    //    height: 40px; /* メニューバーの高さ */
+    //}
 
-    /* li (nav_item) を横並びにする */
-    .header__nav li {
-        margin: 0 10px; /* 間隔を調整 */
-        line-height: 1;
-        
-    }
+    //* li (nav_item) を横並びにする */
+    //.header__nav li {
+    //    margin: 0 10px; /* 間隔を調整 */
+    //    line-height: 1;
+    //}
     
     /* a (menu_item) のスタイルを調整 */
     .menu a {
@@ -157,6 +174,7 @@
 }
 </style>
 
+<div class="image-container">
 
 <!-- ハンバーガーメニューをクリックしたらactiveクラスを付与する制御をJavaScriptで行う -->
 <button class="header__hamburger hamburger" id="js-hamburger">
@@ -167,7 +185,8 @@
 
 <!-- メニュー -->
 <nav class="header__nav nav" id="js-nav">
-    <ul class="nav__items nav-items">
+{{-- <ul class="nav__items nav-items"> --}}
+<ol class="headerAside header-fadeInUp">
     @if (Route::has('login'))
         @auth
             <div class="nav_topbar">{{ Auth::user()->spName }}</div>
@@ -177,22 +196,37 @@
         <div class="menu">
             @auth
                 <!-- ログインしていれば -->
+                 {{-- 
                 <li class="nav_item"></li><a href="{{ url('/dayinfo') }}" class="menu_item">{{ __('reserve Today') }}</a></li>
                 <li class="nav_item"></li><a href="{{ url('/shopcalender') }}" class="menu_item">{{ __('Shop Calender') }}</a></li>
                 <li class="nav_item"></li><a href="{{ url('/reservelist') }}" class="menu_item">{{ __('Reserve list') }}</a></li>
                 <li class="nav_item"></li><a href="{{ url('/dashboard') }}" class="menu_item">{{ __('Dashboard') }}</a></li>
+                 --}}
+                <li class="headerAside__item"><a href="{{ url('/dayinfo') }}"      class="headerAside__link">{{ __('reserve Today') }}</a></li>
+                <li class="headerAside__item"><a href="{{ route('reserve.calender', ['user_id' => Auth::user()->id, 'product_id' => 0]) }}" class="headerAside__link">{{ __('Shop Calender') }}</a></li>
+                <li class="headerAside__item"><a href="{{ url('/reservelist') }}"  class="headerAside__link">{{ __('Reserve list') }}</a></li>
+                <li class="headerAside__item"><a href="{{ url('/dashboard') }}"    class="headerAside__link">{{ __('Dashboard') }}</a></li>
             @else
                 <!-- ログインしていない -->
+                {{-- 
                 <li class="nav_item"></li><a href="{{ route('login') }}" class="menu_item">Log in</a></li>
 
                 @if (Route::has('register'))
                     <!-- registerというルート要素があれば -->
                     <li class="nav_item"></li><a href="{{ route('register') }}" class="menu_item">Register</a></li>
                 @endif
+                 --}}
+                <li class="headerAside__item"><a href="{{ route('reserve.telnoinput') }}" class="headerAside__link">予約検索</a></li>
+                <li class="headerAside__item"><a href="{{ route('login') }}"      class="headerAside__link">Log in</a></li>
+
+                @if (Route::has('register'))
+                    <!-- registerというルート要素があれば -->
+                    <li class="headerAside__item"><a href="{{ route('register') }}" class="headerAside__link">Register</a></li>
+                @endif
             @endauth
         </div>
     @endif
-    </ul>
+</ol>
 </nav>
 
 <script>
@@ -241,16 +275,8 @@ const ham = document.querySelector('#js-hamburger');
     handleScreenChange(mediaQuery);
 </script>
 
-
-
-
-<!--address>
-    <a href="mailto:jim@example.com">jim@example.com</a><br />
-    <a href="tel:+14155550132">+1 (415) 555‑0132</a>
-</address-->
-
 </div>
-<div>
+{{-- <div>
     <!-- No surplus words or unnecessary actions. - Marcus Aurelius -->
 
-</div>
+</div>--}} 

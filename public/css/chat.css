@@ -67,7 +67,6 @@
 //◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆*/
 
 .head_frame {
-  margin-top: 40px;
   margin-bottom: 12px;
   width: 100%;
   background-image: url(../images/slide_back.jpg);
@@ -264,6 +263,18 @@
   background-color: #e68a00; /* 少し濃いオレンジ色に */
 }
 
+/* ホバー時のスタイル */
+.article_frame .product-block {
+  background-color: #ffffA0; /* オレンジ色 */
+  padding: 10px 4px; /* ボタンのサイズ調整 */
+  border: none;
+  border-radius: 5px; /* 角を丸く */
+  border: 4px outset #ff9900; /* borderをoutsetにして立体的に */
+  display: block; /* ブロック要素にして中央揃えを可能にする */
+  width: 96%; /* 横幅を4remに設定 */
+  margin: 8px auto 0; /* 上の余白を8px、左右をautoにして中央揃え */
+}
+
 /*◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆
 //  チェックボックスの枠 定義 
 //    コントローラ: app\View\Components\RCheckbox.php
@@ -370,6 +381,10 @@
   width: 12rem;
   text-align: center;
 }
+.list_table  .price_group{
+  width: 12rem;
+  text-align: center;
+}
 .list_table  .time_period{
   width: 7rem;
   text-align: center;
@@ -385,7 +400,7 @@
 
 .list_table  .ryokin{
   margin: 4px;
-  width: 4.5rem;
+  width: 3.5rem;
   text-align: right;
   padding-right: 4px;
 }
@@ -397,10 +412,20 @@
 
 .list_table  .count{
   width: 2rem;
-  text-align: center;
+  text-align: right;
+}
+
+.list_table .contact { 
+  text-align: left; 
+} 
+
+.list_table  .address{
+  width: 12rem;
+  text-align: left;
 }
 
 .list_table  .memo{
+  width: auto;
   margin: 4px;
   text-align: left;
 }
@@ -422,7 +447,7 @@
 }
 
 .list_table  .innerText {
-  margin:4px;
+  margin:3px;
   border-color: #d1d5db;	/*境界線の色 (灰色 300)*/
   border-radius: 0.375rem;	/*角丸のサイズ (6px)*/
   box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);	/*小さな影を付ける*/
@@ -587,6 +612,7 @@
 }
 
 .txtWidth_2    { width: 2.5em;  }
+.txtWidth_3    { width: 3.5em;  }
 .txtWidth_5    { width: 4.5em;  }
 .txtWidth_6    { width: 6.2em;  }
 .txtWidth_8    { width: 10em;   }
@@ -725,7 +751,7 @@ a[href^='tel']::before {
 .back-button {
   /* 基本スタイル (変更なし) */
   display: inline-block;
-  padding: 12px 30px;
+  padding: 12px 20px;
   font-size: 18px;
   font-weight: 700;
   text-align: center;
@@ -885,6 +911,45 @@ a[href^='tel']::before {
 }
 
 /* 5. ON/OFFのテキスト表示の制御 */
+
+.updown-button {
+  /* 1. margin-leftの追加 */
+  margin-left: 6px;
+  
+  cursor: pointer;
+  padding: 2px 2px; /* 枠のサイズを指定 */
+
+  /* 2. 金色のボタン形状 */
+  /* 背景をグラデーションにして深みを出し、枠線も金色に */
+  background: linear-gradient(to bottom, #FFD700 0%, #FFC700 100%); /* Gold color */
+  border: 2px solid #DAA520; /* Darker gold border */
+  color: #333333; /* 文字色は視認性の高いダークグレーに */
+  
+  border-radius: 4px; /* 角を少し丸める */
+  transition: all 0.3s ease; /* transitionを少し長くして滑らかに */
+  font-weight: bold;
+  width: 16px;
+  height: 20px;
+  
+  /* ホバー時のシャドウ変化のために初期のシャドウを透明で設定 */
+  box-shadow: 0 0 0 0px transparent;
+}
+
+/* 3. mouseoverでボタン枠内 2px離したところに黒枠を書く */
+.updown-button:hover {
+  /* box-shadowを使用して枠を表現 */
+  /* 最初の影 (内側): 0 0 0 2px rgba(0, 0, 0, 0) - ボタン自体と同じサイズで透明 */
+  /* 2つ目の影 (内側, 2px外): inset 0 0 0 2px black - ボタンのコンテンツから2px離した位置に黒枠を表現 */
+  box-shadow: 
+      /* 内側の黒枠 (ボタンのコンテンツ領域から2px離す) */
+      inset 0 0 0 1px #000000, 
+      /* 内側の黒枠とコンテンツの間の2pxの隙間 */
+      inset 0 0 0 3px transparent;
+  
+  /* ホバー時の背景色を少し暗くして押下感を出す */
+  background: linear-gradient(to bottom, #FFC700 0%, #FFB700 100%);
+}
+
 
 /* OFF時 (デフォルト) */
 .checkbox-button-container input[type="checkbox"] + label.toggle-label::after {

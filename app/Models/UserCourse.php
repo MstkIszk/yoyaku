@@ -6,6 +6,8 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Collection;
+use App\Models\UserCoursePrice;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class UserCourse extends Model
 {
@@ -62,6 +64,31 @@ class UserCourse extends Model
     {
         return $this->belongsTo(UserProduct::class, 'productID');
     }
+
+    /**
+     * UserCoursePrice モデルとのリレーションを追加
+     * このコースに紐づく料金体系を取得します。
+     * 親のID（UserCourseのid）を外部キーとして使用します。
+     * * 注意: UserCoursePriceテーブルにはcourseCodeがカラムとしてありますが、
+     * ここではUserCourseのID（主キー）を使ってリレーションを構築します。
+     * もしUserCoursePriceテーブルのcourseCodeカラムがUserCourseのcourseCodeと一致する
+     * データを取得したい場合は、HasManyThroughやカスタムリレーションが必要ですが、
+     * シンプルにUserCourseのIDを外部キーとして扱うのがLaravelの慣例です。
+     * * UserCoursePriceテーブルの外部キーが 'user_course_id' のような名称であるべきですが、
+     * 定義に基づき、今回は `courseCode` をリレーションのローカルキー（親キー）として使用します。
+     */
+    public function userCoursePrices(): HasMany
+    {
+        // 外部キー('courseCode')と、親モデル（UserProduct）のキー('productID')を指定
+
+        // 外部キー: UserCoursePriceテーブルの 'courseCode'
+        // ローカルキー: UserCourseテーブルの 'courseCode'
+        // baseCodeとproductIDも一致させるべきですが、ここではcourseCodeのみでシンプルに定義します。
+        // （ただし、異なる商品で同じ courseCode を使用している場合は問題が発生する可能性があります）
+        return $this->hasMany(UserCoursePrice::class, 'courseCode');
+                //->where('baseCode', $this->baseCode); 
+    }
+
     /**
      * 予約コーステーブルから予約タイプのリストを取得する。
      *

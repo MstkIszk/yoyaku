@@ -11,7 +11,9 @@ class UserAccessory extends Model
     use HasFactory;
 
     protected $table = 'user_accessories';
-
+    // 主キーは 'id' であると仮定
+    protected $primaryKey = 'id';
+    
     //  保存・更新したいカラムを設定
     protected $fillable = [
         'baseCode',

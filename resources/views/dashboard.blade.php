@@ -107,7 +107,8 @@
                                                     <thead class="bg-gray-100">
                                                         <tr>
                                                             <th class="px-2 py-1 text-left font-medium text-gray-600">コース名</th>
-                                                            <th class="px-2 py-1 text-right font-medium text-gray-600">料金</th>
+                                                            <th class="px-2 py-1 text-right font-medium text-gray-600">平日料金</th>
+                                                            <th class="px-2 py-1 text-right font-medium text-gray-600">休日料金</th>
                                                             <th class="px-2 py-1 text-center font-medium text-gray-600">状態</th>
                                                         </tr>
                                                     </thead>
@@ -115,9 +116,32 @@
                                                         @foreach ($product->courses as $course)
                                                             <tr class="border-t border-gray-100 hover:bg-yellow-50 {{ $course->IsEnabled == 0 ? 'opacity-70' : '' }}">
                                                                 <td class="px-2 py-1 text-gray-800">{{ $course->courseName }}</td>
-                                                                <td class="px-2 py-1 text-right text-gray-700">平日:¥{{ number_format($course->weekdayPrice) }}<br>
-                                                                                                                 休日:¥{{ number_format($course->weekendPrice) }}
+
+
+                                                                {{-- コース料金（UserCoursePrice）のデータを表示するセル（colspan="2"で結合） --}}
+                                                                <td colspan="2" class="px-2 py-1 text-left text-gray-700">
+                                                                    {{-- userCoursePricesリレーションをループして表示 --}}
+                                                                    @if ($course->userCoursePrices->isEmpty())
+                                                                        <span class="text-xs text-red-500 italic">料金設定がありません。</span>
+                                                                    @else
+                                                                        @foreach ($course->userCoursePrices as $price)
+                                                                            <div class="mb-1 last:mb-0">
+                                                                                <span class="font-medium text-gray-800">{{ $price->priceName }}</span>:
+                                                                                平日:¥{{ number_format($price->weekdayPrice) }} 
+                                                                                休日:¥{{ number_format($price->weekendPrice) }}
+                                                                            </div>
+                                                                        @endforeach
+                                                                    @endif
                                                                 </td>
+
+                                                                {{--
+                                                                <td class="px-2 py-1 text-right text-gray-700">
+                                                                    平日:¥{{ number_format($course->weekdayPrice) }}
+                                                                </td>
+                                                                <td class="px-2 py-1 text-right text-gray-700">
+                                                                    休日:¥{{ number_format($course->weekendPrice) }}
+                                                                </td>
+                                                                --}}
                                                                 <td class="px-2 py-1 text-center">
                                                                     @if ($course->IsEnabled == 1)
                                                                         <span class="text-green-500">〇</span>

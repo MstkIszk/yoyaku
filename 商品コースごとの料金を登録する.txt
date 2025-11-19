@@ -1,0 +1,177 @@
+商品コースごとの料金を登録する
+
+#テーブル構成は以下
+
+##ユーザー(登録店)の情報
+###モデル名 User
+###テーブル定義
+        Schema::create('users', function (Blueprint $table) {
+            $table->id();
+            $table->string('name');
+            $table->string('role')->default("");    // ロール "admin":店舗管理者、""一般ユーザー 
+            $table->string('email')->unique();
+            $table->timestamp('email_verified_at')->nullable();
+            $table->string('password');
+
+            $table->string('spName')->comment('店舗名');
+            $table->string('spNameKana')->comment('店舗名カナ');	
+            $table->string('spCode')->comment('店舗コード');      //  URLで店舗を指定する場合のコード
+            $table->string('spAddrZip')->comment('郵便番号');	        
+            $table->string('spAddrPref')->comment('県名');	
+            $table->string('spAddrCity')->comment('市町村名');	
+            $table->string('spAddrOther')->comment('地区名');	
+            $table->string('spTel1')->comment('電話番号１');
+            $table->string('spTel2')->comment('電話番号２')->default("");
+            $table->string('spEMail')->comment('メールアドレス')->default("");
+            $table->string('spURL')->comment('URL')->default("");
+            $table->integer('spResvType')->comment('予約タイプ')->default(1);	
+            $table->Text('spMsgText')->comment('連絡');
+
+            $table->rememberToken();
+            $table->timestamps();
+        });
+
+
+##ユーザー(登録店)の商品
+###モデル名 UserProduct.php
+###テーブル定義
+        //  メイン商品
+        Schema::create('user_products', function (Blueprint $table) {
+            $table->id();
+            $table->foreignId('baseCode')->comment('店舗ID');      // usersテーブルの id を参照
+            $table->foreignId('productID')->comment('商品名コード');  //  表示の並び順を指定
+            $table->string('productName')->comment('商品名');      //  対象となるサービス名など
+            $table->integer('IsEnabled')->comment('有効/無効')->default(1);       //  表示対象とするかを指定
+            $table->date('DateStart')->comment('営業開始日');      //  営業期間の指定　開始
+            $table->date('DateEnd')->comment('営業終了日');        //  　　　　　　　　終了
+            $table->time('TimeStart')->comment('開始時刻');
+            $table->time('TimeEnd')->comment('終了時刻'); 
+            $table->integer('capacity')->comment('定員')->default(0);
+            $table->integer('WeekdayPrice')->comment('平日料金')->default(0);
+            $table->integer('WeekendPrice')->comment('休日料金')->default(0);
+            $table->string('AddtionalName')->comment('その他料金名')->default("");
+            $table->integer('AddtionalPrice')->comment('その他料金')->default(0);
+            $table->integer('ResvTypeBit')->comment('予約タイプBit');   // shop_reserv_typessテーブルのRtBitを参照
+            $table->integer('WaysPayBit')->comment('支払い方法Bit');   // shop_ways_paysテーブルのPrBitを参照   
+            $table->string('memo')->comment('メモ');
+
+            $table->timestamps();
+        });
+
+##商品毎のコース名
+###モデル名 UserCourse
+###テーブル定義
+        //  商品コース
+        Schema::create('user_course', function (Blueprint $table) {
+            $table->increments('id');                //  自動加算のID
+            $table->foreignId('baseCode')->comment('店舗ID');      // usersテーブルの id を参照
+            $table->foreignId('productID')->comment('商品名ID');  //  user_productsテーブルの id を参照
+            $table->integer('courseCode')->comment('コースコード');  //  コースコード表示順
+            $table->string('courseName')->comment('コース名');       //  コース名
+            $table->integer('IsEnabled')->comment('有効/無効')->default(1);       //  表示対象とするかを指定
+            $table->integer('weekdayPrice')->comment('平日料金')->default(0);
+            $table->integer('weekendPrice')->comment('休日料金')->default(0);
+            $table->string('memo')->comment('メモ');             //  メモ書き
+            $table->timestamps();
+        });
+
+##商品毎のコースの料金体系
+###モデル名 UserCoursePrice
+###テーブル定義
+        Schema::create('user_course_price', function (Blueprint $table) {
+            $table->increments('id');                //  自動加算のID
+            $table->foreignId('baseCode')->comment('店舗ID');      // usersテーブルの id を参照
+            $table->foreignId('productID')->comment('商品名ID');  //  user_productsテーブルの id を参照
+            $table->integer('courseCode')->comment('コースコード');  //  コースコード表示順
+            $table->integer('priceCode')->comment('料金コード');  //  料金コード表示順
+            $table->string('priceName')->comment('料金名');       //  料金名
+            $table->integer('IsEnabled')->comment('有効/無効')->default(1);       //  表示対象とするかを指定
+            $table->integer('weekdayPrice')->comment('平日料金')->default(0);
+            $table->integer('weekendPrice')->comment('休日料金')->default(0);
+            $table->string('memo')->comment('メモ');             //  メモ書き
+            $table->timestamps();
+        });
+
+#リレーションにより読み込み、データの階層を作成
+
+##1.先頭のapp\Models\User.phpに対してトップ要素を読み込む
+        // 認証ユーザーの取得
+        $user = Auth::user();
+
+##2.$userの下層に User.php内の以下のリレーションで読み込む
+    public function products(): HasMany  
+    {
+        // 'baseCode' が User モデルの 'id' を参照している場合
+        return $this->hasMany(UserProduct::class, 'baseCode', 'id');
+    }
+
+##3.UserProductの下層にUserCourseへのリレーションを読み込む
+app\Models\UserProduct.php
+   // UserCourse モデルとのリレーションを追加
+    public function productCourses(): HasMany
+    {
+        return $this->hasMany(UserCourse::class, 'productID', 'productID');
+               //->where('baseCode', $this->baseCode); 
+    }
+
+
+##4.UserCourseの下層にproductCoursesPriceへのリレーションを読み込む
+app\Models\UserCourse.php
+    // UserCoursePrice モデルとのリレーションを追加
+    public function productCoursesPrice(): HasMany
+    {
+        // 外部キー('courseCode')と、親モデル（UserProduct）のキー('productID')を指定
+        return $this->hasMany(UserCoursePrice::class, 'courseCode');
+                //->where('baseCode', $this->baseCode); 
+    }
+
+
+## これらのリレーションを使い
+DashboardControllerの
+            'products' => $products,
+に渡すようにしたい。
+UserCoursePriceへのリレーションを追加するには？
+
+
+class DashboardController extends Controller
+{
+    /**
+     * ダッシュボードページを表示し、必要なデータを渡す
+     */
+    public function index()
+    {
+        // 1. 認証済みユーザー情報を取得
+        $user = Auth::user();
+
+        // 2. 認証済みユーザーのID (baseCode) に紐づく商品リストを取得
+        // UserProduct モデルに 'courses' リレーション（UserCourseへのリレーション）を追加している
+
+        $products = $user->products()
+                         ->with('allCoursesByProductId')
+                         ->orderBy('productID', 'asc')
+                         ->get();
+
+        // 3. Eager Loadingされた後のデータ（ courses ）を確認
+        if ($products->isNotEmpty()) {
+            $firstProduct = $products->first();
+            
+            // courses がロードされているか確認
+            \Log::info('Courses Count for first product: ' . $firstProduct->courses->count());
+
+            // ロードされているにも関わらず count が 0 の場合、原因は「リレーションの定義」にある（下記原因2へ）
+        }
+
+        // 3. 認証済みユーザーのID (baseCode) に紐づくアクセサリーリストを取得
+        $accessories = $user->accessories()
+                            ->orderBy('productID', 'asc') // productIDで並び替え (UserAccessoryにもproductIDがあるため)
+                            ->get();
+
+        return view('dashboard', [
+            'user' => $user,
+            'products' => $products,
+            'accessories' => $accessories, // accessories データをビューに渡す
+        ]);
+    }
+}
+
+

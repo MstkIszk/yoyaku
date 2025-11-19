@@ -722,6 +722,8 @@ class ReserveController extends Controller
                 $destDate = substr($reserveDates[$infoIx]->destDate, 8, 2);
                 if($day == $destDate) {     //  同じ日付ならば 反映して次のデータへ
                     $week[$posX]['operating'] = $reserveDates[$infoIx]->operating;
+                    $week[$posX]['stars'] = $reserveDates[$infoIx]->stars;
+                    $week[$posX]['memo'] = $reserveDates[$infoIx]->memo;
                     $infoIx++;
                 }
             } 

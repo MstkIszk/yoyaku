@@ -14,6 +14,74 @@
         $productListJson = json_encode($ProductList);
     @endphp
 
+<style>
+    .card-header {
+        /* フォント設定 */
+        /* font: inherit; は親要素からすべて継承するが、今回は明示的に設定を変更 */
+        font-weight: bold; /* 文字を太くする */
+        color: #006400; /* 濃い緑色 (DarkGreenのHEXコード) */
+        
+        /* 文字を目立たせるための追加プロパティ */
+        text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3); /* 軽い影を追加して浮き上がらせる */
+        letter-spacing: 0.5px; /* 文字間隔を少し広げて読みやすくする */
+        /* text-transform: uppercase; */ /* すべて大文字にする（必要に応じてコメント解除） */
+        font-size: 1.3em; */ /* フォントサイズを少し大きくする（必要に応じて調整） */
+    }
+    select {
+        /* styling */
+        background-color: white;
+        border: thin solid blue;
+        border-radius: 4px;
+        display: inline-block;
+        font: inherit;
+        line-height: 1.5em;
+        padding: 0.5em 3.5em 0.5em 1em;
+
+        /* reset */
+
+        margin: 0;      
+        -webkit-box-sizing: border-box;
+        -moz-box-sizing: border-box;
+        box-sizing: border-box;
+        -webkit-appearance: none;
+        -moz-appearance: none;
+    }
+
+    select.classic {
+        background-image:
+        linear-gradient(45deg, transparent 50%, blue 50%),
+        linear-gradient(135deg, blue 50%, transparent 50%),
+        linear-gradient(to right, skyblue, skyblue);
+        background-position:
+        calc(100% - 20px) calc(1em + 2px),
+        calc(100% - 15px) calc(1em + 2px),
+        100% 0;
+        background-size:
+        5px 5px,
+        5px 5px,
+        2.5em 2.5em;
+        background-repeat: no-repeat;
+    }
+
+    select.classic:focus {
+        background-image:
+        linear-gradient(45deg, white 50%, transparent 50%),
+        linear-gradient(135deg, transparent 50%, white 50%),
+        linear-gradient(to right, gray, gray);
+        background-position:
+        calc(100% - 15px) 1em,
+        calc(100% - 20px) 1em,
+        100% 0;
+        background-size:
+        5px 5px,
+        5px 5px,
+        2.5em 2.5em;
+        background-repeat: no-repeat;
+        border-color: grey;
+        outline: 0;
+    }
+  </style>
+
     <div class="py-12">
 
         @livewireStyles
@@ -21,7 +89,7 @@
         <div class="card">
             <div class="card-header" style="text-align: center;">
                 - {{ $ShopInf->spName }}：
-                <select id="productSelector" onchange="changeProduct()">
+                <select class="classic" id="productSelector" onchange="changeProduct()">
                     @foreach ($ProductList as $product)
                         <option value="{{ $product->id }}" {{ $product->id == $ProductID ? 'selected' : '' }}>
                             {{ $product->productName }}
@@ -90,6 +158,13 @@
                     const todayYY = today.getFullYear();
                     const todayMM = ('0' + (today.getMonth() + 1)).slice(-2); // 月は0から始まるため+1し、桁数を2桁に調整
                     const todayDD = ('0' + today.getDate()).slice(-2);
+
+                    @if (Auth::check() && Auth::user()->id == $ShopInf->id)
+                        const isMyPage = true;
+                    @else
+                        const isMyPage = false;
+                    @endif
+
                     // 現在選択中の商品IDを取得する関数を定義
                     function getCurrentProductID() {
                         const selector = document.getElementById('productSelector');
@@ -110,6 +185,23 @@
                         return selectedProduct ? selectedProduct.capacity : 0;
                     }
 
+                    /**
+                     * 詳細ボタンがクリックされたときに、指定の日付URLに遷移する関数
+                     * @param {HTMLInputElement} buttonElement - クリックされたボタン要素
+                     */
+                    function goToReservationDate(buttonElement,designatedDate) {
+                        // 1. 基本となるルートURLを取得
+                        // Bladeのヘルパー関数を使って、JavaScript変数としてルートを定義します。
+                        // 例: /reserve/reception
+                        const baseUrl = "{{ route('ReserveReception.index') }}"; 
+                        
+                        // 2. 遷移先の完全なURLを構築
+                        // 例: /reserve/reception/2025-11-20
+                        const destinationUrl = `${baseUrl}/${designatedDate}`;
+                        
+                        // 3. ページ遷移を実行
+                        window.location.href = destinationUrl;
+                    }
 
                     // 商品選択ドロップダウンが変更されたときの処理
                     function changeProduct() {
@@ -273,16 +365,18 @@
                                             }
 
                                             weekStr += '<div class="names">';   //  予約者リスト
-                                            if(dayInfo.totalCnt > 0) {
+                                            if(isMyPage && dayInfo.totalCnt > 0) {
                                                 //  予約者がいる場合、名前・人数とリンクを追加
                                                 var memCnt = 0;
                                                 dayInfo.member.forEach(function(member) {
                                                     if(memCnt > 0) {
                                                         weekStr += '<br>';
                                                     }
-                                                    weekStr += member.name + ':' + member.cnt;
+                                                    weekStr += member.name + '様:' + member.cnt;
                                                     memCnt++;
                                                 })
+                                                LinkDateStr = reqYM.slice(0, -3) + '-' + dayInfo.day;
+                                                weekStr += '<br><input type="button" value="詳細" onclick="goToReservationDate(this,\'' + LinkDateStr + '\')">';
                                             }
                                             else {
                                                 weekStr += "　　　　　";
@@ -291,12 +385,31 @@
                                             weekStr += '<div class="yoyaku_cnt">' + zanSeki + '</div>';
                                     
                                             if((operatingCode == 1) && (dayInfo.day > chkDD)) {   //  明日以降ならば予約ボタンを表示
-                                                weekStr += '<button class="yoyaku_button" id="Yoyaku' + dayInfo.day + 
-                                                           '" onclick="openYoyakuInput(' + dayInfo.day + ')" ';  
+                                                weekStr += '<button class="yoyaku_button'; 
+                                                if(isMyPage) {
+                                                    // 枠内右下に表示
+                                                    weekStr += ' yoyaku_button_small';
+                                                }
+                                                weekStr += '" id="Yoyaku' + dayInfo.day + 
+                                                        '" onclick="openYoyakuInput(' + dayInfo.day + ')" ';  
+
                                                 if(zanSeki <= 0) {
                                                     weekStr += 'disabled';
                                                 }
                                                 weekStr += '>予約</button>';  
+                                            }
+                                            else {
+                                                weekStr += '<span class="cyouka_view">';
+
+                                                if(dayInfo.stars !== undefined && dayInfo.stars > 0) {
+                                                    weekStr += '<div class="cyouka_stars">' + '★'.repeat(dayInfo.stars) + '</div>';
+                                                }
+                                                
+                                                if(dayInfo.memo !== undefined && dayInfo.memo.length > 0) {
+                                                    const formattedMemo = dayInfo.memo.replace(/\r?\n/g, '<br>');
+                                                    weekStr += '<div class="cyouka_memo">' + formattedMemo + '</div>';
+                                                }
+                                                weekStr += '</span>';
                                             }
                                         }
 
@@ -383,21 +496,33 @@
                             <input type="hidden" id="eigyotype" value="1">  <!-- 目的コード 1:ワカサギ -->
                             <input type="hidden" id="destDate">
                             <div class="modal-header" id="modal-header">
-                                <label id="dateCaption" writingsuggestions="true">Great job 🎉</label>
+                                <label id="dateCaption"  writingsuggestions="true">Great job 🎉</label>
                                 <span class="modalClose" onclick="modalClose()">×</span>
                             </div>
                             <div class="modal-body">
-                                営業状態：<select id="operating">
-                                @foreach ( \App\Models\ReserveDate::GetOperating() as $item) 
-                                    <option value="{{ $item[0] }}">{{ $item[1] }}</option>
-                                @endforeach
+                                <table class="modal-table">
+                                <tr><td>営業状態：</td><td><select id="operating">
+                                    @foreach ( \App\Models\ReserveDate::GetOperating() as $item) 
+                                        <option value="{{ $item[0] }}">{{ $item[1] }}</option>
+                                    @endforeach
+                                    </select>
+                                </td></tr>
+                                <tr><td>予約可能枠：</td>
+                                    <td><input type="number" class="count" min="1" max="25" step="1" id="capacity">人
+                                </td></tr>
+                                <tr><td>予約済人数：</td>
+                                    <td><input type="number" class="count" min="0" max="25" step="1" id="yoyakusu">人
+                                </td></tr>
+                                <tr><td>Stars(★):</td><td><select id="stars">
+                                @for($lv=0;$lv<6;$lv++) 
+                                    <option value="{{ $lv }}">{{ $lv }}</option>
+                                @endfor
                                 </select>
-                                <br>
-                                予約可能枠：<input type="number" min="1" max="20" step="1" id="capacity"><br>
-                                予約済人数：<input type="number" min="0" max="20" step="1" id="yoyakusu"><br>
-                                メモ：<textarea id="memo"> </textarea>
-                                <hr>
-                                <button class="mt-4" id="applysts" onclick="writeDateInfo()">適用</button>
+                                </td></tr>
+                                <tr><td>メモ：</td><td><textarea id="memo"> </textarea>
+                                </td></tr>
+                                </table>
+                                <button class="register-button" id="applysts" onclick="writeDateInfo()">適用</button>
                             </div>
                         </div>
                     </div>
@@ -410,7 +535,7 @@
                             //  対象日付の表示
                             reqDate = CurrYM.substr(0, 7) + '-' +  ('00' + strDate).slice(-2);
                             headDiv = document.getElementById('dateCaption');
-                            headDiv.textContent = reqDate;
+                            headDiv.textContent = "対象日　" + reqDate;
                             document.getElementById('destDate').value = reqDate;
 
                             //  指定日の情報を読み取り
@@ -421,7 +546,7 @@
                                 data: {
                                     type      : '1',
                                     baseCode  : Number({{ $ShopInf->id }}),
-                                    productID : Number( currentProductID ),
+                                    productID : Number( getCurrentProductID() ),
                                     eigyotype : '1',
                                     destDate  : reqDate,
                                 },
@@ -434,6 +559,7 @@
                                     document.getElementById('operating').value = response.operating;
                                     document.getElementById('capacity').value   = response.capacity;
                                     document.getElementById('yoyakusu').value   = response.yoyakusu;
+                                    document.getElementById('stars').value      = response.stars;
                                     document.getElementById('memo').value       = response.memo;
                                 },
                                 error: function(error) {
@@ -448,12 +574,13 @@
                             const data = {
                                 id: document.getElementById('id').value,
                                 baseCode: {{ $ShopInf->id }},
-                                productID: currentProductID,
+                                productID: getCurrentProductID(),
                                 eigyotype: document.getElementById('eigyotype').value,
                                 destDate: document.getElementById('destDate').value,
                                 operating: document.getElementById('operating').value,
                                 capacity: document.getElementById('capacity').value,
                                 yoyakusu: document.getElementById('yoyakusu').value,
+                                stars: document.getElementById('stars').value,
                                 memo: document.getElementById('memo').value
                             };
                             $.ajax({

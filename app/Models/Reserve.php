@@ -5,6 +5,8 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use App\Models\UserCourse;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Reserve extends Model
 {
@@ -91,4 +93,41 @@ class Reserve extends Model
         'complete'  => 1, //  受付後、メール確認済
         'cancel'    => 9, //  キャンセル済
     ];
+
+    /**
+     * この予約が属するコース情報を取得します。
+     * UserCourse モデルとの BelongsTo リレーションを定義します。
+     * * @return BelongsTo
+     */
+    public function course(): BelongsTo
+    {
+        // 外部キー 'Courseid' を使って UserCourse モデルに接続
+        return $this->belongsTo(UserCourse::class, 'Courseid', 'id');
+    }    
+
+    // Reserveモデル内
+    public function user(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'Baseid', 'id');
+    }    
+    public function product(): BelongsTo
+    {
+        return $this->belongsTo(UserProduct::class, 'productID', 'id');
+    }    
+
+    public function accessories(): HasMany
+    {
+        // テンプレート
+        //$this->hasMany(
+        //    関連モデル::class,          // 1. 子モデルのクラス
+        //    '子のテーブル(UserAccessory)にある外部キー', // 2. 子モデルの外部キー (親のIDを保持しているカラム)
+        //    '親のテーブル(reserves)にあるローカルキー' // 3. 親モデルがリレーションに使うキー (通常は 'id')
+        //);
+
+
+        $HasMany = $this->hasMany(UserAccessory::class, 'baseCode', 'Baseid');
+
+        // 'baseCode' が UserAccessory モデルの 'id' を参照している場合
+        return $HasMany;
+    }    
 }

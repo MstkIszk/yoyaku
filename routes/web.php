@@ -12,6 +12,7 @@ use App\Http\Controllers\UserProductController;
 use App\Http\Controllers\ReserveReceptionController;
 use App\Http\Controllers\UserAccessoryController;
 use App\Http\Controllers\UserCourseController;
+use App\Http\Controllers\UserCoursePriceController;
 use App\Http\Controllers\DashboardController;
 
 /*
@@ -65,40 +66,51 @@ Route::middleware('auth')->group(function () {
 //------------------------------------------------------------
 //◆◆◆◆◆◆◆◆◆◆◆  店舗別画面  ◆◆◆◆◆◆◆◆◆◆◆◆◆◆
 //------------------------------------------------------------
-//  店舗登録画面
-Route::get('reservebase/create', [ReserveBaseController::class,'create'])->name('reservebase.create');
-//  店舗の書き込み
-Route::post('reservebase/post', [ReserveBaseController::class,'store'])->name('reservbae.store');
-//  店舗の編集
-Route::get('reservebase/edit/{ReserveBase}', [ReserveBaseController::class,'edit'])->name('reservebase.edit');
-//  商品の登録
-Route::get('/user_products/create', [UserProductController::class, 'create'])->name('user_products.create');
+Route::middleware('auth')->group(function () {
+        //  店舗登録画面
+    Route::get('reservebase/create', [ReserveBaseController::class,'create'])->name('reservebase.create');
+    //  店舗の書き込み
+    Route::post('reservebase/post', [ReserveBaseController::class,'store'])->name('reservbae.store');
+    //  店舗の編集
+    Route::get('reservebase/edit/{ReserveBase}', [ReserveBaseController::class,'edit'])->name('reservebase.edit');
+    //  商品の登録
+    Route::get('/user_products/create', [UserProductController::class, 'create'])->name('user_products.create');
 
-//  店舗カレンダー
-//Route::get('/shopcalender', [ReserveReceptionController::class, 'create'])->name('user_products.create');
-//  日付別予約表示
-//Route::get('/dayinfo/{reqdate?}', [ReserveReceptionController::class, 'create'])->name('user_products.create');
+    //  店舗カレンダー
+    //Route::get('/shopcalender', [ReserveReceptionController::class, 'create'])->name('user_products.create');
+
+    //  日付別予約表示
+    Route::get('/dayinfo/{reqdate?}', [ReserveReceptionController::class, 'index'])->name('ReserveReception.index');
+    Route::post('/api/reservations/list', [ReserveReceptionController::class, 'getReservationsForProduct'])->name('api.reservations.list');
+    //  予約の受付画面
+    Route::get('/reception/{reservid?}', [ReserveReceptionController::class, 'create'])->name('ReserveReception.create');
+    Route::post('/reception', [ReserveReceptionController::class, 'store'])->name('ReserveReception.store');
+    Route::get('/reception/show/{reservid}', [ReserveReceptionController::class, 'show'])->name('ReserveReception.show');
+    Route::get('/reception/topdf/{reservid}', [ReserveReceptionController::class, 'topdf'])->name('ReserveReception.topdf');
+
+    //  付属商品の登録
+    Route::get('/user_accessories/create', [UserAccessoryController::class, 'create'])->name('user_accesories.create');
+    Route::post('/user_accessories/post', [UserAccessoryController::class, 'store'])->name('user_accesories.store');
 
 
-//  付属商品の登録
-Route::get('/user_accessories/create', [UserAccessoryController::class, 'create'])->name('user_accesories.create');
-Route::post('/user_accessories/post', [UserAccessoryController::class, 'store'])->name('user_accesories.store');
+    Route::post('/user_products', [UserProductController::class, 'store'])->name('user_products.store');
 
+    //  商品の編集
+    Route::get('/user_products/{product}/edit', [UserProductController::class, 'edit'])->name('user_products.edit');
+    //  付属商品の編集
+    Route::get('/user_products/{product}/edit', [UserProductController::class, 'edit'])->name('user_products.edit');
 
-Route::post('/user_products', [UserProductController::class, 'store'])->name('user_products.store');
+    // ★ 商品の編集結果保存 (PUT/PATCH /user_products/{product})
+    Route::put('/user_products/{product}', [UserProductController::class, 'update'])->name('user_products.update');
 
-//  商品の編集
-Route::get('/user_products/{product}/edit', [UserProductController::class, 'edit'])->name('user_products.edit');
-//  付属商品の編集
-Route::get('/user_products/{product}/edit', [UserProductController::class, 'edit'])->name('user_products.edit');
+    //  コースの編集
+    Route::get('/user_courses/{product_id}', [UserCourseController::class, 'create'])->name('user_courses.create');
+    Route::post('/user_courses', [UserCourseController::class, 'store'])->name('user_courses.store');
 
-// ★ 商品の編集結果保存 (PUT/PATCH /user_products/{product})
-Route::put('/user_products/{product}', [UserProductController::class, 'update'])->name('user_products.update');
-
-//  コースの編集
-Route::get('/user_courses/{product_id}', [UserCourseController::class, 'create'])->name('user_courses.create');
-Route::post('/user_courses', [UserCourseController::class, 'store'])->name('user_courses.store');
-
+    //  コース料金設定の編集
+    Route::get('/user_courses_price/{course_id}', [UserCoursePriceController::class, 'create'])->name('UserCoursePrice.create');
+    Route::post('/user_courses_price', [UserCoursePriceController::class, 'store'])->name('UserCoursePrice.store');
+});
 
 
 //------------------------------------------------------------

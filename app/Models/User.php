@@ -15,6 +15,8 @@ class User extends Authenticatable
 {
     use HasApiTokens, HasFactory, Notifiable;
 
+    protected $primaryKey = 'id'; // Reserve.Baseid が参照するキー
+    
     /**
      * The attributes that are mass assignable.
      *

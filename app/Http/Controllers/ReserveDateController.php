@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Models\ReserveDate;
 use Illuminate\Http\Request;
+use App\Models\UserProduct;
+
 
 class ReserveDateController extends Controller
 {
@@ -35,6 +37,7 @@ class ReserveDateController extends Controller
                 'operating' =>  $request->operating,
                 'capacity'  =>  $request->capacity,
                 'yoyakusu'  =>  $request->yoyakusu,
+                'stars'     =>  $request->stars,
                 'memo'      =>  $request->memo
             ]);
 
@@ -49,6 +52,8 @@ class ReserveDateController extends Controller
 
         //$dcnt = count($reservations);
         $destDate = $request->destDate . " 00:00:00";
+        $products = UserProduct::find($request->productID);
+
         //  ディフォルトとなる値を読み込み
         $json_string = '{
                         "id":-1,
@@ -56,9 +61,10 @@ class ReserveDateController extends Controller
                         "productID": "' . $request->productID . '",
                         "eigyotype": "' . $request->eigyotype . '",
                         "destDate": "' . $request->destDate . '",
-                        "operating": 0,
-                        "capacity": 15, 
+                        "operating": 1,
+                        "capacity": "' . $products->capacity . '", 
                         "yoyakusu": 0, 
+                        "stars": 0, 
                         "memo": ""
                         }';
         $data = json_decode($json_string, true);
@@ -77,6 +83,7 @@ class ReserveDateController extends Controller
             $data['operating'] = $reservations->operating;      
             $data['capacity'] = $reservations->capacity;
             $data['yoyakusu'] = $reservations->yoyakusu;
+            $data['stars'] = $reservations->stars;
             $data['memo'] = $reservations->memo;
         }
 
@@ -93,6 +100,7 @@ class ReserveDateController extends Controller
             'operating'  => $request->operating,
             'capacity'   => $request->capacity,
             'yoyakusu'   => $request->yoyakusu,
+            'stars'      => $request->stars,
             'memo'       => $request->memo, // memo が存在する場合
         ];
         $status = 0;
