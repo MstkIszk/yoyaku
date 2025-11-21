@@ -7,6 +7,11 @@
     </x-slot>
 
     <style>
+    .prise-new-req {
+        margin 4px;
+        font-size: 1.2rem;
+        color: blue;
+    }    
     .prise-edit-button {
         /* 1. margin-leftの追加 */
         margin-left: 2px;
@@ -33,7 +38,7 @@
 
     <div class="py-12">
         {{-- コントロールパネルのファイル入出力機能 (仮に予約コース用として表示) --}}
-        <x-controltemfileio nameitem="shopname" extension=".course"></x-controltemfileio>
+        <x-controltemfileio nameitem="shopAndproduct" extension=".course"></x-controltemfileio>
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
             <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
                 <div class="p-6 bg-white border-b border-gray-200">
@@ -47,10 +52,11 @@
 
                         {{-- 必須の隠しフィールド --}}
                         <input type="text" name="basecode" value="{{ $user->id }}" style="display: none;">
-                        <input type="text" name="productID" value="{{ $product->productID }}" style="display: none;">
+                        <input type="text" name="destProductID" value="{{ $productID }}" {{-- style="display: none;" --}}>
                         <input type="text" name="shopname" value="{{ $user->spName }}" style="display: none;">
+                        <input type="text" name="shopAndproduct" value="{{ $user->spName }}ー{{ $product->productName }}" style="display: none;">
 
-                        {{-- エラーメッセージ表示 --}}
+                        {{-- エラーメッセージ表示
                         @if ($errors->any())
                             <div class="mb-4 p-4 bg-red-100 border border-red-400 text-red-700 rounded-lg">
                                 <ul>
@@ -60,6 +66,7 @@
                                 </ul>
                             </div>
                         @endif
+                         --}}
 
                         <div class="overflow-x-auto">
                             <table id="course-table" class="list_table min-w-full divide-y divide-gray-200">
@@ -70,7 +77,7 @@
                                         <th class="txtWidth_11 text-right">{{ __('平日料金') }}／{{ __('休日料金') }}
                                             <span class="text-red-500">*</span>
                                         </th>
-                                        <th class="txtWidth_3 text-center">{{ __('有効') }}</th>
+                                        <th class="txtWidth_2 text-center">{{ __('有効') }}</th>
                                         <th class="txtWidth_auto text-left">{{ __('メモ') }}</th>
                                         <th class="txtWidth_3 text-center">{{ __('順序') }}</th>
                                     </tr>
@@ -104,12 +111,34 @@
                                         </td>
                                         {{-- 平日料金 休日料金 --}}
                                         <td class="price_group">
+                                            {{-- ★ UserCoursePrice のデータをループで表示する部分 --}}
+                                            <div class="text-xs text-left w-full mt-2 space-y-1">
+                                                {{-- コントローラで UserCoursePrice リレーションが使われているので 配列名もリレーション関数名となる --}}
+                                                @forelse ($course->userCoursePrices as $priceItem)
+                                                    <div class="p-1 border-b border-gray-100 last:border-b-0">
+                                                        {{-- priceNameを表示 --}}
+                                                        <p class="font-semibold text-gray-800">{{ $priceItem->priceName ?? __('料金プラン') }}</p>
+                                                        <p class="text-gray-600">
+                                                            {{-- 平日料金をカンマ区切りで表示 --}}
+                                                            {{ __('平') }} ￥{{ number_format($priceItem->weekdayPrice ?? 0) }} 
+                                                            <span class="text-gray-400">／</span>
+                                                            {{-- 休日料金をカンマ区切りで表示 --}}
+                                                            {{ __('休') }} ￥{{ number_format($priceItem->weekendPrice ?? 0) }}
+                                                        </p>
+                                                    </div>
+                                                @empty
+                                                    <div class="p-1 text-red-500">
+                                                        {{ __('料金情報がありません') }}
+                                                    </div>
+                                                @endforelse
+
+
                                             {{-- 平日料金 --}}
-                                            <input type="number" name="courses[{{ $index }}][weekdayPrice]" 
+                                            <input type="hidden" name="courses[{{ $index }}][weekdayPrice]" 
                                                     value="{{ old('courses.' . $index . '.weekdayPrice', $course->weekdayPrice) }}"
-                                                    class="innerText ryokin" placeholder="0" min="0" step="1" required>／
+                                                    class="innerText ryokin" placeholder="0" min="0" step="1" required>
                                             {{-- 休日料金 --}}
-                                            <input type="number" name="courses[{{ $index }}][weekendPrice]" 
+                                            <input type="hidden" name="courses[{{ $index }}][weekendPrice]" 
                                                     value="{{ old('courses.' . $index . '.weekendPrice', $course->weekendPrice) }}"
                                                     class="innerText ryokin" placeholder="0" min="0" step="1" required>
 
@@ -156,7 +185,7 @@
                                     @endforeach
 
                                     {{-- 初期表示の空行 --}}
-                                    @for ($i = $existingCourses->count(); $i < $totalRows; $i++)
+                                    @for ( $i = $existingCourses->count() ; $i < $totalRows; $i++)
                                     <tr class="hover:bg-yellow-50">
                                         {{-- ID/courseCode --}}
                                         <td class="py-1 px-2 whitespace-nowrap text-xs text-gray-900 text-center seqNo">
@@ -171,12 +200,13 @@
                                                     placeholder="{{ __('コース名') }}">
                                         </td>
                                         <td class="price_group">
+                                            <div class="prise-new-req">料金は保存後に登録</div>
                                             {{-- 平日料金 --}}
-                                            <input type="number" name="courses[{{ $i }}][weekdayPrice]" 
+                                            <input type="hidden" name="courses[{{ $i }}][weekdayPrice]" 
                                                     value="{{ old('courses.' . $i . '.weekdayPrice') }}"
-                                                    class="innerText ryokin" placeholder="0" min="0" step="1">／
+                                                    class="innerText ryokin" placeholder="0" min="0" step="1">
                                             {{-- 休日料金 --}}
-                                            <input type="number" name="courses[{{ $i }}][weekendPrice]" 
+                                            <input type="hidden" name="courses[{{ $i }}][weekendPrice]" 
                                                     value="{{ old('courses.' . $i . '.weekendPrice') }}"
                                                     class="innerText ryokin" placeholder="0" min="0" step="1">
                                         </td>
@@ -360,10 +390,11 @@
                                 placeholder="{{ __('コース名') }}">
                     </td>
                     <td class="price_group">
-                        <input type="number" name="courses[${index}][weekdayPrice]" 
+                        <div class="prise-new-req">料金は保存後に登録</div>
+                        <input type="hidden" name="courses[${index}][weekdayPrice]" 
                                 class="innerText ryokin" 
-                                placeholder="0" min="0" step="1">／
-                        <input type="number" name="courses[${index}][weekendPrice]" 
+                                placeholder="0" min="0" step="1">
+                        <input type="hidden" name="courses[${index}][weekendPrice]" 
                                 class="innerText ryokin" 
                                 placeholder="0" min="0" step="1">
                     </td>

@@ -30,7 +30,7 @@ class DashboardController extends Controller
 
         $products = $user->products()
                          ->with([
-                            'allCoursesByProductId' => function ($query) {
+                            'productCourses' => function ($query) {
                                 // allCoursesByProductId（Courseモデル）から userCoursePrices をロード
                                 $query->with('userCoursePrices'); 
                             }

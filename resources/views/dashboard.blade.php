@@ -100,7 +100,7 @@
                                     <tr>
                                         {{-- 2行目: 予約コース情報 --}}
                                         <td colspan="5" class="px-3 py-1 border-t border-dashed border-gray-200 bg-gray-50">
-                                            @if ($product->courses->isEmpty())
+                                            @if ($product->productCourses->isEmpty())
                                                 <p class="text-xs text-gray-500 italic">コースが登録されていません。</p>
                                             @else
                                                 <table class="min-w-full text-xs bg-white border border-gray-200 rounded-lg">
@@ -113,8 +113,10 @@
                                                         </tr>
                                                     </thead>
                                                     <tbody>
-                                                        @foreach ($product->courses as $course)
-                                                            <tr class="border-t border-gray-100 hover:bg-yellow-50 {{ $course->IsEnabled == 0 ? 'opacity-70' : '' }}">
+                                                    
+                                                    {{-- @foreach ($product->courses as $course) --}}
+                                                    @foreach ($product->productCourses as $course)
+                                                        <tr class="border-t border-gray-100 hover:bg-yellow-50 {{ $course->IsEnabled == 0 ? 'opacity-70' : '' }}">
                                                                 <td class="px-2 py-1 text-gray-800">{{ $course->courseName }}</td>
 
 
@@ -156,8 +158,8 @@
                                             @endif
                                         </td>
                                         <td class="px-3 py-1 whitespace-nowrap text-right text-sm font-medium border-t border-dashed border-gray-200 bg-gray-50">
-                                            {{-- UserCourseController::create に productID を渡す --}}
-                                            <a href="{{ route('user_courses.create', ['product_id' => $product->productID]) }}" class="link-button table-link-button bg-yellow-500 hover:bg-yellow-600">
+                                            {{-- UserCourseController::create に $product->id を渡す --}}
+                                            <a href="{{ route('user_courses.create', ['product_id' => $product->id]) }}" class="link-button table-link-button bg-yellow-500 hover:bg-yellow-600">
                                                 コース編集
                                             </a>
                                         </td>

@@ -382,6 +382,7 @@
   text-align: center;
 }
 .list_table  .price_group{
+  /*display: none;*/
   width: 12rem;
   text-align: center;
 }
@@ -406,7 +407,7 @@
 }
 
 .list_table  .status{
-  width: 4rem;
+  width: 3rem;
   text-align: center;
 }
 

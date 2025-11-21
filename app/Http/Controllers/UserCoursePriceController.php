@@ -41,9 +41,7 @@ class UserCoursePriceController extends Controller
         // 2. 関連する UserCoursePrice の取得 (既存データ)
         // UserCourse の ID (courseID) が UserCoursePrice の productID または courseCode に関連付けられていると仮定
         // 今回のテーブル定義では UserCoursePrice の productID が UserCourse の ID に対応すると仮定します。
-        $userCoursePrices = UserCoursePrice::where('baseCode', $user->id)
-                                            ->where('productID', $userCourse->id)
-                                            ->orderBy('courseCode')
+        $userCoursePrices = UserCoursePrice::where('courseCode', $courseID)
                                             ->orderBy('priceCode')
                                             ->get();
 

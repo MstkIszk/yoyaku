@@ -53,13 +53,7 @@ class UserProduct extends Model
     // UserCourse モデルとのリレーションを追加
     public function productCourses(): HasMany
     {
-        return $this->hasMany(UserCourse::class, 'productID', 'productID');
+        return $this->hasMany(UserCourse::class, 'productID');
                //->where('baseCode', $this->baseCode); 
-    }
-    
-    
-    public function allCoursesByProductId(): HasMany
-    {
-        return $this->hasMany(UserCourse::class, 'productID', 'productID');
     }
 }

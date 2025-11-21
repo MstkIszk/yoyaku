@@ -158,8 +158,8 @@ class ReserveReceptionController extends Controller
             'product' => function ($query) {
                 $query->select('productID', 'productName'); // productNameのみを取得する前提
             },
-            // 予約されたコース (UserCourse)
-            'course',
+            // 予約されたコース (UserCourse) と、それに紐づく料金情報 (UserCoursePrice) も合わせて取得
+            'course.userCoursePrices', 
             // オプション商品 (UserAccessory) - BaseidをbaseCodeとして使用
             'accessories' => function ($query) {
                 $query->where('IsEnabled', '!=', 0)

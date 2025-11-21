@@ -81,8 +81,8 @@ class UserCourse extends Model
     {
         // 外部キー('courseCode')と、親モデル（UserProduct）のキー('productID')を指定
 
-        // 外部キー: UserCoursePriceテーブルの 'courseCode'
-        // ローカルキー: UserCourseテーブルの 'courseCode'
+        // foreignKey(外部キー): UserCoursePriceテーブルの 'courseCode'
+        // localKey(ローカルキー): UserCourseテーブルの 'courseCode'
         // baseCodeとproductIDも一致させるべきですが、ここではcourseCodeのみでシンプルに定義します。
         // （ただし、異なる商品で同じ courseCode を使用している場合は問題が発生する可能性があります）
         return $this->hasMany(UserCoursePrice::class, 'courseCode');

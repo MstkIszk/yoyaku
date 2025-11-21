@@ -49,33 +49,62 @@
                 </tr>
             </thead>
             <tbody>
-                <!-- 1. コース商品 -->
+
+                {{-- コース名を表示 (グループヘッダーとして利用) --}}
+                @if ($reserve->course)
+                <tr>
+                    <td colspan="4" class="bg-indigo-100 font-bold text-indigo-800">
+                        コース: {{ $reserve->course->courseName ?? 'コース不明' }}
+                    </td>
+                </tr>
+                @endif
+
+                {{-- 1. コースに紐づく料金設定をループで表示 --}}
                 @php
                     // 予約人数をデフォルト数量とする
                     $defaultCourseCount = $reserve->CliResvCnt;
+                    // itemのインデックスを管理するためのカウンター
+                    $itemIndex = 0; 
                 @endphp
-                <tr data-type="1" data-id="{{ $reserve->Courseid }}" data-price="{{ $coursePrice }}">
-                    <td>
-                        <span class="font-bold text-indigo-700">{{ $reserve->course->courseName ?? 'コース不明' }}</span>
-                        <p class="text-xs text-gray-500">{{ $reserve->course->memo ?? '' }}</p>
-                    </td>
-                    <td class="text-right price-value">{{ number_format($coursePrice) }}</td>
-                    <td class="text-center">
-                        <div class="flex items-center justify-center space-x-2">
-                            <button type="button" class="quantity-btn minus-btn bg-red-100 text-red-600 rounded-full w-6 h-6 leading-none">-</button>
-                            <input type="number" name="items[0][count]" class="count-input w-12 text-center border rounded-md" 
-                                value="{{ $defaultCourseCount }}" min="0" required data-index="0">
-                            <button type="button" class="quantity-btn plus-btn bg-green-100 text-green-600 rounded-full w-6 h-6 leading-none">+</button>
-                        </div>
-                        <input type="hidden" name="items[0][payType]" value="1">
-                        <input type="hidden" name="items[0][index]" value="{{ $reserve->Courseid }}">
-                        <input type="hidden" name="items[0][price]" value="{{ $coursePrice }}" class="input-price">
-                        <input type="hidden" name="items[0][memo]" value="{{ $reserve->course->memo ?? '' }}">
-                    </td>
-                    <td class="text-right subtotal-value">
-                        {{ number_format($coursePrice * $defaultCourseCount) }}
-                    </td>
-                </tr>
+
+                @forelse ($reserve->course->userCoursePrices as $price)
+                    @php
+                        // 当日の曜日によって price を決定
+                        $currentPrice = $isWeekend ? $price->weekendPrice : $price->weekdayPrice;
+                        // コースの最初の料金設定のみに予約人数をデフォルトセット
+                        $currentCount = ($itemIndex === 0) ? $defaultCourseCount : 0; 
+                    @endphp
+                    <tr data-type="1" data-id="{{ $price->courseCode }}_{{ $price->priceCode }}" data-price="{{ $currentPrice }}">
+                        <td>
+                            {{-- 料金名を表示 --}}
+                            <span class="font-bold text-indigo-700 ml-4">{{ $price->priceName ?? '料金不明' }}</span>
+                            <p class="text-xs text-gray-500 ml-4">{{ $price->memo ?? '' }}</p>
+                        </td>
+                        <td class="text-right price-value">{{ number_format($currentPrice) }}</td>
+                        <td class="text-center">
+                            <div class="flex items-center justify-center space-x-2">
+                                <button type="button" class="quantity-btn minus-btn bg-red-100 text-red-600 rounded-full w-6 h-6 leading-none">-</button>
+                                <input type="number" name="items[{{ $itemIndex }}][count]" class="count-input w-12 text-center border rounded-md" 
+                                    value="{{ $currentCount }}" min="0" required data-index="{{ $itemIndex }}">
+                                <button type="button" class="quantity-btn plus-btn bg-green-100 text-green-600 rounded-full w-6 h-6 leading-none">+</button>
+                            </div>
+                            <input type="hidden" name="items[{{ $itemIndex }}][payType]" value="1">
+                            <input type="hidden" name="items[{{ $itemIndex }}][index]" value="{{ $price->id }}"> {{-- price IDを送信 --}}
+                            <input type="hidden" name="items[{{ $itemIndex }}][price]" value="{{ $currentPrice }}" class="input-price">
+                            <input type="hidden" name="items[{{ $itemIndex }}][memo]" value="{{ $price->priceName ?? '' }}">
+                        </td>
+                        <td class="text-right subtotal-value">
+                            {{ number_format($currentPrice * $currentCount) }}
+                        </td>
+                    </tr>
+                    @php
+                        $itemIndex++;
+                    @endphp
+                @empty
+                    <tr>
+                        <td colspan="4" class="text-center text-red-500">コースの料金設定が見つかりませんでした。</td>
+                    </tr>
+                @endforelse
 
                 <!-- 2. オプション商品 -->
                 @foreach ($reserve->accessories as $index => $accessory)
@@ -133,18 +162,27 @@
             
             // 各行の処理
             table.querySelectorAll('tbody tr').forEach(row => {
+                // コース名グループヘッダー行はスキップ
+                if (row.querySelector('td[colspan="4"]')) {
+                    return;
+                }
+
                 const countInput = row.querySelector('.count-input');
+                // data-price属性から単価を取得
                 const priceValue = parseInt(row.dataset.price);
                 const subtotalElement = row.querySelector('.subtotal-value');
                 
-                const count = parseInt(countInput.value) || 0;
+                // 数量が取得できない場合は 0
+                const count = parseInt(countInput ? countInput.value : 0) || 0;
 
                 // 小計計算
                 const subtotal = priceValue * count;
                 grandTotal += subtotal;
 
                 // 小計表示の更新
-                subtotalElement.textContent = subtotal.toLocaleString('ja-JP');
+                if (subtotalElement) {
+                   subtotalElement.textContent = subtotal.toLocaleString('ja-JP');
+                }
             });
 
             // 合計金額表示の更新
@@ -165,7 +203,7 @@
             });
             input.addEventListener('input', (e) => {
                  // リアルタイムで入力値が変化した場合も計算
-                calculateTotal();
+                 calculateTotal();
             });
         });
 
@@ -177,6 +215,9 @@
                 // クリックされたボタンから最も近い行を取得
                 const row = e.target.closest('tr');
                 const countInput = row.querySelector('.count-input');
+
+                if (!countInput) return; // 数量入力がない行（例: コース名行）はスキップ
+
                 let count = parseInt(countInput.value) || 0;
 
                 if (e.target.classList.contains('plus-btn')) {
@@ -194,11 +235,10 @@
         calculateTotal();
 
         /**
-         * フォーム送信時の処理（数量が0の場合の項目を除外するなどの処理は、サーバー側で対応済み）
+         * フォーム送信時の処理
          */
         document.getElementById('receptionForm').addEventListener('submit', function(e) {
             // クライアント側で最終チェックが必要な場合はここに追加
-            // 例: 合計が0円でないか、など
         });
     });
 </script>

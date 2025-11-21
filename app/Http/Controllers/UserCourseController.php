@@ -33,8 +33,8 @@ class UserCourseController extends Controller
 
         // 指定された productID に紐づく既存のコースを取得
         // baseCode（店舗ID）も合わせてフィルタリングすることで、他の店舗のデータにアクセスするのを防ぎます。
-        $courses = UserCourse::where('baseCode', $user->id)
-            ->where('productID', $productID)
+        $courses = UserCourse::where('productID', $productID)
+            ->with('userCoursePrices') // ★ UserCoursePriceリレーションを読み込みます
             ->orderBy('courseCode') // 表示順（courseCode）でソート
             ->get();
         
@@ -56,7 +56,7 @@ class UserCourseController extends Controller
         
         // フォームから送信されたコースデータ（配列の配列）
         $coursesData = $request->input('courses', []);
-        $productID = $request->input('productID'); // フォームの隠しフィールドから productID を取得
+        $productID = $request->input('destProductID'); // フォームの隠しフィールドから productID を取得
         $coursesToSave = [];
 
         // productIDが必須

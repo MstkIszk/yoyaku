@@ -8,18 +8,6 @@
     <div class="container mx-auto px-4 py-8">
         <x-controltemfileio nameitem="courseName" extension=".pryokin"></x-controltemfileio>
 
-        {{-- エラーメッセージの表示 --}}
-        @if ($errors->any())
-            <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4" role="alert">
-                <strong class="font-bold">エラーが発生しました:</strong>
-                <ul>
-                    @foreach ($errors->all() as $error)
-                        <li>{{ $error }}</li>
-                    @endforeach
-                </ul>
-            </div>
-        @endif
-
         <form action="{{ route('UserCoursePrice.store') }}" method="POST">
             @csrf
 
@@ -68,15 +56,11 @@
                                 {{ $price->id ?? '-' }}
                             </td>
                             <td class="seqNo">
-                                <input type="number" name="prices[{{ $index }}][courseCode]" value="{{ $price->courseCode ?? 0 }}" 
-                                    class="innerLabel txtWidth_2 text-center" placeholder="表示順">
-                            </td>
-                            <td class="seqNo">
                                 <input type="number" name="prices[{{ $index }}][priceCode]" value="{{ $price->priceCode ?? 0 }}" 
                                     class="innerLabel txtWidth_2 text-center" placeholder="表示順">
                             </td>
                             <td class="product">
-                                <input type="text" name="prices[{{ $index }}][priceName]" value="{{ $price->courseName ?? '' }}" 
+                                <input type="text" name="prices[{{ $index }}][priceName]" value="{{ $price->priceName ?? '' }}" 
                                     class="innerText txtWidth_90pc" placeholder="料金名">
                             </td>
                             <td class="ryokin">
@@ -119,10 +103,6 @@
                             <td class="seqNo">
                                 <input type="number" name="prices[{{ $index }}][id]" value=""
                                     class="innerLabel txtWidth_2 text-center">
-                            </td>
-                            <td class="seqNo">
-                                <input type="number" name="prices[{{ $index }}][courseCode]" value="" 
-                                    class="innerLabel txtWidth_2 text-center" placeholder="表示順">
                             </td>
                             <td class="seqNo">
                                 <input type="number" name="prices[{{ $index }}][priceCode]" value="{{ $priceCodeIx }}0" 
