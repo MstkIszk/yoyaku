@@ -38,7 +38,7 @@ a {
     text-align: center;
 }
 .calender {
-    padding:10px;
+    padding:4px;
     font-size:1.2rem;
     width: 100%; /* 追加: 親要素の幅いっぱいに広げる */
     table-layout: fixed; /* 追加: 列幅を固定してレスポンシブ時の崩れを防ぐ */            
@@ -61,8 +61,8 @@ a {
 }
 @media (max-width: 780px) {
     .calender {
-        padding:4px;
-        font-size:1.0rem;
+        padding:0px;
+        font-size:0.8rem;
     }
     .calender th {
         height: 20px;
@@ -114,12 +114,17 @@ a {
     margin-bottom:2px;
 }
 @media (max-width: 780px) {
+    .calender .area {
+        grid-gap: 1px;
+        padding: 0px 1px 0px 1px;
+    }
     .calender .day {
-        width: 2rem;
+        width: 1.6rem;
         font-size:0.8rem;
     }
     .calender .dayname {
-        font-size:0.7rem;
+        font-size:0.5rem;
+        margin-bottom:0px;
     }
 }
 .calender .day_today {
@@ -140,6 +145,10 @@ a {
     font-size:0.8rem;
 }
 @media (max-width: 780px) {
+    .calender .day_today {
+        width: 1.4rem;
+        font-size:0.8rem;
+    }
     .calender .edit_button {   /* 管理者用の編集ボタン */
         width: 100%;
         padding-left: 2px;
@@ -201,6 +210,16 @@ a {
     font-size: 0.8em;
     grid-area: yoyaku;  /* 右下に表示する */
 }
+@media (max-width: 780px) {
+    .yoyaku_button {
+        font-size: 1.0em;
+        height: 2.8rem;
+    }
+    .yoyaku_button_small {
+        height: 1.4rem;
+        font-size: 0.6em;
+    }
+}
 
 yoyaku_button:hover {  /* マウスホバー時の状態 */
     background-color: #3e8e41;
@@ -225,18 +244,127 @@ yoyaku_button:active { /* 押下時の状態 */
 }
 .cyouka_stars {
     position: relative;
-    color: #FFD700;    /* 色を濃い金色に変更 */
-    /* 文字に影を追加 */
-    text-shadow: 0 0 4px #FFD700, /* 周囲を明るく光らせる影 */
-                0 0 10px rgba(0, 0, 0, 0.5); /* 立体感を出すための暗い影 */
+    /* 既存の色と影は共通設定として維持 */
+    color: #FFD700;
+    text-shadow: 0 0 4px #FFD700,
+                 0 0 10px rgba(0, 0, 0, 0.5);
     text-align: center;
     font-size: 1.2rem;
+    padding: 2px 5px; /* 背景色を適用しやすくするため */
+    border-radius: 4px; /* 背景色を適用しやすくするため */
+    display: inline-block; /* 幅を内容に合わせる */
 }
 .cyouka_memo {
     /*    grid-area: yoyaku;    */
     position: relative;
     color: blue;
     text-align: left;
+}
+@media (max-width: 780px) {
+    .names {
+        min-height: 3rem;
+        font-size:0.4rem;
+    }
+    .cyouka_stars {
+        font-size: 0.8rem;
+    }
+    
+}
+@media (max-width: 650px) {
+    .cyouka_stars {
+        font-size: 0.6rem;
+    }
+    
+}
+/* stars の値に応じた配色設定 */
+.cyouka_stars-1 {
+    background-color: #ADD8E6; /* 薄い水色 */
+    color: #000080; /* 文字色: 濃い目の青 */
+    text-shadow: none; /* 背景に合わせた調整 */
+}
+.cyouka_stars-2 {
+    background-color: #87CEEB; /* 水色 */
+    color: #000080; /* 文字色: 濃い目の青 */
+    text-shadow: none;
+}
+.cyouka_stars-3 {
+    background-color: #DDA0DD; /* 薄い紫 */
+    color: #4B0082; /* 文字色: 濃い目の紫 */
+    text-shadow: none;
+}
+.cyouka_stars-4 {
+    background-color: #F08080; /* 薄い赤 */
+    color: #8B0000; /* 文字色: 濃い目の赤 */
+    text-shadow: none;
+}
+.cyouka_stars-5 {
+    background-color: #8A2BE2; /* 紫 */
+    color: #FFFFFF; /* 文字色: 白（濃い目としてコントラストを考慮） */
+    text-shadow: 0 0 2px #000; /* 見やすくするために影を追加 */
+}
+
+.cyouka_memo {
+    position: relative;
+    color: blue;
+    text-align: left;
+    /* 3行表示制限のためのスタイル調整は不要ですが、必要に応じて line-height などを調整できます */
+}
+
+/* --- ポップアップ用 CSS --- */
+.cyouka_popup_overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.cyouka_popup {
+    width: 300px;
+    height: 300px;
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    display: flex;
+    flex-direction: column;
+}
+
+.cyouka_popup_titlebar {
+    background-color: #FFD700; /* 濃い黄色 */
+    padding: 2px;
+    margin: 2px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-weight: bold;
+    border-radius: 4px 4px 0 0; /* 上部のみ角丸 */
+}
+
+.cyouka_popup_title {
+    color: blue;
+    margin-left: 5px;
+}
+
+.cyouka_popup_close {
+    color: blue;
+    cursor: pointer;
+    font-size: 1.2rem;
+    padding: 0 5px;
+}
+
+.cyouka_popup_message_area {
+    flex-grow: 1; /* 残りの部分を埋める */
+    background-color: #ADD8E6; /* 水色 */
+    padding: 10px;
+    margin: 0 2px 2px 2px; /* 上部以外の margin:2px */
+    border-radius: 0 0 4px 4px; /* 下部のみ角丸 */
+    overflow-y: auto; /* メモが長い場合にスクロール可能にする */
+    white-space: pre-wrap; /* メモの改行を保持 */
 }
     
 .allow_box {
@@ -286,6 +414,17 @@ yoyaku_button:active { /* 押下時の状態 */
     border: 1px solid #008440;
     font-size: 1.4rem;
     clip-path: polygon(10% 20%,80% 20%,80% 0,90% 50%,80% 90%,80% 80%,10% 80%,10% 20%);       
+}
+@media (max-width: 780px) {
+    .text-center {
+        font-size: 1.2rem;
+    }
+    .arrow-right , .arrow-left {
+        font-size: 1.0rem;
+        padding: 0.2rem;
+        margin-top: 0.5rem;
+        height: 2.0rem;
+    }
 }
 
 

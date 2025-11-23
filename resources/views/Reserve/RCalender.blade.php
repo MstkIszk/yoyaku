@@ -80,6 +80,9 @@
         border-color: grey;
         outline: 0;
     }
+    .card-body {
+        margin: 0px;
+    }
   </style>
 
     <div class="py-12">
@@ -145,6 +148,16 @@
                         <tbody id="calenderTable">
                         </tbody>
                     </table>
+                    <div id="cyouka_popup_overlay" class="cyouka_popup_overlay" style="display: none;">
+                        <div class="cyouka_popup">
+                            <div class="cyouka_popup_titlebar">
+                                <span id="cyouka_popup_title" class="cyouka_popup_title"></span>
+                                <span class="cyouka_popup_close" onclick="closeCyoukaPopup()">&times;</span>
+                            </div>
+                            <div id="cyouka_popup_message" class="cyouka_popup_message_area">
+                                </div>
+                        </div>
+                    </div>
 
                     <script>
                     var CurrYM = '{{ $month }}';
@@ -399,10 +412,32 @@
                                                 weekStr += '>予約</button>';  
                                             }
                                             else {
-                                                weekStr += '<span class="cyouka_view">';
+                                                // stars の数に応じたクラス名を生成
+                                                let starClass = '';
+                                                if (dayInfo.stars !== undefined && dayInfo.stars > 0) {
+                                                    starClass = 'cyouka_stars-' + dayInfo.stars;
+                                                }
+
+                                                // メモの表示制限と"..."の追加
+                                                let displayMemo = '';
+                                                let fullMemo = '';
+                                                if (dayInfo.memo !== undefined && dayInfo.memo.length > 0) {
+                                                    fullMemo = dayInfo.memo;
+                                                    const lines = dayInfo.memo.split(/\r?\n/);
+                                                    if (lines.length > 3) {
+                                                        displayMemo = lines.slice(0, 3).join('<br>') + '...';
+                                                    } else {
+                                                        displayMemo = dayInfo.memo.replace(/\r?\n/g, '<br>');
+                                                    }
+                                                }
+
+                                                //weekStr += '<span class="cyouka_view">';
+                                                // ポップアップ表示のために data 属性を追加し、onclick ハンドラを設定
+                                                weekStr += '<span class="cyouka_view" onclick="showCyoukaPopup(this)" data-day="' + dayInfo.day + '" data-memo="' + fullMemo.replace(/"/g, '&quot;') + '">';
 
                                                 if(dayInfo.stars !== undefined && dayInfo.stars > 0) {
-                                                    weekStr += '<div class="cyouka_stars">' + '★'.repeat(dayInfo.stars) + '</div>';
+                                                    // starClass を追加
+                                                    weekStr += '<div class="cyouka_stars ' + starClass + '">' + '★'.repeat(dayInfo.stars) + '</div>';
                                                 }
                                                 
                                                 if(dayInfo.memo !== undefined && dayInfo.memo.length > 0) {
@@ -606,7 +641,36 @@
                         }        
                         function modalClose() {
                             editModal.style.display = 'none';
-                        }            
+                        }
+                        
+                        /**
+                         * cyouka_view クリック時にポップアップを表示する
+                         * @param {HTMLElement} element - クリックされた .cyouka_view 要素
+                         */
+                        function showCyoukaPopup(element) {
+                            const day = element.getAttribute('data-day');
+                            const memo = element.getAttribute('data-memo');
+
+                            const overlay = document.getElementById('cyouka_popup_overlay');
+                            const title = document.getElementById('cyouka_popup_title');
+                            const message = document.getElementById('cyouka_popup_message');
+
+                            // タイトルとメッセージを設定
+                            title.textContent = day + '日';
+                            message.textContent = memo; // 改行をそのまま表示するため textContent を使用
+
+                            // ポップアップを表示
+                            overlay.style.display = 'flex';
+                        }
+
+                        /**
+                        * ポップアップを非表示にする
+                        */
+                        function closeCyoukaPopup() {
+                            const overlay = document.getElementById('cyouka_popup_overlay');
+                            overlay.style.display = 'none';
+                        }
+
                     </script>
                 </div>
             </div>

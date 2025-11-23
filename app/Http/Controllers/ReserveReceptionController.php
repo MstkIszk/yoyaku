@@ -13,9 +13,10 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use setasign\Fpdi\Tcpdf\Fpdi;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\View\View;
-
+use Illuminate\Support\Facades\Storage;
 
 class ReserveReceptionController extends Controller
 {
@@ -177,14 +178,14 @@ class ReserveReceptionController extends Controller
 
         // コース料金（当日の曜日によって weekdayPrice または weekendPrice を採用）
         // 実際には曜日判定ロジックが必要です。ここでは簡単のため weekdayPrice を採用
-        $isHoriday = UserCalender::GetHoriday($reserve->ReserveDate); // データベース検索の結果に応じて true/false
-        $coursePrice = $isHoriday ? $reserve->course->weekendPrice : $reserve->course->weekdayPrice;
+        $isWeekend = UserCalender::GetHoriday($reserve->ReserveDate); // データベース検索の結果に応じて true/false
+        $coursePrice = $isWeekend ? $reserve->course->weekendPrice : $reserve->course->weekdayPrice;
         
         // 予約情報をビューに渡す
         return view('Reserve.ReceptionAccept', [
             'reserve' => $reserve,
             'coursePrice' => $coursePrice,
-            'isWeekend' => $isHoriday,
+            'isWeekend' => $isWeekend,
         ]);
     }
 
@@ -249,7 +250,7 @@ class ReserveReceptionController extends Controller
     
     
             //  受付完了画面を表示
-            return view('Reserve.ReceptionAccept', [
+            return view('Reserve.ReceptionShow', [
                 'reserve' => $reserve,
                 'receptions' => $receptions,
                 'grandTotal' => $grandTotal,
@@ -284,7 +285,7 @@ class ReserveReceptionController extends Controller
         // 合計金額を計算
         $grandTotal = $receptions->sum(fn ($reception) => $reception->price * $reception->count);
 
-        return view('Reserve.ReceptionAccept', [
+        return view('Reserve.ReceptionShow', [
             'reserve' => $reserve,
             'receptions' => $receptions,
             'grandTotal' => $grandTotal,
@@ -324,8 +325,12 @@ class ReserveReceptionController extends Controller
         
         // フォント設定（日本語フォント: kozgoprolight を使用）
         // ※ kochi-gothic/kochi-mincho などの代替フォントを設定する場合は適宜変更してください
-        $font = 'kozgoprobold'; 
+        //$font = 'kozgoprobold'; 
         
+        // 太字に近いゴシック体を使いたい場合    'kozanmproregular'
+        // 明朝体を使いたい場合     'kozminproregular'
+        // 汎用的なゴシック体を使いたい場合        'cid0jp'
+
         // ページ設定
         $pdf->SetMargins(0, 0, 0); // マージンをゼロに設定
         $pdf->SetAutoPageBreak(false, 0); // 自動改ページ無効
@@ -348,7 +353,7 @@ class ReserveReceptionController extends Controller
         // 3. PDF内のフィールドにデータ埋め込み
         
         // 3-1. 予約IDと日付の埋め込み (座標はshop_5_ryosyu_base.pdfを元に仮定)
-        $pdf->SetFont($font, '', 9);
+        $pdf->SetFont('cid0jp', '', 9);
         $pdf->SetTextColor(0, 0, 0); // 黒色
         
         // No.の横
@@ -358,7 +363,7 @@ class ReserveReceptionController extends Controller
         $pdf->Text(155, 76.5, Carbon::now()->format('Y/m/d')); // 発行日を現在の日付に設定
 
         // 顧客情報の仮埋め込み（PDFに「ご注文日」「納入日」「入金日」のフィールドが存在することを想定）
-        $pdf->SetFont($font, '', 8);
+        $pdf->SetFont('cid0jp', '', 8);
         $pdf->Text(100, 48, 'ご注文日: ' . $reserve->orderDate); 
         $pdf->Text(100, 52, '納入日: ' . $reserve->deliveryDate); 
         $pdf->Text(100, 56, '入金日: ' . $reserve->paymentDate); 
@@ -367,7 +372,7 @@ class ReserveReceptionController extends Controller
         // 3-2. 明細行の埋め込み
         $startY = 120; // 明細の開始Y座標を仮定
         $lineHeight = 7; // 1行の高さ
-        $pdf->SetFont($font, '', 9);
+        $pdf->SetFont('cid0jp', '', 9);
 
         foreach ($reserve->accessories as $index => $accessory) {
             $y = $startY + ($index * $lineHeight);
@@ -394,7 +399,7 @@ class ReserveReceptionController extends Controller
         }
 
         // 3-3. 合計金額の埋め込み
-        $pdf->SetFont($font, 'B', 12);
+        $pdf->SetFont('cid0jp', 'B', 12);
         
         // 上部の「合計」欄 (座標はPDFを元に仮定)
         // PDFの「合計」の右に大きく表示される場所を想定
@@ -403,7 +408,7 @@ class ReserveReceptionController extends Controller
 
         // 下部の「合計」欄 (明細表の最後の行、座標はPDFを元に仮定)
         // PDFの明細表の合計金額表示セルを想定
-        $pdf->SetFont($font, 'B', 9);
+        $pdf->SetFont('cid0jp', 'B', 9);
         $pdf->SetXY(145, 230); // 仮のY座標
         $pdf->Cell(25, $lineHeight, number_format($reserve->totalAmount), 0, 0, 'R');
 

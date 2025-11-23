@@ -2,7 +2,8 @@
 <x-app-layout>
     <x-slot name="header">
         <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-            {{ $targetDate }} の予約者一覧
+            {{ \Carbon\Carbon::parse($reserve->ReserveDate)->isoFormat('YYYY年MM月DD日') }}　
+            {{ $reserve->ClitNameKanji }} 様　受付完了
         </h2>
     </x-slot>
 
@@ -75,7 +76,7 @@
     <!-- ボタンエリア -->
     <div class="flex justify-center space-x-6 pt-6 no-print">
         <!-- 完了ボタン: 予約一覧へ遷移 -->
-        <a href="{{ route('reserve.list') }}" class="flex items-center justify-center px-8 py-3 bg-indigo-600 text-white font-bold rounded-xl shadow-lg hover:bg-indigo-700 transition transform hover:scale-105">
+        <a href="{{ route('ReserveReception.index', ['reservid' => \Carbon\Carbon::parse($reserve->ReserveDate)->isoFormat('YYYY-MM-DD')] ) }}" class="flex items-center justify-center px-8 py-3 bg-indigo-600 text-white font-bold rounded-xl shadow-lg hover:bg-indigo-700 transition transform hover:scale-105">
             完了 (一覧へ)
         </a>
 
