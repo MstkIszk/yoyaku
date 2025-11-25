@@ -2,6 +2,9 @@
 
 namespace Database\Seeders;
 
+//　Seeder 実行 コマンド
+// php artisan db:seed --class=UserCalenderSeeder
+
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use App\Models\UserCalender;
@@ -20,7 +23,7 @@ class UserCalenderSeeder extends Seeder
         // 2025年
         '2025-10-13' => 'スポーツ',
         '2025-11-03' => '文化の日',
-        '2025-11-24' => '勤労感謝振替', // 11/23が日曜のため
+        '2025-11-24' => '勤労振替', // 11/23が日曜のため
         '2025-12-23' => '天皇誕生日',
 
         // 2026年

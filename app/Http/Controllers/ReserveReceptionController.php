@@ -377,8 +377,8 @@ class ReserveReceptionController extends Controller
 
         // 顧客情報の仮埋め込み（PDFに「ご注文日」「納入日」「入金日」のフィールドが存在することを想定）
         $pdf->SetFont('cid0jp', '', 12);
-        $pdf->Text(45, 65,  $reserve->ReqDate->format('Y年m月d日'));   //納入日: ' .
-        $pdf->Text(45, 72,  $reserve->ReserveDate->format('Y年m月d日'));    //'ご注文日: ' .
+        $pdf->Text(44, 65.5,  $reserve->ReqDate->format('Y年m月d日'));   //納入日: ' .
+        $pdf->Text(44, 72.5,  $reserve->ReserveDate->format('Y年m月d日'));    //'ご注文日: ' .
         //$pdf->Text(100, 56, '入金日: ' . $reserve->paymentDate); 
 
 
@@ -418,7 +418,7 @@ class ReserveReceptionController extends Controller
         
         // 下部の「合計」欄 (明細表の最後の行、座標はPDFを元に仮定)
         // PDFの明細表の合計金額表示セルを想定
-        $pdf->SetFont('cid0jp', 'B', 9);
+        $pdf->SetFont('cid0jp', 'B', 12);
         $pdf->SetXY(168, 236.5); // 仮のY座標
         $pdf->Cell(25, $lineHeight, '￥' . $totalFormatted, 0, 0, 'R');
 
