@@ -171,7 +171,7 @@
                     const todayYY = today.getFullYear();
                     const todayMM = ('0' + (today.getMonth() + 1)).slice(-2); // 月は0から始まるため+1し、桁数を2桁に調整
                     const todayDD = ('0' + today.getDate()).slice(-2);
-
+                    var chkDD = 0;
                     @if (Auth::check() && Auth::user()->id == $ShopInf->id)
                         const isMyPage = true;
                     @else
@@ -271,7 +271,7 @@
                     function GetYoyakuCalender(reqYM) {
                         CurrYM = reqYM;
                         const [reqYY, reqMM, reqDD] = reqYM.split('-');
-                        chkDD = 0;
+                        //chkDD = 0;    //グローバルに移動
                         if((reqYY == todayYY) && (reqMM == todayMM)) {
                             chkDD = todayDD;
                         }
@@ -466,6 +466,8 @@
                             }
                         });
                     }
+
+
                     function openYoyakuInput(day) {
                         //  YYYY-MM-DD に編集
                         var reqDate = CurrYM.substr(0,7) + '-' + ('00' + day).slice(-2);
@@ -604,6 +606,164 @@
                             });
                             editModal.style.display = 'block';
                         }
+                        /**
+                         * 1日分のカレンダーセル全体を更新する共通関数
+                         * @param {object} dayInfo - その日の日付情報と予約情報を持つオブジェクト
+                         * @param {number} dayIx - カレンダー上のインデックス (0-41)
+                         * @param {string} reqYM - 現在のカレンダーの年月 (YYYY-MM)
+                         * @param {number} chkDD - 今日の日付
+                         * @param {number} maxYoyaku - 現在選択中の商品の最大予約可能数
+                         * @param {boolean} isMyPage - マイページかどうか
+                         * @param {object[]} opetbl - 営業状態テーブル
+                         */
+                        function updateDayCellDisplay(dayInfo, dayIx, reqYM, chkDD, maxYoyaku, isMyPage, opetbl) {
+                            const areaName = 'area' + dayIx;
+                            const area = document.getElementById(areaName);
+                            
+                            // dayInfo が空の場合（カレンダーに存在しない日）は何もしない
+                            if (!area || dayInfo.day <= 0) {
+                                return;
+                            }
+
+                            let weekStr = '';
+                            
+                            // ----------------------------------------------------------------------
+                            // 336行目からのロジックを移植・再構築
+                            // ----------------------------------------------------------------------
+                            
+                            if(dayInfo.day == chkDD) {
+                                weekStr += '<div class="day_today">' + dayInfo.day + '</div>';
+                            } else {
+                                weekStr += '<div class="day">' + dayInfo.day + '</div>';
+                            }
+
+                            let operatingCode = 1;  
+                            if ("operating" in dayInfo) {
+                                operatingCode = dayInfo.operating;
+                            }
+
+                            var zanSeki = maxYoyaku - dayInfo.totalCnt;
+                            // totalCnt が更新されたデータに含まれていない場合、yoyakusu (予約済人数) を使用
+                            if (dayInfo.yoyakusu !== undefined) {
+                                zanSeki = maxYoyaku - Number(dayInfo.yoyakusu);
+                            }
+                            
+                            let editBtnStyle = 'class="edit_button ';
+                            switch(operatingCode) {
+                            case 1:
+                                editBtnStyle += 'edit_button_normal';
+                                break;
+                            case 2:
+                                editBtnStyle += 'edit_button_horiday';
+                                break;
+                            case 3:
+                                editBtnStyle += 'edit_button_private';
+                                break;
+                            }
+                            
+                            let editBtnDef = '<div class="edit_button ' + editBtnStyle + '">' + getOpeName(operatingCode) + '</div>'
+
+                            if(isMyPage) {
+                                // ログインしていてマイページの場合
+                                editBtnDef = `<button ${editBtnStyle}" onclick='openEditModal(${dayIx},"${dayInfo.day}")'>${getOpeName(operatingCode)}</button>`;
+                            }
+                            weekStr += editBtnDef;
+
+
+                            if(dayInfo.DayName) {
+                                weekStr += '<div class="dayname">' + dayInfo.DayName + '</div>'; //  祭日の名前
+                            }
+                            else {
+                                weekStr += '<div class="dayname">　</div>'; //  祭日の名前
+                            }
+
+                            weekStr += '<div class="names">';   //  予約者リスト
+                            if(isMyPage && dayInfo.totalCnt > 0) {
+                                //  予約者がいる場合、名前・人数とリンクを追加
+                                var memCnt = 0;
+                                // 注意: writeDateInfo() から呼ばれた場合、member データは渡されないため、表示は更新されません。
+                                // （ここはカレンダー全体を再取得しない限り更新が難しい部分です）
+                                dayInfo.member = dayInfo.member || []; // メンバーがなくてもエラーにならないように
+                                dayInfo.member.forEach(function(member) {
+                                    if(memCnt > 0) {
+                                        weekStr += '<br>';
+                                    }
+                                    weekStr += member.name + '様:' + member.cnt;
+                                    memCnt++;
+                                })
+                                LinkDateStr = reqYM.slice(0, -3) + '-' + dayInfo.day;
+                                weekStr += '<br><input type="button" value="詳細" onclick="goToReservationDate(this,\'' + LinkDateStr + '\')">';
+                            }
+                            else {
+                                weekStr += "　　　　　";
+                            }
+                            weekStr += '</div>';
+                            
+                            // yoyaku_cnt の表示を更新
+                            weekStr += '<div class="yoyaku_cnt">' + zanSeki + '</div>';
+
+                            // 今日の日付を取得 (クライアント側で再計算)
+                            const today = new Date();
+                            const todayDD = ('0' + today.getDate()).slice(-2);
+                            const reqDD = ('0' + dayInfo.day).slice(-2);
+                            const dateStr = reqYM + '-' + reqDD;
+                            const reqDateObj = new Date(dateStr);
+                            const todayDateObj = new Date(today.getFullYear() + '-' + (today.getMonth() + 1).toString().padStart(2, '0') + '-' + todayDD);
+                            
+                            // 明日以降の通常営業の場合、予約ボタンを表示
+                            if((operatingCode == 1) && (reqDateObj >= todayDateObj)) {
+                                weekStr += '<button class="yoyaku_button'; 
+                                if(isMyPage) {
+                                    weekStr += ' yoyaku_button_small';
+                                }
+                                weekStr += '" id="Yoyaku' + dayInfo.day + 
+                                        '" onclick="openYoyakuInput(' + dayInfo.day + ')" ';  
+
+                                if(zanSeki <= 0) {
+                                    weekStr += 'disabled';
+                                }
+                                weekStr += '>予約</button>';  
+                            }
+                            else {
+                                // stars の数に応じたクラス名を生成
+                                let starClass = '';
+                                if (dayInfo.stars !== undefined && dayInfo.stars > 0) {
+                                    starClass = 'cyouka_stars-' + dayInfo.stars;
+                                }
+
+                                // メモの表示制限と"..."の追加
+                                let displayMemo = '';
+                                let fullMemo = '';
+                                if (dayInfo.memo !== undefined && dayInfo.memo.length > 0) {
+                                    fullMemo = dayInfo.memo;
+                                    const lines = dayInfo.memo.split(/\r?\n/);
+                                    // writeDateInfoから呼ばれた場合、memoの改行を考慮する必要があるため、ここで処理
+                                    if (lines.length > 3) {
+                                        displayMemo = lines.slice(0, 3).join('<br>') + '...';
+                                    } else {
+                                        displayMemo = dayInfo.memo.replace(/\r?\n/g, '<br>');
+                                    }
+                                }
+
+                                // ポップアップ表示のために data 属性を追加し、onclick ハンドラを設定
+                                weekStr += '<span class="cyouka_view" onclick="showCyoukaPopup(this)" data-day="' + dayInfo.day + '" data-memo="' + fullMemo.replace(/"/g, '&quot;') + '">';
+
+                                if(dayInfo.stars !== undefined && dayInfo.stars > 0) {
+                                    // starClass を追加
+                                    weekStr += '<div class="cyouka_stars ' + starClass + '">' + '★'.repeat(dayInfo.stars) + '</div>';
+                                }
+                                
+                                if(dayInfo.memo !== undefined && dayInfo.memo.length > 0) {
+                                    // displayMemo を使用
+                                    weekStr += '<div class="cyouka_memo">' + displayMemo + '</div>';
+                                }
+                                weekStr += '</span>';
+                            }
+
+                            // 既存のコンテンツを置き換える
+                            area.innerHTML = weekStr;
+                        }
+
                         //  指定日の情報を書き込む
                         function writeDateInfo() {
                             const data = {
@@ -631,7 +791,34 @@
                                     console.log('Success:', responseData); // 成功時の処理
                                     const areaName =  'area' + document.getElementById('dayIx').value;
                                     const area = document.getElementById(areaName); // area12 の要素を取得
-                                    updateButtonColor(area,data);
+
+                                    //  updateButtonColor(area,data);
+                                    //  updateButtonColor の代わりに updateDayCellDisplay を呼び出す
+                                    
+                                    // サーバーレスポンス（responseData）とローカルデータ（data）を結合し、
+                                    // updateDayCellDisplayが期待する dayInfo 形式のオブジェクトを構築
+                                    const updatedDayInfo = {
+                                        day: Number(document.getElementById('destDate').value.slice(-2)), // 日付部分のみ
+                                        stars: Number(data.stars),
+                                        memo: data.memo,
+                                        operating: Number(data.operating),
+                                        totalCnt: Number(data.yoyakusu), // totalCntとして扱う
+                                        yoyakusu: Number(data.yoyakusu), // 予約済人数
+                                        member: [], // 予約者リストは更新しない
+                                        // DayName は不明なので省略
+                                    };
+
+                                    // updateDayCellDisplay 関数を呼び出し、該当セルを再描画
+                                    // このとき、全カレンダー変数を渡す必要がある点に注意
+                                    updateDayCellDisplay(
+                                        updatedDayInfo, 
+                                        Number(document.getElementById('dayIx').value), // dayIx
+                                        CurrYM, 
+                                        chkDD, // グローバル変数またはGetYoyakuCalender内で定義された変数
+                                        getCurrentProductCapacity(), 
+                                        isMyPage, 
+                                        opetbl
+                                    );
                                 },
                                 error: function(xhr, status, error) {
                                     console.error('Error:', status, error); // エラー時の処理

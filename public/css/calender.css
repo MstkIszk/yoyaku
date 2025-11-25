@@ -489,14 +489,15 @@ yoyaku_button:active { /* 押下時の状態 */
     font-size:1.4rem;
     text-align:center;
 }
+
 .modal-table {
     padding:10px;
-    font-size:1.2rem;
+    font-size:1rem;
     width: 100%; /* 追加: 親要素の幅いっぱいに広げる */
 }
 .modal-table th,td {
     border:2px solid #408040;
-}		
+}
 .modal-table td {
     color: black;
     background: white;
@@ -505,6 +506,9 @@ yoyaku_button:active { /* 押下時の状態 */
 .modal-table  .count{
     width: 2rem;
     text-align: right;
+}
+.modal-table select {
+    line-height: 1em;
 }
   
 .modal-table textarea {

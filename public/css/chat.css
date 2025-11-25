@@ -412,6 +412,7 @@
 }
 
 .list_table  .count{
+  margin-right: 4px;
   width: 2rem;
   text-align: right;
 }
@@ -705,6 +706,11 @@ a[href^='tel']::before {
 
   /* transitionで変化を滑らかにする */
   transition: background-color 0.3s, border-color 0.3s;
+}
+
+//  link-buttonの色違い
+.lever-button {
+  background-color: #aeff41; /* 黄緑背景 */
 }
 
 .table-link-button {

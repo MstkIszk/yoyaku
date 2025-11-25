@@ -23,8 +23,8 @@ use Illuminate\Support\Facades\Mail;
 
 enum ReserveStatus : int
 {
-    const Entry = 0; //  受付後、未確認
-    const Accept = 1; //  受付後、メール確認済
+    const Entry = 1; //  受付後、未確認
+    const Accept = 2; //  受付後、メール確認済
     const Cancel = 9; //  キャンセル済
 }
 
@@ -406,7 +406,9 @@ class ReserveController extends Controller
     //  予約の照会
     public function show($id) {
         $reserve = Reserve::find($id);
-        return view("Reserve.RShow", compact('reserve'));
+        $WaysPayList = ShopWaysPay::GetWaysPay($reserve->WaysPayBit);
+        $YoyakuTypeList = UserCourse::GetYoyakuType($reserve->Baseid, $reserve->Productid);
+        return view("Reserve.RShow", compact('reserve','WaysPayList','YoyakuTypeList'));
     }
     //  予約の照会
     public function telnoinput(Request $request) {
@@ -506,7 +508,9 @@ class ReserveController extends Controller
     //  予約の編集
     public function edit(Reserve $reserve) {
         //return view("Reserve.RUpdate",compact('reserve'));
-        return view("Reserve.REdit",compact('reserve'));
+        $WaysPayList = ShopWaysPay::GetWaysPay($reserve->WaysPayBit);
+        $YoyakuTypeList = UserCourse::GetYoyakuType($reserve->Baseid, $reserve->Productid);
+        return view("Reserve.REdit",compact('reserve','WaysPayList','YoyakuTypeList'));
     }
     public function update(Request $request, Reserve $reserve) {
         //  入力の妥当性チェック
@@ -548,7 +552,9 @@ class ReserveController extends Controller
         return view("Reserve.RCancel");
     }
     public function destroy(Request $request, Reserve $reserve) {
-        $reserve->delete();
+        //$reserve->delete();
+        $reserve->Status = 9;   //  キャンセル設定して 
+        $reserve->save();       //        -> 書き込む
         $request->session()->flush('message', '削除しました');
         return redirect()->route('reserve.index');
     }

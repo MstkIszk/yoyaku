@@ -16,6 +16,7 @@ class ReserveReception extends Model
         'ReserveID',    // reservテーブルの id を参照
         'payType',  // １:コース商品 / 2:オプション商品
         'index',   //  対象商品コード
+        'name', 	//  対象商品名
         'price', 	//  単価
         'count',     //  数量
         'memo',        //  メモ書き

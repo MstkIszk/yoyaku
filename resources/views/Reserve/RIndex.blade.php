@@ -10,7 +10,7 @@
                 display: flex;
                 flex-direction: column;
                 word-wrap: break-word;
-                background-color: #FFDDDD;
+                background-color: #feffe1;
                 background-clip: border-box;
             }
             .list-frame table{

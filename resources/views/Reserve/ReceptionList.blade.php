@@ -32,6 +32,44 @@
             flex-shrink: 0;         /* 縮小させず、内容の幅を維持する */
             text-align: right;      /* ボタン内要素を右寄せ */
         }
+        /* 画面幅が 799px 以下の場合に適用 */
+        @media (max-width: 799px) {
+            
+            /* name-box 全体を縦並び (flex-direction: column) に変更 */
+            .name-box {
+                flex-direction: column; /* 要素を縦に重ねて表示 */
+                align-items: flex-start; /* 左寄せに変更 (必要に応じて) */
+                gap: 0.25rem; /* 縦積み時の間隔を少し狭くする */
+            }
+
+            /* 左側の氏名部分 */
+            .name-box .left-name {
+                width: 100%; /* 全幅に広げる */
+                margin-bottom: 0.25rem; /* ボタンとの間に少し間隔を空ける */
+                /* text-align: left; はデフォルトなので通常不要 */
+            }
+
+            /* 右側のボタン部分 */
+            .name-box .right-button {
+                width: 100%; /* ボタンも全幅に広げると見やすい */
+                flex-shrink: 1;
+                /* ボタン全体を右寄せにしたい場合は以下を設定 */
+                text-align: right; 
+                /* もしボタンを中央に配置したい場合は text-align: center; を使用 */
+            }
+            
+            /* ボタン自体がインライン要素の場合、aタグなどをブロック要素にする調整が必要になることがあります */
+            .name-box .right-button a {
+                /* ボタンの a タグをブロック要素にして width: 100% が効くようにする（デザイン次第で調整） */
+                /* display: block; */ 
+            }
+        }
+        /* 画面幅が 799px 以下の場合に適用 */
+        @media (max-width: 699px) {
+            .list_table .address {
+                display: none;                /* 要素を非表示にする */
+            }      
+        }
 
         /* 商品ブロック間の間隔 */
         .product-block {
@@ -325,6 +363,15 @@
                             newRow.classList.add('hover:bg-gray-100', 'transition', 'duration-100');
                             
                             const address = `〒${reservation.CliAddrZip}<br>${reservation.CliAddrCity}${reservation.CliAddrOther}`;
+                            var AcceptButton = '';
+                            if(reservation.Status == 1) {
+                                AcceptButton = `
+                                    class="link-button" title="受付処理へ進む (ID: ${reservation.OrderNo})"> 受付`;
+                            }
+                            else /*if(reservation.Status == 1)*/ {
+                                AcceptButton = `
+                                    class="link-button lever-button" title="受付処理へ進む (ID: ${reservation.OrderNo})"> 再受付`;
+                            }
 
                             // 受付ボタン付きの氏名セルを作成
                             newRow.innerHTML = `
@@ -337,8 +384,7 @@
                                         </div>
                                         <!-- 受付ボタン -->
                                         <div class="right-button">
-                                            <a href="${receptionUrlBase}/${reservation.OrderNo}" class="link-button"
-                                            title="受付処理へ進む (ID: ${reservation.OrderNo})"> 受付 </a>
+                                            <a href="${receptionUrlBase}/${reservation.OrderNo}" ${AcceptButton}</a>
                                         </div>
                                     </div>
                                 </td>

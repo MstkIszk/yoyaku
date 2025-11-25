@@ -3,10 +3,12 @@
 namespace App\Http\Controllers;
 
 use App\Models\ReserveReception;
+use App\Http\Controllers\ReserveStatus;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
 use App\Models\User;
+use App\Models\UserProduct;
 use App\Models\Reserve;
 use App\Models\UserCalender;
 use Illuminate\Support\Facades\DB;
@@ -116,6 +118,8 @@ class ReserveReceptionController extends Controller
                 'CliResvType', // コースIDとして使用
                 'CliResvCnt',
                 'Courseid', // リレーションキーとして必要
+                'Status'    //  予約状態
+
             ]);
 
         // 必要なデータ形式に整形
@@ -133,6 +137,7 @@ class ReserveReceptionController extends Controller
                 'CliResvCnt' => $reservation->CliResvCnt,
                 // コースIDから取得したコース名を設定
                 'courseName' => $reservation->course ? $reservation->course->courseName : '不明',
+                'Status' => $reservation->Status
             ];
         });
 
@@ -202,6 +207,7 @@ class ReserveReceptionController extends Controller
             'items' => 'required|array',
             'items.*.payType' => 'required|integer|in:1,2', // 1:コース, 2:オプション
             'items.*.index' => 'required|integer',         // 対象商品コード (courseID / accessoryID)
+            'items.*.name' => 'nullable|string|max:255',   // 単価
             'items.*.price' => 'required|integer|min:0',   // 単価
             'items.*.count' => 'required|integer|min:0',   // 数量
             'items.*.memo' => 'nullable|string|max:255',   // メモ
@@ -221,6 +227,7 @@ class ReserveReceptionController extends Controller
                             'ReserveID' => $reserveId,
                             'payType'   => $item['payType'],
                             'index'     => $item['index'],
+                            'name'      => $item['name'],
                             'price'     => $item['price'],
                             'count'     => $item['count'],
                             'memo'      => $item['memo'] ?? '',
@@ -241,6 +248,9 @@ class ReserveReceptionController extends Controller
                 // 予約が見つからない場合はエラー処理
                 return redirect()->route('ReserveReception.index')->with('error', '指定された予約情報が見つかりません。');
             }
+            // 予約状態を完了（Accept）に更新
+            $reserve->Status = 2;   //ReserveStatus::Accept;
+            $reserve->save(); // データベースに保存            
     
             // 予約IDに紐づく受付情報を取得 (storeで保存したデータ)
             $receptions = ReserveReception::where('ReserveID', $ReserveId)->get();
@@ -248,10 +258,12 @@ class ReserveReceptionController extends Controller
             // 合計金額を計算
             $grandTotal = $receptions->sum(fn ($reception) => $reception->price * $reception->count);
     
-    
+            $product = UserProduct::find($reserve->Productid);
+   
             //  受付完了画面を表示
             return view('Reserve.ReceptionShow', [
                 'reserve' => $reserve,
+                'product' => $product,
                 'receptions' => $receptions,
                 'grandTotal' => $grandTotal,
             ]);
@@ -282,11 +294,14 @@ class ReserveReceptionController extends Controller
         // 予約IDに紐づく受付情報を取得 (storeで保存したデータ)
         $receptions = ReserveReception::where('ReserveID', $reservid)->get();
 
+        $product = UserProduct::find($reserve->Productid);
+
         // 合計金額を計算
         $grandTotal = $receptions->sum(fn ($reception) => $reception->price * $reception->count);
 
         return view('Reserve.ReceptionShow', [
             'reserve' => $reserve,
+            'product' => $product,
             'receptions' => $receptions,
             'grandTotal' => $grandTotal,
         ]);
@@ -300,7 +315,7 @@ class ReserveReceptionController extends Controller
      */
     public function topdf($reserveId): RedirectResponse|Response
     {
-        $reserve = Reserve::with(['user', 'product', 'course'])->find($reserveId);
+        $reserve = Reserve::with(['user', 'product', 'course','reception'])->find($reserveId);
         
         if (!$reserve) {
             // 予約が見つからない場合はエラー処理
@@ -313,8 +328,6 @@ class ReserveReceptionController extends Controller
             $item->subtotal = $item->price * $item->count;
             $total += $item->subtotal;
         }
-        $reserve->totalAmount = $total;
-        $totalFormatted = number_format($reserve->totalAmount);
 
         // 2. PDF生成処理の開始
         $baseId = $reserve->Baseid;
@@ -353,64 +366,67 @@ class ReserveReceptionController extends Controller
         // 3. PDF内のフィールドにデータ埋め込み
         
         // 3-1. 予約IDと日付の埋め込み (座標はshop_5_ryosyu_base.pdfを元に仮定)
-        $pdf->SetFont('cid0jp', '', 9);
+        $pdf->SetFont('cid0jp', '', 12);
         $pdf->SetTextColor(0, 0, 0); // 黒色
         
         // No.の横
-        $pdf->Text(126, 76.5, $reserve->id);
+        $pdf->Text(160, 38, $reserve->id);
         
         // 発行日の横
-        $pdf->Text(155, 76.5, Carbon::now()->format('Y/m/d')); // 発行日を現在の日付に設定
+        $pdf->Text(160, 44, Carbon::now()->format('Y/m/d')); // 発行日を現在の日付に設定
 
         // 顧客情報の仮埋め込み（PDFに「ご注文日」「納入日」「入金日」のフィールドが存在することを想定）
-        $pdf->SetFont('cid0jp', '', 8);
-        $pdf->Text(100, 48, 'ご注文日: ' . $reserve->orderDate); 
-        $pdf->Text(100, 52, '納入日: ' . $reserve->deliveryDate); 
-        $pdf->Text(100, 56, '入金日: ' . $reserve->paymentDate); 
+        $pdf->SetFont('cid0jp', '', 12);
+        $pdf->Text(45, 65,  $reserve->ReqDate->format('Y年m月d日'));   //納入日: ' .
+        $pdf->Text(45, 72,  $reserve->ReserveDate->format('Y年m月d日'));    //'ご注文日: ' .
+        //$pdf->Text(100, 56, '入金日: ' . $reserve->paymentDate); 
 
 
         // 3-2. 明細行の埋め込み
-        $startY = 120; // 明細の開始Y座標を仮定
+        $startY = 124; // 明細の開始Y座標を仮定
         $lineHeight = 7; // 1行の高さ
-        $pdf->SetFont('cid0jp', '', 9);
-
-        foreach ($reserve->accessories as $index => $accessory) {
+        $pdf->SetFont('cid0jp', '', 12);
+        $total = 0; 
+        foreach ($reserve->reception as $index => $reception) {
             $y = $startY + ($index * $lineHeight);
             
             // 摘要 (商品名 + メモ)
-            $description = $accessory->productName . ($accessory->memo ? ' (' . $accessory->memo . ')' : '');
+            $description = $reception->name;
             $pdf->Text(15, $y, $description);
 
             // 数量
-            // 数量フィールドの座標はPDFによって異なるため、ここでは簡略化
-            $pdf->SetXY(85, $y); 
-            $pdf->Cell(15, $lineHeight, number_format($accessory->count), 0, 0, 'R'); 
-
-            // 単位 (ここでは「式」を仮定)
-            $pdf->Text(100, $y, '式');
+            $pdf->SetXY(92, $y); 
+            $pdf->Cell(15, $lineHeight, number_format($reception->count), 0, 0, 'R'); 
 
             // 単価
-            $pdf->SetXY(105, $y); 
-            $pdf->Cell(25, $lineHeight, number_format($accessory->price), 0, 0, 'R');
+            $pdf->SetXY(125, $y); 
+            $pdf->Cell(25, $lineHeight, number_format($reception->price), 0, 0, 'R');
+
+            $total += $reception->price * $reception->count;
+            // 単位 (ここでは「式」を仮定)
+            //$pdf->Text(100, $y, '式');
 
             // 金額 (小計)
-            $pdf->SetXY(145, $y); 
-            $pdf->Cell(25, $lineHeight, number_format($accessory->subtotal), 0, 0, 'R');
+            $pdf->SetXY(170, $y); 
+            $pdf->Cell(25, $lineHeight, number_format($reception->price * $reception->count), 0, 0, 'R');
         }
+
+        $totalFormatted = number_format($total);
 
         // 3-3. 合計金額の埋め込み
         $pdf->SetFont('cid0jp', 'B', 12);
         
-        // 上部の「合計」欄 (座標はPDFを元に仮定)
-        // PDFの「合計」の右に大きく表示される場所を想定
-        $pdf->SetXY(135, 93);
-        $pdf->Cell(45, 10, '￥' . $totalFormatted, 0, 0, 'R'); 
-
         // 下部の「合計」欄 (明細表の最後の行、座標はPDFを元に仮定)
         // PDFの明細表の合計金額表示セルを想定
         $pdf->SetFont('cid0jp', 'B', 9);
-        $pdf->SetXY(145, 230); // 仮のY座標
-        $pdf->Cell(25, $lineHeight, number_format($reserve->totalAmount), 0, 0, 'R');
+        $pdf->SetXY(168, 236.5); // 仮のY座標
+        $pdf->Cell(25, $lineHeight, '￥' . $totalFormatted, 0, 0, 'R');
+
+        //  上部の合計金額
+        $pdf->SetFont('cid0jp', '', 24);
+        $pdf->SetXY(45, 97);
+        $pdf->Cell(45, 10, '￥' . $totalFormatted, 0, 0, 'R'); 
+
 
         // 4. PDFの出力
         return response($pdf->Output('領収書_' . $reserve->id . '.pdf', 'I'), 200)

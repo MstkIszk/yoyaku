@@ -8,13 +8,21 @@
         <div class="mt-4 p-4">
             <x-rTextbox name="ReserveDate"   type="label" value="{{ $reserve->ReserveDate }}">{{  __('Resarve date') }}</x-rTextbox>
             <x-rTextbox name="CliResvCnt"    type="label"  value="{{ $reserve->CliResvCnt }}" >{{  __('Resarve count') }}</x-rTextbox>
-            <x-rTextbox name="CliResvType"   type="label"  value="{{  }}" >{{  __('Resarve type') }}</x-rTextbox>
-            
-            <label for="CliResvType">予約タイプ</label>
-            <select id="CliResvType" name="CliResvType" required>
-                <option value="1" @if(1 === (int)old('CliResvType')) selected @endif>タイプ1</option>
-                <option value="2" @if(2 === (int)old('CliResvType')) selected @endif>タイプ2</option>
-            </select><br>
+
+            @php
+                $SelectedItem = '未定義';
+            @endphp
+            @foreach ($YoyakuTypeList as $item)
+                @if ($item->id === $reserve->CliResvType)
+                    {{-- 目的の値が見つかった --}}
+                    @php
+                        $SelectedItem = $item->courseName;
+                    @endphp
+                    @break
+                @endif
+            @endforeach
+            <x-rTextbox name="CliResvType"   type="label"  value="{{ $SelectedItem }}" >{{  __('Resarve type') }}</x-rTextbox>
+
             {{ html()->label('name') }}
 
             <x-rTextbox name="ClitNameKanji" type="label" value="{{ $reserve->ClitNameKanji }}">{{  __('Name Kanji') }}</x-rTextbox>
@@ -26,10 +34,15 @@
             <x-rTextbox name="CliAddrOther"  type="label"  value="{{ $reserve->CliAddrOther }}">{{  __('Address Other') }}</x-rTextbox>
             <x-rTextbox name="CliTel1"       type="label" value="{{ $reserve->CliTel1 }}">{{  __('Phone') }}:</x-rTextbox>
             <x-rTextbox name="CliEMail"      type="label" value="{{ $reserve->CliEMail }}">{{  __('Email') }}:</x-rTextbox>
-            <x-rTextbox name="CliWaysPay"    type="label" value="{{$data['CliWaysPay_text'] ?? $data['CliWaysPay']}}">{{  __('WaysPay') }}</x-rTextbox>
 
-            <x-textarea id="MessageText" attr="label" name="MessageText" value="{{$data['MessageText']}}">{{  __('MessageText') }}</textarea><br>
+            @foreach ($WaysPayList as $item)
+                @if ($item->id === $reserve->CliWaysPay)
+                    <x-rTextbox name="CliWaysPay"    type="label" value="{{ $item->PrName }}">{{  __('WaysPay') }}</x-rTextbox>
+                    @break
+                @endif
+            @endforeach
 
+            <x-rTextarea name="MessageText" attr="label" msgText="{{$reserve->MessageText}}">{{  __('MessageText') }}</x-rTextarea><br>
             <a href="{{route('reserve.edit',$reserve)}}">
                 <x-primary-button>
                     編集
@@ -47,3 +60,4 @@
        </div>
     </div>
 </x-app-layout>
+ 

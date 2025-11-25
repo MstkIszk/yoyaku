@@ -38,7 +38,7 @@ return new class extends Migration
             $table->Text('MessageText')->comment('連絡Memo')->nullable();
             $table->integer('RandomNumber')->comment('確認用乱数')->nullable();
             $table->dateTime('UpdateDate')->comment('状態変更日時');
-            $table->integer('Status')->comment('予約状態');	
+            $table->integer('Status')->comment('予約状態');	//  ReserveStatus 定義
             $table->timestamps();
         });
     }

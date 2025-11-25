@@ -112,7 +112,15 @@ class Reserve extends Model
     }    
     public function product(): BelongsTo
     {
-        return $this->belongsTo(UserProduct::class, 'productID', 'id');
+        return $this->belongsTo(UserProduct::class, 'Productid', 'id');
+    }    
+
+    public function reception(): HasMany
+    {
+        $HasMany = $this->hasMany(ReserveReception::class, 'ReserveID', 'id');
+
+        // 'baseCode' が UserAccessory モデルの 'id' を参照している場合
+        return $HasMany;
     }    
 
     public function accessories(): HasMany

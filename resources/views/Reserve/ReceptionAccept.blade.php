@@ -88,10 +88,11 @@
                                     value="{{ $currentCount }}" min="0" required data-index="{{ $itemIndex }}">
                                 <button type="button" class="quantity-btn plus-btn bg-green-100 text-green-600 rounded-full w-6 h-6 leading-none">+</button>
                             </div>
-                            <input type="hidden" name="items[{{ $itemIndex }}][payType]" value="1">
+                            <input type="hidden" name="items[{{ $itemIndex }}][payType]" value="1">          {{-- 1がコース情報であることを示す --}}
                             <input type="hidden" name="items[{{ $itemIndex }}][index]" value="{{ $price->id }}"> {{-- price IDを送信 --}}
+                            <input type="hidden" name="items[{{ $itemIndex }}][name]" value="{{ $price->priceName ?? '' }}">          {{-- 1がコース情報であることを示す --}}
                             <input type="hidden" name="items[{{ $itemIndex }}][price]" value="{{ $currentPrice }}" class="input-price">
-                            <input type="hidden" name="items[{{ $itemIndex }}][memo]" value="{{ $price->priceName ?? '' }}">
+                            <input type="hidden" name="items[{{ $itemIndex }}][memo]" value="{{ $price->memo ?? '' }}">
                         </td>
                         <td class="text-right subtotal-value">
                             {{ number_format($currentPrice * $currentCount) }}
@@ -117,19 +118,23 @@
                         <td class="text-center">
                             <div class="flex items-center justify-center space-x-2">
                                 <button type="button" class="quantity-btn minus-btn bg-red-100 text-red-600 rounded-full w-6 h-6 leading-none">-</button>
-                                <input type="number" name="items[{{ $index + 1 }}][count]" class="count-input w-12 text-center border rounded-md" 
-                                    value="0" min="0" required data-index="{{ $index + 1 }}">
+                                <input type="number" name="items[{{ $itemIndex }}][count]" class="count-input w-12 text-center border rounded-md" 
+                                    value="0" min="0" required data-index="{{ $itemIndex }}">
                                 <button type="button" class="quantity-btn plus-btn bg-green-100 text-green-600 rounded-full w-6 h-6 leading-none">+</button>
                             </div>
-                            <input type="hidden" name="items[{{ $index + 1 }}][payType]" value="2">
-                            <input type="hidden" name="items[{{ $index + 1 }}][index]" value="{{ $accessory->id }}">
-                            <input type="hidden" name="items[{{ $index + 1 }}][price]" value="{{ $accessory->price }}" class="input-price">
-                            <input type="hidden" name="items[{{ $index + 1 }}][memo]" value="{{ $accessory->memo ?? '' }}">
+                            <input type="hidden" name="items[{{ $itemIndex }}][payType]" value="2">         {{-- 2がオプション情報であることを示す --}}
+                            <input type="hidden" name="items[{{ $itemIndex }}][index]" value="{{ $accessory->id }}">
+                            <input type="hidden" name="items[{{ $itemIndex }}][name]" value="{{ $accessory->productName }}" >
+                            <input type="hidden" name="items[{{ $itemIndex }}][price]" value="{{ $accessory->price }}" class="input-price">
+                            <input type="hidden" name="items[{{ $itemIndex }}][memo]" value="{{ $accessory->memo ?? '' }}">
                         </td>
                         <td class="text-right subtotal-value">
                             0
                         </td>
                     </tr>
+                    @php
+                        $itemIndex++;
+                    @endphp
                 @endforeach
             </tbody>
             <tfoot>

@@ -20,11 +20,24 @@
                 <input type="number" id="CliResvCnt" name="CliResvCnt" required
                     value="{{ old('CliResvCnt',$reserve->CliResvCnt) }}"><br>
 
-                <label for="CliResvType">予約タイプ:</label>
-                <select id="CliResvType" name="CliResvType" required>
-                    <option value="1" {{ old('CliResvType', $reserve->CliResvType) == '1' ? 'selected' : '' }}>タイプ1</option>
-                    <option value="2" {{ old('CliResvType', $reserve->CliResvType) == '2' ? 'selected' : '' }}>タイプ2</option>
-                </select><br>
+                <x-rSelect name="CliResvType" caption="{{ __('Reserve type') }}">
+                    @foreach ($YoyakuTypeList as $item)
+                        {{-- 選択状態の判定ロジック --}}
+                        @php
+                            $isSelected = false;
+                            if ($item->id === $reserve->CliResvType) {
+                                $isSelected = true;
+                            }
+                        @endphp
+
+                        <option 
+                            value="{{ $item->id }}" 
+                            {{ $isSelected ? 'selected' : '' }}
+                        >
+                            {{ $item->courseName }}
+                        </option>
+                    @endforeach
+                </x-rSelect>
 
                 <label for="ClitNameKanji">氏名（漢字）:</label>
                 <input type="text" id="ClitNameKanji" name="ClitNameKanji" required
