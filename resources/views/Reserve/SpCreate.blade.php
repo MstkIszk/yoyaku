@@ -51,9 +51,7 @@
                     @endforeach
                 </fieldset>
 
-                <label for="MessageText">店舗説明:</label>
-                <x-r-text-area name="MessageText" value="{{old('MessageText')}}">店舗説明:</x-rTextbox>
-                <!--textarea id="MessageText" name="MessageText" value="{{old('MessageText')}}"></textarea><br-->
+                <x-rTextarea name="MessageText" msgText="{{old('MessageText')}}">{{ __('Shop guide') }}:</x-rTextarea>
 
                 <x-primary-button class="mt-4">
                     店舗登録

@@ -79,8 +79,7 @@
                         @endforeach
                     </x-rCheckbox>
 
-                    <x-r-text-area name="memo" msgText="{{old('memo',$product->memo)}}">案内:</x-rTextbox>
-
+                    <x-rTextarea name="memo" msgText="{{old('memo',$product->memo)}}">{{ __('guide') }}:</x-rTextarea>
 
                     <button type="submit" class="register-button">
                         更新
