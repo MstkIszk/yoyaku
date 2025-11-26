@@ -25,8 +25,8 @@
                 <table class="list_table">
                     <thead class="bg-gray-50">
                         <tr>
-                            <th class="seqNo">ID</th>
-                            <th class="seqNo">コースコード</th>
+                            {{--<th class="seqNo">ID</th>
+                            <th class="seqNo">コースコード</th>  --}}
                             <th class="seqNo">料金コード</th>
                             <th class="product">料金名</th>
                             <th class="ryokin">平日料金</th>
@@ -41,7 +41,7 @@
                             // 既存のコースデータを取得。渡されていない場合は空のCollectionとして扱う
                             $existingCourses = $courses ?? collect();
                             $minRows = 10;
-                            $priceCodeIx = 1;
+                            $priceCodeIx = 0;
                             // 初期表示する行数は、既存データの件数と最低10行の多い方とする
                             $totalRows = max($minRows, $existingCourses->count());
                         @endphp
@@ -51,11 +51,12 @@
                         @forelse ($userCoursePrices as $index => $price)
 
                         <tr class="hover:bg-gray-50">
-                            <td class="seqNo">
+                            {{-- <td class="seqNo">
                                 <input type="number" name="prices[{{ $index }}][id]" value="{{ $price->id ?? '' }}">
                                 {{ $price->id ?? '-' }}
-                            </td>
+                            </td>--}}
                             <td class="seqNo">
+                                <input type="hidden" name="prices[{{ $index }}][id]" value="{{ $price->id ?? '-1' }}">
                                 <input type="number" name="prices[{{ $index }}][priceCode]" value="{{ $price->priceCode ?? 0 }}" 
                                     class="innerLabel txtWidth_2 text-center" placeholder="表示順">
                             </td>
@@ -74,7 +75,7 @@
                             <td class="text-center status">
                                 <div class="checkbox-line-button">
                                     <div class="checkbox-button-container">
-                                        <input type="checkbox" name="prices[{{ $index }}][IsEnabled]" id="courses-1-IsEnabled" class="checkbox-line" value="1" checked="">
+                                        <input type="checkbox" name="prices[{{ $index }}][IsEnabled]" id="courses-{{ $index }}-IsEnabled" class="checkbox-line" value="1" checked="">
                                         <label class="toggle-label" for="courses-{{ $index }}-IsEnabled"></label>
                                     </div>
                                 </div>
@@ -89,9 +90,7 @@
                         </tr>
 
                         @php
-                            if($price->priceCode >= $priceCodeIx) {
-                                $priceCodeIx = $price->priceCode + 1;
-                            }
+                            $priceCodeIx++;
                         @endphp
                         @empty
                         @endforelse
@@ -100,36 +99,37 @@
                         @for ($index = $existingCourses->count(); $index < $totalRows; $index++)
 
                         <tr class="hover:bg-gray-50">
-                            <td class="seqNo">
+                            {{-- <td class="seqNo">
                                 <input type="number" name="prices[{{ $index }}][id]" value=""
                                     class="innerLabel txtWidth_2 text-center">
-                            </td>
+                            </td>--}}
                             <td class="seqNo">
-                                <input type="number" name="prices[{{ $index }}][priceCode]" value="{{ $priceCodeIx }}0" 
+                                <input type="hidden" name="prices[{{ $index }}][id]" value="">  {{-- IDを未設定とし新規追加として扱う --}}
+                                <input type="number" name="prices[{{ $priceCodeIx }}][priceCode]" value="{{ $priceCodeIx }}0" 
                                     class="innerLabel txtWidth_2 text-center" placeholder="表示順">
                             </td>
                             <td class="product">
-                                <input type="text" name="prices[{{ $index }}][priceName]" value="" 
+                                <input type="text" name="prices[{{ $priceCodeIx }}][priceName]" value="" 
                                     class="innerText txtWidth_90pc" placeholder="料金名 (必須)">
                             </td>
                             <td class="ryokin">
-                                <input type="number" name="prices[{{ $index }}][weekdayPrice]" value="0"
+                                <input type="number" name="prices[{{ $priceCodeIx }}][weekdayPrice]" value="0"
                                     class="innerText ryokin" placeholder="0">
                             </td>
                             <td class="ryokin">
-                                <input type="number" name="prices[{{ $index }}][weekendPrice]" value="0"
+                                <input type="number" name="prices[{{ $priceCodeIx }}][weekendPrice]" value="0"
                                     class="innerText ryokin" placeholder="0">
                             </td>
                             <td class="text-center status">
                                 <div class="checkbox-line-button">
                                     <div class="checkbox-button-container">
-                                        <input type="checkbox" name="prices[{{ $index }}][IsEnabled]" id="courses-1-IsEnabled" class="checkbox-line" value="1" checked="">
-                                        <label class="toggle-label" for="courses-{{ $index }}-IsEnabled"></label>
+                                        <input type="checkbox" name="prices[{{ $priceCodeIx }}][IsEnabled]" id="courses-{{ $priceCodeIx }}-IsEnabled" class="checkbox-line" value="1" checked="">
+                                        <label class="toggle-label" for="courses-{{ $priceCodeIx }}-IsEnabled"></label>
                                     </div>
                                 </div>
                             </td>
                             <td class="memo">
-                                <input type="text" name="prices[{{ $index }}][memo]" value=""
+                                <input type="text" name="prices[{{ $priceCodeIx }}][memo]" value=""
                                     class="form-input block w-full border-gray-300 rounded-md shadow-sm text-sm" placeholder="備考">
                             </td>
                             <td class="px-3 py-2 whitespace-nowrap text-center">
