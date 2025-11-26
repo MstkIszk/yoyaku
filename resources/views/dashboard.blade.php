@@ -63,7 +63,6 @@
                                     <th scope="col">定員</th>
                                     <th scope="col">料金</th>
                                     <th scope="col">操作</th>
-                                    <th scope="col" ><span class="sr-only">編集</span></th>
                                 </tr>
                             </thead>
                             <tbody class="bg-white divide-y divide-gray-200">
@@ -103,47 +102,69 @@
                                             @if ($product->productCourses->isEmpty())
                                                 <p class="text-xs text-gray-500 italic">コースが登録されていません。</p>
                                             @else
-                                                <table class="min-w-full text-xs bg-white border border-gray-200 rounded-lg">
+                                                <table class="list_table sub_table">
                                                     <thead class="bg-gray-100">
                                                         <tr>
                                                             <th class="px-2 py-1 text-left font-medium text-gray-600">コース名</th>
-                                                            <th class="px-2 py-1 text-right font-medium text-gray-600">平日料金</th>
-                                                            <th class="px-2 py-1 text-right font-medium text-gray-600">休日料金</th>
-                                                            <th class="px-2 py-1 text-center font-medium text-gray-600">状態</th>
+                                                            <th class="px-2 py-1 text-right font-medium text-gray-600">料金体系</th>
+                                                            <th class="price">平日料金</th>
+                                                            <th class="price">休日料金</th>
+                                                            <th class="status">状態</th>
                                                         </tr>
                                                     </thead>
                                                     <tbody>
                                                     
-                                                    {{-- @foreach ($product->courses as $course) --}}
+
+                                                    
                                                     @foreach ($product->productCourses as $course)
-                                                        <tr class="border-t border-gray-100 hover:bg-yellow-50 {{ $course->IsEnabled == 0 ? 'opacity-70' : '' }}">
+                                                        {{-- 1. コースに紐づく料金体系の数を取得 (rowspanの値) --}}
+                                                        @php
+                                                            // 料金設定がなければ rowspan は 1、あればその数
+                                                            $priceCount = $course->userCoursePrices->count();
+                                                            $rowspanValue = $priceCount > 0 ? $priceCount : 1; 
+                                                            $isFirstPriceRow = true; // 最初の料金行フラグ
+                                                        @endphp
+                                                        
+                                                        {{-- 2. 料金体系のループを開始 --}}
+                                                        @forelse ($course->userCoursePrices as $price)
+                                                            <tr class="border-t border-gray-100 hover:bg-yellow-50 {{ $course->IsEnabled == 0 ? 'opacity-70' : '' }}">
+                                                                
+                                                                {{-- 2-1. コース名（最初の行のみ表示し、rowspanを設定） --}}
+                                                                @if ($isFirstPriceRow)
+                                                                    <td class="px-2 py-1 text-gray-800" rowspan="{{ $rowspanValue }}">{{ $course->courseName }}</td>
+                                                                @endif
+
+                                                                {{-- 2-2. 料金体系のデータ --}}
+                                                                <td class="px-2 py-1 text-left text-gray-700">{{ $price->priceName }}</td>
+                                                                <td class="px-2 py-1 text-right text-gray-700">{{ number_format($price->weekdayPrice) }}</td>
+                                                                <td class="px-2 py-1 text-right text-gray-700">{{ number_format($price->weekendPrice) }}</td>
+                                                                
+                                                                {{-- 2-3. 状態（〇/×）（最初の行のみ表示し、rowspanを設定） --}}
+                                                                @if ($isFirstPriceRow)
+                                                                    <td class="px-2 py-1 text-center" rowspan="{{ $rowspanValue }}">
+                                                                        @if ($course->IsEnabled == 1)
+                                                                            <span class="text-green-500">〇</span>
+                                                                        @else
+                                                                            <span class="text-red-500">×</span>
+                                                                        @endif
+                                                                    </td>
+                                                                @endif
+
+                                                            </tr>
+                                                            {{-- 最初の料金行が終わったことを示すフラグをリセット --}}
+                                                            @php $isFirstPriceRow = false; @endphp
+                                                        @empty
+                                                            {{-- 料金設定がない場合（userCoursePricesが空の場合）の処理 --}}
+                                                            <tr class="border-t border-gray-100 hover:bg-yellow-50 {{ $course->IsEnabled == 0 ? 'opacity-70' : '' }}">
+                                                                {{-- コース名（rowspan=1） --}}
                                                                 <td class="px-2 py-1 text-gray-800">{{ $course->courseName }}</td>
 
-
-                                                                {{-- コース料金（UserCoursePrice）のデータを表示するセル（colspan="2"で結合） --}}
-                                                                <td colspan="2" class="px-2 py-1 text-left text-gray-700">
-                                                                    {{-- userCoursePricesリレーションをループして表示 --}}
-                                                                    @if ($course->userCoursePrices->isEmpty())
-                                                                        <span class="text-xs text-red-500 italic">料金設定がありません。</span>
-                                                                    @else
-                                                                        @foreach ($course->userCoursePrices as $price)
-                                                                            <div class="mb-1 last:mb-0">
-                                                                                <span class="font-medium text-gray-800">{{ $price->priceName }}</span>:
-                                                                                平日:¥{{ number_format($price->weekdayPrice) }} 
-                                                                                休日:¥{{ number_format($price->weekendPrice) }}
-                                                                            </div>
-                                                                        @endforeach
-                                                                    @endif
+                                                                {{-- 料金設定がない旨をcolspan=3で表示 --}}
+                                                                <td colspan="3" class="px-2 py-1 text-left text-gray-700">
+                                                                    <span class="text-xs text-red-500 italic">料金設定がありません。</span>
                                                                 </td>
 
-                                                                {{--
-                                                                <td class="px-2 py-1 text-right text-gray-700">
-                                                                    平日:¥{{ number_format($course->weekdayPrice) }}
-                                                                </td>
-                                                                <td class="px-2 py-1 text-right text-gray-700">
-                                                                    休日:¥{{ number_format($course->weekendPrice) }}
-                                                                </td>
-                                                                --}}
+                                                                {{-- 状態（〇/×）（rowspan=1） --}}
                                                                 <td class="px-2 py-1 text-center">
                                                                     @if ($course->IsEnabled == 1)
                                                                         <span class="text-green-500">〇</span>
@@ -152,7 +173,11 @@
                                                                     @endif
                                                                 </td>
                                                             </tr>
-                                                        @endforeach
+                                                        @endforelse
+                                                    @endforeach
+
+
+
                                                     </tbody>
                                                 </table>
                                             @endif

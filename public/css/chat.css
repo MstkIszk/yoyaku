@@ -334,7 +334,6 @@
   width: 100%;
   border-collapse:separate;
   border-spacing: 0;
-
 }
 
 .list_table  th:first-child{
@@ -355,6 +354,10 @@
   border-bottom: 1px solid #3c6690;
   box-shadow: 0px 1px 1px rgba(255,255,255,0.3) inset;
   padding: 2px 0;
+}
+
+.sub_table th {
+  background: linear-gradient(#bc9e82,#885522);
 }
 
 .list_table  td{
@@ -391,6 +394,9 @@
   text-align: center;
 }
 @media (max-width: 640px) {
+  .list_table {
+    font-size : 0.8rem;
+  }
   .list_table  .date_period{
     width: 5rem;
   }
