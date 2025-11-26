@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/png" href="/images/favicon-32x32.png">
     <title>予約受付 | {{ $reserve->product->productName ?? '受付画面' }}</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>

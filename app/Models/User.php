@@ -37,6 +37,7 @@ class User extends Authenticatable
         'spTel2',
         'spEMail',
         'spURL',
+        'spResvType',
         'spMsgText',
     ];
 

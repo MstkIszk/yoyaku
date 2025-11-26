@@ -1,6 +1,9 @@
 <?php
 namespace Database\Seeders;
 
+//　Seeder 実行 コマンド
+// php artisan db:seed --class=ShopWaysPaysSeeder
+
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 

@@ -41,7 +41,7 @@ return new class extends Migration
             $table->string('spTel2')->comment('電話番号２')->default("");
             $table->string('spEMail')->comment('メールアドレス')->default("");
             $table->string('spURL')->comment('URL')->default("");
-            $table->integer('spResvType')->comment('予約タイプ')->default(1);	
+            $table->integer('spResvType')->comment('予約タイプ')->default(1);	//  BIT0:ネット予約可否
             $table->Text('spMsgText')->comment('連絡');
 
             $table->rememberToken();

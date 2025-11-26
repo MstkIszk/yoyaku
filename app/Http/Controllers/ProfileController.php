@@ -60,17 +60,25 @@ class ProfileController extends Controller
             'baseTel1' => ['required', 'string', 'max:255'],
             'baseTel2' => ['max:255'],
         ]);
+        $formattedZipCode = zipCodeFormat($request->baseAddrZip);
+        $formattedTel1 = telNoFormat($request->baseTel1); // デフォルトは元の値
+        $formattedTel2 = telNoFormat($request->baseTel2); // デフォルトは元の値
+        $ResvTypeBit = 0;
+        if($request->has('spResvType')){
+            $ResvTypeBit = $request->spResvType;
+        }
 
         $user->spName = $request->baseNameKanji;
         $user->spNameKana = $request->baseNameKana;
-        $user->spAddrZip = $request->input('p-postal-code'); // ハイフン付き郵便番号に対応
+        $user->spAddrZip = $formattedZipCode; // ハイフン付き郵便番号に対応
         $user->spAddrPref = $request->baseAddrPref;
         $user->spAddrCity = $request->baseAddrCity;
         $user->spAddrOther = $request->baseAddrOther;
-        $user->spTel1 = $request->baseTel1;
-        $user->spTel2 = $request->baseTel2;
+        $user->spTel1 = $formattedTel1;
+        $user->spTel2 = $formattedTel2;
         $user->spEMail = $request->baseEMail;
         $user->spURL = $request->baseURL;
+        $user->spResvType = $ResvTypeBit;
         $user->spMsgText = $request->MessageText;
         $user->save();
 

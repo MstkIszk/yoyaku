@@ -31,6 +31,20 @@
         <x-rTextbox name="baseTel2" type="tel" value="{{old('baseTel2')}}">{{ __('phone') }}2:</x-rTextbox>
         <x-rTextbox name="baseEMail" type="email" required value="{{old('Email')}}">{{ __('Email') }}:</x-rTextbox>
         <x-rTextbox name="baseURL" type="url" value="{{old('baseURL')}}">URL:</x-rTextbox>
+        <x-rCheckbox name="ResvTypeBit" caption="予約タイプ"> 
+            <div class="checkbox-line">
+                <input type="checkbox" name="spResvType" value="1" id="spResvType"
+                @checked(
+                    // 1. フォーム送信でチェックONだった場合に '1' が返る (old()の標準動作)
+                    old('spResvType') == 1 || 
+                    
+                    // 2. フォーム送信がない場合（初回ロード/リダイレクト時）にビットマスクの0ビット目をチェック
+                    (is_null(old('spResvType')) && (($reserve->spResvType ?? 0) & 1))
+                )
+                >
+                <label for="spResvType">ネット予約可能</label>
+            </div>
+        </x-rCheckbox>
         <x-rTextarea name="MessageText" msgText="{{old('Guide message')}}">{{ __('notifications') }}:</x-rTextarea><br>
 
         <div class="flex items-center justify-end mt-4">

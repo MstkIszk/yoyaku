@@ -2,6 +2,9 @@
 
 namespace Database\Seeders;
 
+//　Seeder 実行 コマンド
+// php artisan db:seed --class=ShopReservTypesSeeder
+
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;

@@ -4,8 +4,9 @@
         <x-article-title caption="{{ __('Profile Information') }}" />
     </header>
 
-    <form method="post" action="{{ route('profile.update') }}" class="mt-6 space-y-6">
-        @csrf
+    {{-- <form method="post" action="{{ route('profile.update') }}" class="mt-6 space-y-6"> --}}
+     <form method="post" action="{{ route('userinf.update') }}" class="mt-6 space-y-6">
+       @csrf
         @method('patch')
 
         <!-- Name -->
@@ -45,39 +46,29 @@
 
         <hr>
         <script src="https://yubinbango.github.io/yubinbango/yubinbango.js" charset="UTF-8"></script>
-
-        <x-input-error :messages="$errors->get('baseNameKanji')" class="mt-2" />
         <x-rTextbox name="baseNameKanji" required value="{{Auth::user()->spName}}">{{ __('Shop name') }}</x-rTextbox>
-
-        <x-input-error :messages="$errors->get('baseNameKana')" class="mt-2" />
         <x-rTextbox name="baseNameKana" required value="{{Auth::user()->spNameKana}}">{{ __('Shop name') }}{{ __('(KANA)') }}</x-rTextbox>
         
         <label>{{ __('validation.attributes.address') }}</label>
         <span class="p-country-name" style="display:none;">Japan</span>
 
-        <x-input-error :messages="$errors->get('baseAddrZip')" class="mt-2" />
-        <x-rTextbox class="p-postal-code " name="baseAddrZip" required value="{{Auth::user()->spAddrZip}}">{{ __('postal code') }}:</x-rTextbox>
-
-        <x-input-error :messages="$errors->get('baseAddrPref')" class="mt-2" />
+        <x-rTextbox name="baseAddrZip"  class="p-postal-code " required value="{{Auth::user()->spAddrZip}}">{{ __('postal code') }}:</x-rTextbox>
         <x-rTextbox name="baseAddrPref" class="p-region " required value="{{Auth::user()->spAddrPref}}">{{ __('province') }}:</x-rTextbox>
-
-        <x-input-error :messages="$errors->get('baseAddrCity')" class="mt-2" />
         <x-rTextbox name="baseAddrCity" class="p-locality "  required value="{{Auth::user()->spAddrCity}}">{{ __('municipality') }}:</x-rTextbox>
-
-        <x-input-error :messages="$errors->get('baseAddrOther')" class="mt-2" />
         <x-rTextbox name="baseAddrOther" class="p-street-address p-extended-address "  required value="{{Auth::user()->spAddrOther}}">{{ __('village') }}:</x-rTextbox>
-
-        <x-input-error :messages="$errors->get('baseTel1')" class="mt-2" />
         <x-rTextbox name="baseTel1" type="tel" value="{{Auth::user()->spTel1}}">{{ __('phone') }}1:</x-rTextbox>
-
-        <x-input-error :messages="$errors->get('baseTel2')" class="mt-2" />
         <x-rTextbox name="baseTel2" type="tel" value="{{Auth::user()->spTel2}}">{{ __('phone') }}2:</x-rTextbox>
-
-        <x-input-error :messages="$errors->get('baseEMail')" class="mt-2" />
         <x-rTextbox name="baseEMail" type="email" required value="{{Auth::user()->spEMail}}">{{ __('Email') }}:</x-rTextbox>
-
-        <x-input-error :messages="$errors->get('baseURL')" class="mt-2" />
         <x-rTextbox name="baseURL" type="url" required value="{{Auth::user()->spURL}}">URL:</x-rTextbox>
+        <x-rCheckbox name="ResvTypeBit" caption="予約設定"> 
+            <div class="checkbox-line">
+                <input type="checkbox" name="spResvType" value="1" id="spResvType"
+                    {{-- old() の値に応じてチェック状態を復元 --}}
+                    @checked( Auth::user()->spResvType & 1 )
+                >
+                <label for="spResvType">ネット予約可能</label>
+            </div>
+        </x-rCheckbox>
 
         <label for="MessageText">{{ __('validation.attributes.guide_text') }}:</label><br>
         <textarea id="MessageText" name="MessageText" >{{Auth::user()->spMsgText}}</textarea><br>

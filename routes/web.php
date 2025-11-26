@@ -57,7 +57,7 @@ Route::middleware('auth')->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 
     Route::get('userinfedit', [ProfileController::class, 'userinfedit'])->name('userinf.edit');
-    Route::put('userinfupdate', [ProfileController::class, 'userinfupdate'])->name('userinf.update');
+    Route::patch('userinfupdate', [ProfileController::class, 'userinfupdate'])->name('userinf.update');
 
     // 店舗別予約 View表示の初期画面ロード
     Route::get('/reservelist', [ProfileController::class, 'reserveList'])->name('userinf.rindex');

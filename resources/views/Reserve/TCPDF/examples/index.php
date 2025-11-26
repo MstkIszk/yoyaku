@@ -11,6 +11,7 @@ echo '<'.'?'.'xml version="1.0" encoding="UTF-8"'.'?'.'>';
 <meta name="description" content="TCPDF is a PHP class for generating PDF documents on the fly" />
 <meta name="author" content="Nicola Asuni" />
 <meta name="keywords" content="Examples, TCPDF, PDF, PHP class" />
+<link rel="icon" type="image/png" href="/images/favicon-32x32.png">
 </head>
 
 <body>

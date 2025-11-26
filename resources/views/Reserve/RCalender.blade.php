@@ -172,6 +172,7 @@
                     const todayMM = ('0' + (today.getMonth() + 1)).slice(-2); // 月は0から始まるため+1し、桁数を2桁に調整
                     const todayDD = ('0' + today.getDate()).slice(-2);
                     var chkDD = 0;
+                    const bCanWebYoyaku = {{ $ShopInf->spResvType }} & 1;
                     @if (Auth::check() && Auth::user()->id == $ShopInf->id)
                         const isMyPage = true;
                     @else
@@ -398,18 +399,26 @@
                                             weekStr += '<div class="yoyaku_cnt">' + zanSeki + '</div>';
                                     
                                             if((operatingCode == 1) && (dayInfo.day > chkDD)) {   //  明日以降ならば予約ボタンを表示
-                                                weekStr += '<button class="yoyaku_button'; 
-                                                if(isMyPage) {
-                                                    // 枠内右下に表示
-                                                    weekStr += ' yoyaku_button_small';
-                                                }
-                                                weekStr += '" id="Yoyaku' + dayInfo.day + 
-                                                        '" onclick="openYoyakuInput(' + dayInfo.day + ')" ';  
+                                                if(isMyPage || bCanWebYoyaku) {
+                                                    if(isMyPage) {
+                                                        // 枠内右下に表示
+                                                        weekStr += '<button class="yoyaku_button yoyaku_button_small';
+                                                    }
+                                                    else if(bCanWebYoyaku) {
+                                                        //  WEB予約可能
+                                                        weekStr += '<button class="yoyaku_button'; 
+                                                    }
+                                                    weekStr += '" id="Yoyaku' + dayInfo.day + 
+                                                            '" onclick="openYoyakuInput(' + dayInfo.day + ')" ';  
 
-                                                if(zanSeki <= 0) {
-                                                    weekStr += 'disabled';
+                                                    if(zanSeki <= 0) {
+                                                        weekStr += 'disabled';
+                                                    }
+                                                    weekStr += '>予約</button>';  
                                                 }
-                                                weekStr += '>予約</button>';  
+                                                else {
+                                                    weekStr += '<div class="cyouka_view"></div>';  
+                                                }
                                             }
                                             else {
                                                 // stars の数に応じたクラス名を生成
