@@ -1,0 +1,54 @@
+#以下reservテーブルのテストデータを生成
+
+        Schema::create('reserv', function (Blueprint $table) {
+            $table->id();
+            $table->integer('OrderNo')->comment('予約番号');
+            $table->foreignId('Baseid')->comment('予約先店コード');   //  usersテーブルの id を参照
+            $table->foreignId('Productid')->comment('予約商品');      //  user_productsのID
+            $table->foreignId('Courseid')->comment('コース');         //  user_courseのID
+            $table->string('KeyStr')->comment('照会時に比較する');	
+            $table->dateTime('ReqDate')->comment('予約日時');	
+            $table->dateTime('ReserveDate')->comment('予約日');
+            $table->integer('ClitNo')->comment('予約番号');	
+            $table->string('ClitNameKanji')->comment('氏名漢字');	
+            $table->string('ClitNameKana')->comment('氏名カナ');	
+            $table->string('CliAddrZip')->comment('郵便番号');	
+            $table->string('CliAddrPref')->comment('県名');	
+            $table->string('CliAddrCity')->comment('市町村名');	
+            $table->string('CliAddrOther')->comment('地区名');	
+            $table->string('CliTel1')->comment('電話番号');	
+            $table->string('CliEMail')->comment('メールアドレス')->nullable();	
+            $table->integer('CliResvType')->comment('予約タイプ');	
+            $table->integer('CliResvCnt')->comment('予約人数');	
+            $table->integer('CliWaysPay')->comment('支払い方法');	
+            $table->Text('MessageText')->comment('連絡Memo')->nullable();
+            $table->integer('RandomNumber')->comment('確認用乱数')->nullable();
+            $table->dateTime('UpdateDate')->comment('状態変更日時');
+            $table->integer('Status')->comment('予約状態');	
+            $table->timestamps();
+        });
+    }
+##データの設定要領は以下
+
+・OrderNoは 8から連番
+・Baseid　５固定
+・Productid 3固定
+・Courseid 1固定
+・KeyStr　"ABCDFEG"固定
+・ReqDate		2025/11/1 7:00 ～ 2025/11/20 21:00 までの日付
+・ReserveDate	2025/11/1 ～ 2025/12/31 までの日付、 時刻は7:00固定 
+・ClitNo		1固定
+・ClitNameKanji	任意の漢字氏名
+・ClitNameKana	ClitNameKanjiのカナ名
+・CliAddrZip、CliAddrPref、CliAddrCity、CliAddrOther は長野県の任意の住所
+・CliTel1は長野県の任意の電話番号
+・CliEMail 長野県の任意のEMailアドレス
+・CliResvType　Courseidと同じ値
+・CliResvCnt １～４の値
+・CliWaysPay　１固定
+・MessageText　"テスト"＋ClitNameKanjiの設定値
+・RandomNumber　1000～9999までの乱数
+・UpdateDate　本日日付
+・Status　１固定
+
+##データはReserveDate指定の１日につき 4～6件作成する

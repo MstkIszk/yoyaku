@@ -1,0 +1,29 @@
+#休日判定を行う
+
+
+##関数呼び出し
+$isHoriday = GetHoriday($date);
+
+##GetHoriday($date)関数では 日付(YYYY-MM-DD)を受け取る
+
+###渡された日付が土曜日または日曜日ならば true を返す
+###その他の日付ならば UserCalenderモデルで user_calendersテーブルを検索する
+####user_calendersテーブルの定義は以下
+
+    public function up(): void
+    {
+        Schema::create('user_calenders', function (Blueprint $table) {
+            $table->increments('id');       // 自動加算のID
+            $table->dateTime('destDate')->comment('対象日付');      // 対象日付
+            $table->integer('datetype')->comment('日付タイプ');     // 日付タイプ (1:土曜, 2:日曜, 3:祭日)
+            $table->string('memo')->nullable()->comment('メモ');    // メモ書き
+            $table->timestamps();
+
+            // 対象日付と店舗IDの組み合わせで重複を防ぐためのユニークインデックスを追加
+            $table->unique(['destDate']);
+        });
+    }
+####渡された日付でテーブルの対象日付に存在するかを検索する
+####存在した場合はture、しない場合はfalse を返す
+
+

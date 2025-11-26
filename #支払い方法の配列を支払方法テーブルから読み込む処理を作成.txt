@@ -1,0 +1,52 @@
+
+#支払い方法の配列を支払方法テーブルから読み込む処理を作成
+##関数名    GetPaysWay($WaysPayBit) {
+        
+	支払方法テーブル　：shop_ways_pays
+    モデル ：ShopWaysPay;
+
+	$WaysPayBitはBit列として使用
+	支払方法テーブルのPrBitと $WaysPayBitをBit AND演算し、0でなければ 
+
+    $PaysWayList に以下の形で格納
+	[
+        [   0  , '現金'    ],
+        [   1  , '銀行振込'  ],
+        [   2  , 'Paypay'    ],
+        [   3  , 'クレジットカード'  ]
+    ];
+
+	作成した配列（リスト）を返すようにする
+
+##テーブル定義
+###        //  メイン商品
+        Schema::create('user_products', function (Blueprint $table) {
+            $table->id();
+            $table->foreignId('baseCode')->comment('店舗ID');      // usersテーブルの id を参照
+            $table->integer('productID')->comment('商品名コード');  //  表示の並び順を指定
+            $table->string('productName')->comment('商品名');      //  対象となるサービス名など
+            $table->integer('IsEnabled')->comment('有効/無効')->default(1);       //  表示対象とするかを指定
+            $table->date('DateStart')->comment('営業開始日');      //  営業期間の指定　開始
+            $table->date('DateEnd')->comment('営業終了日');        //  　　　　　　　　終了
+            $table->time('TimeStart')->comment('開始時刻');
+            $table->time('TimeEnd')->comment('終了時刻'); 
+            $table->integer('capacity')->comment('定員')->default(0);
+            $table->integer('WeekdayPrice')->comment('平日料金')->default(0);
+            $table->integer('WeekendPrice')->comment('休日料金')->default(0);
+            $table->string('AddtionalName')->comment('その他料金名')->default("");
+            $table->integer('AddtionalPrice')->comment('その他料金')->default(0);
+            $table->integer('ResvTypeBit')->comment('予約タイプBit');   // shop_reserv_typessテーブルのRtBitを参照
+            $table->integer('WaysPayBit')->comment('支払い方法Bit');   // shop_ways_paysテーブルのPrBitを参照   
+            $table->string('memo')->comment('メモ');
+
+            $table->timestamps();
+        });
+
+
+###        // 支払方法テーブル
+        Schema::create('shop_ways_pays', function (Blueprint $table) {
+            $table->id();
+            $table->integer('PrBit')->comment('bit割当');
+            $table->string('PrName')->comment('支払方法');
+            $table->timestamps();
+        });

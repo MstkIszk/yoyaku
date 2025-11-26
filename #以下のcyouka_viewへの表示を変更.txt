@@ -1,0 +1,47 @@
+#以下のcyouka_viewへの表示を変更
+
+                                                weekStr += '<span class="cyouka_view">';
+
+                                                if(dayInfo.stars !== undefined && dayInfo.stars > 0) {
+                                                    weekStr += '<div class="cyouka_stars">' + '★'.repeat(dayInfo.stars) + '</div>';
+                                                }
+                                                
+                                                if(dayInfo.memo !== undefined && dayInfo.memo.length > 0) {
+                                                    const formattedMemo = dayInfo.memo.replace(/\r?\n/g, '<br>');
+                                                    weekStr += '<div class="cyouka_memo">' + formattedMemo + '</div>';
+                                                }
+                                                weekStr += '</span>';
+
+##cssの定義は以下
+.cyouka_stars {
+    position: relative;
+    color: #FFD700;    /* 色を濃い金色に変更 */
+    /* 文字に影を追加 */
+    text-shadow: 0 0 4px #FFD700, /* 周囲を明るく光らせる影 */
+                0 0 10px rgba(0, 0, 0, 0.5); /* 立体感を出すための暗い影 */
+    text-align: center;
+    font-size: 1.2rem;
+}
+.cyouka_memo {
+    /*    grid-area: yoyaku;    */
+    position: relative;
+    color: blue;
+    text-align: left;
+}
+
+##cyouka_starsの背景と文字色をdayInfo.starsの値により変化させる
+・dayInfo.stars=0 : 現状の配色
+・dayInfo.stars=1 : 薄い水色
+・dayInfo.stars=2 : 水色
+・dayInfo.stars=3 : 薄い紫
+・dayInfo.stars=4 : 薄い赤
+・dayInfo.stars=5 : 紫　文字色は濃い目
+
+##cyouka_memo 3行以上の場合は３行目の最後に"･･･"を追加
+##cyouka_viewがクリックされたら以下のポップアップを表示
+###画面中央に横300px,縦300pxのポップアップ表示
+###一番上にタイトルバーとして margin:2pxで濃い黄色のバーの背景に青字で{{ dayInfo.day }}日 と　右端に×を表示
+###タイトルバーの下に角丸の水色背景でメッセージ表示エリアを margin:2pxでポップアップ内の残り部分を埋める
+###メッセージ表示エリアにdayInfo.memoを表示
+###タイトルバー右の×がクリックされたらポップアップを閉じる
+

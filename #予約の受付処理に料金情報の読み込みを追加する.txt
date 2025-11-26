@@ -1,0 +1,428 @@
+#予約の受付処理に料金情報の読み込みを追加する
+##現在の問い合わせは以下
+
+        // Reserveテーブルから$reservIDに該当するデータを取得し、関連テーブルをEager Loading
+        $reserve = Reserve::with([
+            // 予約者が紐づく店舗情報 (User)
+            'user' => function ($query) {
+                $query->select('id', 'name'); // nameのみを取得する前提
+            },
+            // 予約された商品 (UserProduct)
+            'product' => function ($query) {
+                $query->select('productID', 'productName'); // productNameのみを取得する前提
+            },
+            // 予約されたコース (UserCourse)
+            'course',
+            // オプション商品 (UserAccessory) - BaseidをbaseCodeとして使用
+            'accessories' => function ($query) {
+                $query->where('IsEnabled', '!=', 0)
+                      ->orderBy('productID'); 
+            }
+        ])
+        ->where('id', $reservID)
+        ->first();
+
+###予約されたコースまでとなっている
+            // 予約されたコース (UserCourse)
+            'course',
+
+###UserCourseモデルは以下
+
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Support\Collection;
+use App\Models\UserCoursePrice;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+
+class UserCourse extends Model
+{
+    use HasFactory;
+
+    /**
+     * The table associated with the model.
+     *
+     * @var string
+     */
+    protected $table = 'user_course';
+
+    /**
+     * The attributes that are mass assignable.
+     *
+     * @var array<int, string>
+     */
+    protected $fillable = [
+        'baseCode',
+        'productID',
+        'courseCode',
+        'courseName',
+        'IsEnabled',
+        'weekdayPrice',
+        'weekendPrice',
+        'memo',
+    ];
+
+
+    /**
+     * 日付として扱う属性
+     * @var array
+     */
+    protected $casts = [
+        'IsEnabled' => 'boolean',
+    ];
+
+    /**
+     * このコースが属するUserProductを取得するリレーション
+     * 外部キー: user_course.productID
+     * 参照元キー: user_products.productID (またはUserProductモデルの$primaryKey)
+     * * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     */
+    public function userProduct(): BelongsTo
+    {
+        // 外部キー('productID')と、親モデル（UserProduct）のキー('productID')を指定
+        return $this->belongsTo(UserProduct::class, 'productID', 'productID');
+    }
+
+    /**
+     * このコースが属する商品（UserProduct）を取得します。
+     */
+    public function product(): BelongsTo
+    {
+        return $this->belongsTo(UserProduct::class, 'productID');
+    }
+
+    public function userCoursePrices(): HasMany
+    {
+        // 外部キー('courseCode')と、親モデル（UserProduct）のキー('productID')を指定
+
+        // 外部キー: UserCoursePriceテーブルの 'courseCode'
+        // ローカルキー: UserCourseテーブルの 'courseCode'
+        // baseCodeとproductIDも一致させるべきですが、ここではcourseCodeのみでシンプルに定義します。
+        // （ただし、異なる商品で同じ courseCode を使用している場合は問題が発生する可能性があります）
+        return $this->hasMany(UserCoursePrice::class, 'courseCode');
+                //->where('baseCode', $this->baseCode); 
+    }
+
+}
+#### userCoursePrices()リレーションを使い、UserCoursePriceの読み込みを追加
+
+#### UserCoursePriceのモデル定義は以下
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+
+/**
+ * @property int $id
+ * @property int $baseCode 店舗ID
+ * @property int $productID 商品名ID
+ * @property int $courseCode コースコード
+ * @property int $priceCode 料金コード
+ * @property string $courseName 料金名
+ * @property int $IsEnabled 有効/無効
+ * @property int $weekdayPrice 平日料金
+ * @property int $weekendPrice 休日料金
+ * @property string $memo メモ書き
+ */
+class UserCoursePrice extends Model
+{
+    use HasFactory;
+
+    protected $table = 'user_course_price';
+
+    protected $fillable = [
+        'baseCode',
+        'productID',
+        'courseCode',
+        'priceCode',
+        'priceName',
+        'IsEnabled',
+        'weekdayPrice',
+        'weekendPrice',
+        'memo',
+    ];
+
+    /**
+     * UserProduct (商品名) とのリレーション
+     */
+    public function userProduct(): BelongsTo
+    {
+        return $this->belongsTo(UserProduct::class, 'productID');
+    }
+
+    /**
+     * UserCourse (コース) とのリレーション (productIDがUserCourseとリレーションされている場合)
+     */
+    public function userCourse(): BelongsTo
+    {
+        // 実際のリレーションキーに合わせて調整してください。
+        // productIDがUserCourseのIDに対応していると仮定します。
+        return $this->belongsTo(UserCourse::class, 'productID'); 
+    }
+    /**
+     * リレーション: この料金体系が属するコースを取得
+     */
+    public function course()
+    {
+        // UserCourseのcourseCodeを参照します
+        return $this->belongsTo(UserCourse::class, 'courseCode', 'courseCode');
+    }
+}
+
+
+------------------------------------------
+
+                <!-- 1. コース商品 -->
+                @php
+                    // 予約人数をデフォルト数量とする
+                    $defaultCourseCount = $reserve->CliResvCnt;
+                    // コースの最初の料金設定のみに予約人数をデフォルトセット
+                    $currentCount = ($itemIndex === 0) ? $defaultCourseCount : 0;                     
+                @endphp
+                <tr data-type="1" data-id="{{ $reserve->Courseid }}" data-price="{{ $coursePrice }}">
+                    <td>
+                        <span class="font-bold text-indigo-700">{{ $reserve->course->courseName ?? 'コース不明' }}</span>
+                        <p class="text-xs text-gray-500">{{ $reserve->course->memo ?? '' }}</p>
+                    </td>
+                    <td class="text-right price-value">{{ number_format($coursePrice) }}</td>
+                    <td class="text-center">
+                        <div class="flex items-center justify-center space-x-2">
+                            <button type="button" class="quantity-btn minus-btn bg-red-100 text-red-600 rounded-full w-6 h-6 leading-none">-</button>
+                            <input type="number" name="items[0][count]" class="count-input w-12 text-center border rounded-md" 
+                                value="{{ $defaultCourseCount }}" min="0" required data-index="0">
+                            <button type="button" class="quantity-btn plus-btn bg-green-100 text-green-600 rounded-full w-6 h-6 leading-none">+</button>
+                        </div>
+                        <input type="hidden" name="items[0][payType]" value="1">
+                        <input type="hidden" name="items[0][index]" value="{{ $reserve->Courseid }}">
+                        <input type="hidden" name="items[0][price]" value="{{ $coursePrice }}" class="input-price">
+                        <input type="hidden" name="items[0][memo]" value="{{ $reserve->course->memo ?? '' }}">
+                    </td>
+                    <td class="text-right subtotal-value">
+                        {{ number_format($coursePrice * $defaultCourseCount) }}
+                    </td>
+                </tr>
+
+------------------------------------------
+
+#以下のコントローラーにも UserCourse に繋がるUserCoursePriceのリレーションを追加して読み込むようにして
+
+    /**
+     * 予約コースの登録・編集画面を表示します。
+     *
+     * @param int $productID 編集対象の商品名ID
+     * @return \Illuminate\View\View
+     */
+    public function create(int $productID)
+    {
+        // 認証ユーザーの取得
+        $user = Auth::user();
+
+        // 指定された productID に紐づく既存のコースを取得
+        // baseCode（店舗ID）も合わせてフィルタリングすることで、他の店舗のデータにアクセスするのを防ぎます。
+        $courses = UserCourse::where('baseCode', $user->id)
+            ->where('productID', $productID)
+            ->orderBy('courseCode') // 表示順（courseCode）でソート
+            ->get();
+        
+        // 予約コースが紐づく商品情報を取得（Viewで商品名を表示するためなど）
+        $product = UserProduct::find($productID);
+
+        // Viewに既存データを渡す
+        return view('user_course.CsCreate', compact('user', 'productID', 'product', 'courses'));
+    }
+
+##UserCoursePriceテーブルは
+UserCoursePrice の courseCode は UserCourseの idを指している
+
+
+
+#Viewの以下のソースにも 
+ファイル名は resources\views\user_course\CsCreate.blade.php
+
+    <div class="py-12">
+        {{-- コントロールパネルのファイル入出力機能 (仮に予約コース用として表示) --}}
+        <x-controltemfileio nameitem="shopname" extension=".course"></x-controltemfileio>
+        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
+            <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
+                <div class="p-6 bg-white border-b border-gray-200">
+                    <h3 class="text-lg font-bold mb-4 border-b pb-2 text-yellow-700">
+                        {{-- productが存在する場合のみ商品名を表示 --}}
+                        {{ __('商品:') }} {{ $product->productName ?? '商品ID ' . $productID }} {{ __('の予約コース一括登録・編集') }}
+                    </h3>
+
+                    <form id="course-form" method="POST" action="{{ route("user_courses.store") }}">
+                        @csrf
+
+                        {{-- 必須の隠しフィールド --}}
+                        <input type="text" name="basecode" value="{{ $user->id }}" style="display: none;">
+                        <input type="text" name="productID" value="{{ $product->id }}" style="display: none;">
+                        <input type="text" name="shopname" value="{{ $user->spName }}" style="display: none;">
+
+                        {{-- エラーメッセージ表示 --}}
+                        @if ($errors->any())
+                            <div class="mb-4 p-4 bg-red-100 border border-red-400 text-red-700 rounded-lg">
+                                <ul>
+                                    @foreach ($errors->all() as $error)
+                                        <li>{{ $error }}</li>
+                                    @endforeach
+                                </ul>
+                            </div>
+                        @endif
+
+                        <div class="overflow-x-auto">
+                            <table id="course-table" class="list_table min-w-full divide-y divide-gray-200">
+                                <thead>
+                                    <tr>
+                                        <th class="txtWidth_2 text-center">{{ __('ID') }}</th>
+                                        <th class="txtWidth_30pc text-left">{{ __('コース名') }}<span class="text-red-500">*</span></th>
+                                        <th class="txtWidth_11 text-right">{{ __('平日料金') }}／{{ __('休日料金') }}
+                                            <span class="text-red-500">*</span>
+                                        </th>
+                                        <th class="txtWidth_2 text-center">{{ __('有効') }}</th>
+                                        <th class="txtWidth_auto text-left">{{ __('メモ') }}</th>
+                                        <th class="txtWidth_3 text-center">{{ __('順序') }}</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="course-body" class="bg-white divide-y divide-gray-200">
+                                    @php
+                                        // 既存のコースデータを取得。渡されていない場合は空のCollectionとして扱う
+                                        $existingCourses = $courses ?? collect();
+                                        $minRows = 10;
+                                        // 初期表示する行数は、既存データの件数と最低10行の多い方とする
+                                        $totalRows = max($minRows, $existingCourses->count());
+                                    @endphp
+
+                                    {{-- 既存データの表示 --}}
+                                    @foreach ($existingCourses as $index => $course)
+                                    <tr class="hover:bg-yellow-50 data-row">
+                                        {{-- ID (2rem幅) --}}
+                                        <td class="py-1 px-2 whitespace-nowrap text-xs text-gray-900 text-center seqNo">
+                                            {{-- 既存レコードのIDを保存するために必須 --}}
+                                            <input type="hidden" name="courses[{{ $index }}][id]" value="{{ $course->id }}">
+                                            <input type="text" name="courses[{{ $index }}][courseCode]" 
+                                                    value="{{ $course->courseCode }}" 
+                                                    class="innerLabel txtWidth_2 text-center" placeholder="自動" readonly>
+                                        </td>
+                                        {{-- コース名 --}}
+                                        <td class="courseName">
+                                            <input type="text" name="courses[{{ $index }}][courseName]" 
+                                                    value="{{ old('courses.' . $index . '.courseName', $course->courseName) }}"
+                                                    class="innerLabel txtWidth_90pc" 
+                                                    placeholder="{{ __('コース名') }}">
+                                        </td>
+                                        {{-- 平日料金 休日料金 --}}
+                                        <td class="price_group">
+                                            {{-- 平日料金 --}}
+                                            <input type="hidden" name="courses[{{ $index }}][weekdayPrice]" 
+                                                    value="{{ old('courses.' . $index . '.weekdayPrice', $course->weekdayPrice) }}"
+                                                    class="innerText ryokin" placeholder="0" min="0" step="1" required>
+                                            {{-- 休日料金 --}}
+                                            <input type="hidden" name="courses[{{ $index }}][weekendPrice]" 
+                                                    value="{{ old('courses.' . $index . '.weekendPrice', $course->weekendPrice) }}"
+                                                    class="innerText ryokin" placeholder="0" min="0" step="1" required>
+
+                                            {{-- 料金変更ページへのリンク。courseIDとして $course->id を渡す --}}
+                                            <a href="{{ route('UserCoursePrice.create', ['course_id' => $course->id]) }}" 
+                                                class="prise-edit-button">
+                                                変更
+                                            </a>
+                                        </td>
+                                        {{-- 有効チェックボックス --}}
+                                        <td class="text-center status">
+                                            <div class="checkbox-line-button">
+                                                <div class="checkbox-button-container">
+                                                    <input type="checkbox" 
+                                                        name="courses[{{ $index }}][IsEnabled]" 
+                                                        id="courses-{{ $index }}-IsEnabled" 
+                                                        class="checkbox-line" 
+                                                        value="1" 
+                                                        {{-- old または $course->IsEnabled の値が 0 以外（真）であれば checked 属性を付与 --}}
+                                                        @checked(old('courses.' . $index . '.IsEnabled', $course->IsEnabled ?? 1))
+                                                    >
+                                                    <label class="toggle-label" for="courses-{{ $index }}-IsEnabled"></label>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        {{-- メモ --}}
+                                        <td class="py-1 px-2 memo">
+                                            <input type="text" name="courses[{{ $index }}][memo]" 
+                                                    value="{{ old('courses.' . $index . '.memo', $course->memo) }}"
+                                                    class="innerText txtWidth_96pc" 
+                                                    placeholder="{{ __('備考/説明') }}">
+                                        </td>
+
+                                        {{-- 行の入れ替えボタン --}}
+                                        <td class="py-1 px-2 text-center row-controls">
+                                            <button type="button" class="updown-button" title="{{ __('上に移動') }}">
+                                                <svg class="w-4 h-4 inline-block" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"></path></svg>
+                                            </button>
+                                            <button type="button" class="updown-button" title="{{ __('下に移動') }}">
+                                                <svg class="w-4 h-4 inline-block" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                                            </button>
+                                        </td>
+                                    </tr>
+                                    @endforeach
+
+
+## <td class="price_group" 内に UserCoursePrice の courseCode が UserCourseの id を指しているものを表示
+
+
+
+#UserCourseの１件に対し、UserCoursePriceは複数存在する
+
+
+                                    {{-- ★ UserCoursePrice のデータを表示する部分 (courseCodeがUserCourseのidを指す) --}}
+
+                                <td class="price_group">
+                                    {{-- 料金変更ページへのリンク。courseIDとして $course->id を渡す --}}
+                                    <a href="{{ route('UserCoursePrice.create', ['course_id' => $course->id]) }}" 
+                                        class="prise-edit-button">
+                                        変更
+                                    </a>
+
+                                    {{-- ★ UserCoursePrice のデータを表示する部分 (courseCodeがUserCourseのidを指す) --}}
+                                    @php
+                                        // UserCoursePriceから平日料金と休日料金を特定する（構造に依存）
+                                        // ここでは、pricesリレーションから2つの価格を取り出すと仮定
+                                        $weekdayPrice = $course->prices->firstWhere('priceType', 1) ? $course->prices->firstWhere('priceType', 1)->price : ($course->weekdayPrice ?? 0);
+                                        $weekendPrice = $course->prices->firstWhere('priceType', 2) ? $course->prices->firstWhere('priceType', 2)->price : ($course->weekendPrice ?? 0);
+                                        // pricesリレーションにデータがない場合、既存のweekdayPrice/weekendPriceを使用（互換性維持のため）
+                                    @endphp
+                                    
+                                    <div class="text-right text-xs mt-1">
+                                        {{-- 平日料金 --}}
+                                        <span class="text-gray-600">{{ number_format($weekdayPrice) }}円</span>
+                                        <span class="text-gray-400">／</span>
+                                        {{-- 休日料金 --}}
+                                        <span class="text-gray-600">{{ number_format($weekendPrice) }}円</span>
+                                    </div>
+                                    
+                                    {{-- 平日料金 (hidden) --}}
+                                    <input type="hidden" name="courses[{{ $index }}][weekdayPrice]" 
+                                            value="{{ old('courses.' . $index . '.weekdayPrice', $weekdayPrice) }}"
+                                            class="innerText ryokin" placeholder="0" min="0" step="1" required>
+                                    {{-- 休日料金 (hidden) --}}
+                                    <input type="hidden" name="courses[{{ $index }}][weekendPrice]" 
+                                            value="{{ old('courses.' . $index . '.weekendPrice', $weekendPrice) }}"
+                                            class="innerText ryokin" placeholder="0" min="0" step="1" required>
+                                </td>
+
+
+#UserCourseの１件に対し、UserCoursePriceは複数存在する
+
+##"price"リレーションの関数は複数取得となっている？
+
+###price()リレーションの関数も表示してください
+
+##UserCoursePrice のデータを表示する部分をループで 
+
+priceName　平 ￥weekdayPrice　休￥weekendPrice と表示
+
+### weekdayPrice とweekendPrice は３桁区切りのカンマを挿入して表示
