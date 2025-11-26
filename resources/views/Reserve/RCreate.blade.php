@@ -9,7 +9,6 @@
         <x-controltemfileio nameitem="ClitNameKanji" extension=".yoyaku"></x-controltemfileio>
 
         <x-message :message="session('message')" />
-        <script src="https://yubinbango.github.io/yubinbango/yubinbango.js" charset="UTF-8"></script>
 
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
         
@@ -19,7 +18,6 @@
                 <input type="hidden" name="Baseid" value="{{ $user->id }}">
                 <input type="hidden" name="Productid" value="{{ $Product->id }}">
 
-                <span class="p-country-name" style="display:none;">Japan</span>
                 <x-rTextbox name="CliTel1" type="tel" value="{{old('CliTel1')}}">電話番号:</x-rTextbox>
                 <input type="button" id="refTelButton" value="　検索　" />
 						<Label id="RefMessage">過去にご予約頂いた方は、最終予約情報から住所氏名等を引用します。</Label>
@@ -67,7 +65,9 @@
                 <x-rTextbox name="ClitNameKanji" required value="{{old('ClitNameKanji')}}">氏名（漢字）</x-rTextbox>
                 <x-rTextbox name="ClitNameKana" required value="{{old('ClitNameKana')}}">カナ氏名:</x-rTextbox>
                 <label>住所</label>
-                <x-rTextbox class="p-postal-code " name="CliAddrZip" required value="{{old('CliAddrZip')}}">郵便番号:</x-rTextbox>
+                <script src="https://yubinbango.github.io/yubinbango/yubinbango.js" charset="UTF-8"></script>
+                <span class="p-country-name" style="display:none;">Japan</span>
+                <x-rTextbox class="p-postal-code" name="CliAddrZip" required value="{{old('CliAddrZip')}}">郵便番号:</x-rTextbox>
                 <x-rTextbox name="CliAddrPref" class="p-region " required value="{{old('CliAddrPref')}}">県名:</x-rTextbox>
                 <x-rTextbox name="CliAddrCity" class="p-locality "  required value="{{old('CliAddrCity')}}">市町村名:</x-rTextbox>
                 <x-rTextbox name="CliAddrOther" class="p-street-address p-extended-address "  required value="{{old('CliAddrOther')}}">地域名:</x-rTextbox>
