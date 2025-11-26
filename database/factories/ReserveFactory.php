@@ -53,8 +53,8 @@ class ReserveFactory extends Factory
 
         return [
             // OrderNo は Seeder 側で設定
-            'Baseid' => 5,
-            'Productid' => 3,
+            'Baseid' => 1,
+            'Productid' => 1,
             'Courseid' => 1,
             'KeyStr' => 'ABCDFEG',
             'ReqDate' => $reqDate,

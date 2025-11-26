@@ -23,7 +23,7 @@ class ReserveSeeder extends Seeder
         $endDate = Carbon::create(2025, 12, 31);
         
         // OrderNo の初期値 (8から連番)
-        $orderNo = 8;
+        $orderNo = 1;
 
         // 期間内の全ての日付に対してループ
         for ($date = $startDate; $date->lte($endDate); $date->addDay()) {
@@ -34,6 +34,7 @@ class ReserveSeeder extends Seeder
             for ($i = 0; $i < $reservationCount; $i++) {
                 
                 // Factoryを使用してデータを生成
+                //  定義 : database\factories\ReserveFactory.php
                 $data = Reserve::factory()->make([
                     'ReserveDate' => $date->format('Y-m-d') . ' 07:00:00',
                 ])->toArray();
