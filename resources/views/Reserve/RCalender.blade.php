@@ -402,21 +402,25 @@
                                     
                                             if((operatingCode == 1) && ((reqDayNum + dayInfo.day) > todayNum)) {   //  明日以降ならば予約ボタンを表示
                                                 if(isMyPage || bCanWebYoyaku) {
-                                                    if(isMyPage) {
-                                                        // 枠内右下に表示
-                                                        weekStr += '<button class="yoyaku_button yoyaku_button_small';
+                                                    if(zanSeki > 0) {
+                                                        if(isMyPage) {
+                                                            // 枠内右下に表示
+                                                            weekStr += '<button class="yoyaku_button yoyaku_button_small';
+                                                        }
+                                                        else if(bCanWebYoyaku) {
+                                                            //  WEB予約可能
+                                                            weekStr += '<button class="yoyaku_button'; 
+                                                        }
+                                                        weekStr += '" id="Yoyaku' + dayInfo.day + 
+                                                                '" onclick="openYoyakuInput(' + dayInfo.day + ')">予約</button>';
                                                     }
-                                                    else if(bCanWebYoyaku) {
-                                                        //  WEB予約可能
-                                                        weekStr += '<button class="yoyaku_button'; 
+                                                    else {
+                                                        weekStr += '<span class="disabled_yoyaku_button';
+                                                        if(isMyPage) {
+                                                            weekStr += ' yoyaku_button_small';
+                                                        }                                                        
+                                                        weekStr += '">満席</span>';
                                                     }
-                                                    weekStr += '" id="Yoyaku' + dayInfo.day + 
-                                                            '" onclick="openYoyakuInput(' + dayInfo.day + ')" ';  
-
-                                                    if(zanSeki <= 0) {
-                                                        weekStr += 'disabled';
-                                                    }
-                                                    weekStr += '>予約</button>';  
                                                 }
                                                 else {
                                                     weekStr += '<div class="cyouka_view"></div>';  

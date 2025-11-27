@@ -204,6 +204,36 @@ a {
     display: inline-block;     
     clip-path: polygon(0 10%,81% 10%,80% 0,100% 50%,80% 100%,80% 90%,0 90%,0 10%);       
 }
+.disabled_yoyaku_button {
+    /* サイズと配置は維持 */
+    grid-area: names; /* または元の grid-area: yoyaku; */
+    height: 4rem;
+    width: 94%;
+    vertical-align: bottom;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+
+    /* --- 新しいスタイル定義 --- */
+    
+    /* 背景色: グレーの角丸矩形 */
+    background-color: #e0e0e0; /* 明るいグレー */
+    border: 1px solid #a0a0a0; /* 濃いめのグレーの枠線 */
+    border-radius: 4px; /* 角丸を適用 (8px) */
+    
+    /* 文字色: 赤系 */
+    color: #cc0000; /* 鮮やかな赤 */
+    
+    /* 文字装飾は維持 */
+    font-weight: bold;
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
+    letter-spacing: 0.5px;
+    font-size: 1.3em; 
+
+    /* クリックできない状態を強調するためカーソルを変更 */
+    cursor: not-allowed; 
+}
+
 /* 自分の店の場合の予約ボタン */
 .yoyaku_button_small {
     height: 2rem;
