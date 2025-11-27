@@ -375,10 +375,10 @@ class ReserveController extends Controller
                 Mail::send($reservationMail);
             }
 
-            $request->session()->flash('message','確認メールを送信しました');
+            $request->session()->flash('success','確認メールを送信しました');
         } catch (\Exception $e) {
             Log::error('予約確認メール送信エラー: ' . $e->getMessage());
-            $request->session()->flash('message','確認メールの送信に失敗しました');
+            $request->session()->flash('error','確認メールの送信に失敗しました');
         }
         //  一覧のページに戻る
         return redirect()->route('reserve.calender',
@@ -395,12 +395,12 @@ class ReserveController extends Controller
         if ($result) {
             $result->status = ReserveStatus::Accept;
             $result->save();
-            $request->session()->flash('message','予約が確定しました');
+            $request->session()->flash('success','予約が確定しました');
             return view("Reserve.RShow", compact('result'));
         } 
         else {
             // レコードが見つからなかった場合の処理
-            $request->session()->flash('message','確認が見つかりません');
+            $request->session()->flash('error','確認が見つかりません');
         }
     }
     //  予約の照会
@@ -445,7 +445,7 @@ class ReserveController extends Controller
 
         if ((!$reserve) || ($reserve->count() <= 0)) {
             // レコードが見つからなかった場合の処理
-            $request->session()->flash('message','指定された電話番号での予約は見つかりません');
+            $request->session()->flash('error','指定された電話番号での予約は見つかりません');
             return view("Reserve.RTelNoinput");
         }
         $products = "";

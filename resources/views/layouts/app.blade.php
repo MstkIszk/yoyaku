@@ -50,6 +50,20 @@
                 </header>
             @endif
 
+            @if (session('success'))
+                {{-- 成功メッセージが存在する場合（緑色や青色で表示） --}}
+                <div class="session_message_area success">
+                    <p>{{ session('success') }}</p>
+                </div>
+            @endif
+
+            @if (session('error'))
+                {{-- エラーメッセージが存在する場合（赤色や黄色で表示） --}}
+                <div class="session_message_area error">
+                    <p>{{ session('error') }}</p>
+                </div>
+            @endif
+
             <!-- Page yield Content -- start -->
             @yield ('content')
             <!-- Page yield Content -- end -->

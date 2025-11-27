@@ -276,6 +276,8 @@
                         if((reqYY == todayYY) && (reqMM == todayMM)) {
                             chkDD = todayDD;
                         }
+                        todayNum = ((todayYY % 100) * 10000) + (todayMM * 100) + Number(todayDD);   //  本日日付の数値化
+                        reqDayNum = ((reqYY % 100) * 10000) + (reqMM * 100);   //  要求日付の数値化
 
                         // 既存のtbody要素を削除
                         const tbody = document.getElementById('calenderTable'); // idが'calenderTable'のtbody要素を想定
@@ -398,7 +400,7 @@
                                             weekStr += '</div>';
                                             weekStr += '<div class="yoyaku_cnt">' + zanSeki + '</div>';
                                     
-                                            if((operatingCode == 1) && (dayInfo.day > chkDD)) {   //  明日以降ならば予約ボタンを表示
+                                            if((operatingCode == 1) && ((reqDayNum + dayInfo.day) > todayNum)) {   //  明日以降ならば予約ボタンを表示
                                                 if(isMyPage || bCanWebYoyaku) {
                                                     if(isMyPage) {
                                                         // 枠内右下に表示

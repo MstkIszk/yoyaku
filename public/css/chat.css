@@ -173,6 +173,7 @@
 }                
 
 
+
 /*◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆
 //  記事見出し 定義 
 //◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆*/
@@ -963,6 +964,39 @@ a[href^='tel']::before {
   background: linear-gradient(to bottom, #FFC700 0%, #FFB700 100%);
 }
 
+/*◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆
+//  画面上部にメッセージを表示するための Style
+/*◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆*/
+
+.session_message_area {
+  
+  /* shadow に相当: 軽めの影を適用 */
+  /* Tailwind CSS のデフォルト shadow (medium) に近い値を設定 */
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
+  
+  /* 追加：見栄えを良くするための設定 */
+  border-radius: 0.5rem; /* 角丸 (Tailwindの rounded-lg 程度) */
+  padding: 0.2rem; /* 内側の余白 (Tailwindの p-4 程度) */
+  margin-top: 0.3rem; /* 他の要素との間に下マージン */
+  margin-bottom: 0.3rem; /* 他の要素との間に下マージン */
+}
+/* メッセージを囲む枠線の例 (オプション) */
+.session_message_area .success {
+  background-color: #d4edda; /* 薄い緑 */
+  color: #155724; /* 濃い緑 */
+  border: 1px solid #c3e6cb;
+}
+.session_message_area .error {
+  background-color: #f897da; /* 薄い赤 */
+  color: #C21c24; /* 濃い赤 */
+  border: 1px solid #f5c6cb;
+}
+.session_message_area p {
+  /* bg-white に相当: 背景色を白に */
+  background-color: #ffffff;
+  font-weight: bold;
+  font-size: 1.2rem;
+}
 
 /* OFF時 (デフォルト) */
 .checkbox-button-container input[type="checkbox"] + label.toggle-label::after {
