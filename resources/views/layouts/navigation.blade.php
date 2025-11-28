@@ -1,7 +1,7 @@
 <!-- resources\views\layouts\navigation.blade.php --- Start -->
 <nav x-data="{ open: false }" class="bg-white border-b border-gray-100">
     <!--「resources\views\layouts\navigation.blade.php」 -->
-    <!-- Primary Navigation Menu -->
+    <!-- Primary Navigation Menu Area -->
     <x-owner-menu />
     <div class="head_frame">
         <div class="head_inbox">
@@ -20,6 +20,6 @@
             </div>
         </div>
     </div>
-
+    <script src="{{ asset('js/hard_frame_hide.js') }}"></script>
 </nav>
 <!-- resources\views\layouts\navigation.blade.php --- End -->

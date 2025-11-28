@@ -35,5 +35,7 @@ app.blade.php<br>
         </div>
     </div>
 </div>
+<script src="{{ asset('js/hard_frame_hide.js') }}"></script>
+
 <!--「resources\views\components\application-logo.blade.php」--- end -->
 

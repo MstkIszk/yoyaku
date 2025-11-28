@@ -128,8 +128,11 @@ Route::post('reserve/fixed/{id?,keystr?}', [ReserveController::class,'fixed'])->
 Route::get('reserve/telnoinput', [ReserveController::class,'telnoinput'])->name('reserve.telnoinput');
 //  予約の一覧表示
 Route::get('reserve/index/{CliTel1?}', [ReserveController::class,'index'])->name('reserve.index');
-//  予約の表示
+//  予約の表示 店舗用
 Route::get('reserve/show/{id}', [ReserveController::class,'show'])->name('reserve.show');
+//  予約の表示 ゲスト用
+Route::get('/reserve/showreserve', [ReserveController::class, 'showreserve'])->name('reserve.showreserve');
+
 //  予約の編集
 Route::get('reserve/edit/{reserve}', [ReserveController::class,'edit'])->name('reserve.edit');
 //  予約の編集結果を書き込み

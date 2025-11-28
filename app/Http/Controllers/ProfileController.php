@@ -105,8 +105,13 @@ class ProfileController extends Controller
 
         return Redirect::to('/');
     }
+
     /**
-     * home画面で店舗一覧を表示.
+     * トップページ（'/' ルート）からのアクセスを処理し、
+     * Cookieがあれば自動ログインと予約カレンダーへのリダイレクトを行う。
+     *
+     * @param Request $request
+     * @return \Illuminate\Http\RedirectResponse|\Illuminate\View\View
      */
     public function homelist(Request $request)
     {

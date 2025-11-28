@@ -308,10 +308,6 @@ class ReserveController extends Controller
         $headers .= "Bcc:$AdditMailAddr \r\n";
         $param = "-f $InquiryMailAddr";	//	サーバーによってはReturn-Path:を勝手に書き換えてしまうものもあるので、そのときは追加オプションのほうで -f を指定してあげます。
 
-
-
-
-
         $messageContent = "受付日時:\r\n$ReqDate\r\n\r\n";
         $messageContent .= "お名前:\r\n" .  $request->ClitNameKanji . "(" . $request->ClitNameKana . ")様\r\n\r\n";
         $messageContent .= $ProductInf['productName'] . "　(" . $CourseInf['courseName'] . "名)\r\n\r\n";
@@ -350,7 +346,10 @@ class ReserveController extends Controller
             toName: $data['ClitNameKanji'] // 宛先名として顧客名をセット
         );
 
-        // Bccアドレスを設定
+        // 1. Mailファサードから送信処理を開始
+        $mailer = Mail::to($reservationMail); // Mailableオブジェクト自身を渡すと、envelope()で設定した宛先が使用される
+
+        // 2. Bccアドレスを設定（$AdditMailAddr が空でなければ）
         if (!empty($AdditMailAddr)) {
             // カンマ区切りで複数のBccアドレスがある場合も考慮し、配列に変換
             $bccEmails = collect(explode(',', $AdditMailAddr))
@@ -358,28 +357,22 @@ class ReserveController extends Controller
                 ->filter()
                 ->all();
             
-            // MailファサードのBccメソッドを使用
-            $mailer = Mail::bcc($bccEmails);
-        } else {
-            $mailer = Mail::shouldReceive('send')->once()->andReturn(true); // $mailer を初期化
-            $mailer = Mail::getFacadeRoot(); // 実際の Mailer インスタンスを取得
+            // MailerインスタンスにBccを設定
+            $mailer->bcc($bccEmails);
         }
 
         // 送信処理（try-catchでエラーを捕捉し、セッションにメッセージをセット）
         try {
-            // Mail::bcc(...) が設定されている場合は $mailer を使用して送信
-            // そうでない場合は Mail::send() を直接使用
-            if (!empty($AdditMailAddr)) {
-                $mailer->send($reservationMail);
-            } else {
-                Mail::send($reservationMail);
-            }
+            // 3. 設定をすべて終えた $mailer インスタンス（Mailファサードまたはその結果）で send を実行
+            $reservationMail->send(Mail::mailer(null)); // Mailerインスタンスを渡して実行
 
             $request->session()->flash('success','確認メールを送信しました');
         } catch (\Exception $e) {
             Log::error('予約確認メール送信エラー: ' . $e->getMessage());
             $request->session()->flash('error','確認メールの送信に失敗しました');
+            // 開発時には $e->getTraceAsString() もログに出すと詳細がわかります
         }
+
         //  一覧のページに戻る
         return redirect()->route('reserve.calender',
          [
@@ -410,6 +403,50 @@ class ReserveController extends Controller
         $YoyakuTypeList = UserCourse::GetYoyakuType($reserve->Baseid, $reserve->Productid);
         return view("Reserve.RShow", compact('reserve','WaysPayList','YoyakuTypeList'));
     }
+
+    //  予約の照会
+    /**
+     * URLパラメータから予約情報を検索し、存在すれば詳細表示（show）にルーティングする。
+     * * @param \Illuminate\Http\Request $request
+     * @return \Illuminate\Http\Response|\Illuminate\View\View
+     */
+    public function showreserve(Request $request)
+    {
+        // 1. パラメータの取得
+        $reservationId = $request->query('id'); // クエリパラメータ 'id' を取得
+        $randomNumber = $request->query('randomNumber'); // クエリパラメータ 'randomNumber' を取得
+        
+        // パラメータが不足している場合はエラー画面へ
+        if (empty($reservationId) || empty($randomNumber)) {
+            $message = 'URLが無効です。';
+            return view('reserve.not_found', compact('message')); // ★ メッセージを渡す
+        }
+
+        // 2. Reserveモデルを検索
+        // RandomNumber は Reserveモデルの RandomNumber カラムと比較
+        $reserve = Reserve::where('id', $reservationId)
+                          ->where('RandomNumber', $randomNumber)
+                          ->first();
+
+        // 3. 見つからない場合の処理
+        if (!$reserve) {
+            Log::warning("予約NotFound: ID={$reservationId}, RN={$randomNumber}");
+            // 「指定された予約が見つかりません」画面を表示
+            $message = '指定された予約が見つかりません。URLが無効であるか、予約情報が削除された可能性があります。';
+            return view('reserve.not_found', compact('message')); // ★ メッセージを渡す
+        }
+
+        // 4. 見つかった場合は ReserveController::show($id) 関数を呼ぶ
+        // 通常、コントローラ内で他のコントローラアクションを呼ぶのは推奨されませんが、
+        // 要件に従い、showメソッドに処理を委譲します。
+        
+        // show() メソッドに処理を渡すために、リクエストを加工して渡すか、
+        // もしくはシンプルな $id を引数として渡します。
+        
+        // ここでは、ReserveController::show($id) が ReserveモデルのIDを引数に取ることを想定
+        return $this->show($reservationId);
+    }
+
     //  予約の照会
     public function telnoinput(Request $request) {
         // 2. セッションからIDを取得
@@ -529,7 +566,7 @@ class ReserveController extends Controller
             "CliTel1" =>  "required|phone_number",          //  電話番号
             "CliEMail" =>  "required|email",         //  メールアドレス
             "CliResvType" =>  "",      //  予約タイプ	
-            "CliResvCnt" =>   ['required', 'numeric', new CheckReservationCount($reserve->ReserveDate, $reserve->CliResvCnt)],       //  予約人数
+            "CliResvCnt" =>   ['required', 'numeric', new CheckReservationCount($reserve->ReserveDate,$reserve->Baseid, $reserve->Productid)],       //  予約人数
             "CliWaysPay" =>  "",       //  支払い方法
             "MessageText" =>  ""      //  連絡
             ],

@@ -23,6 +23,24 @@ class AuthenticatedSessionController extends Controller
         return view('auth.login');
     }
 
+/**
+     * 管理者ログイン画面を表示し、CookieからIDとパスワードを読み込む
+     * * @param \Illuminate\Http\Request $request
+     * @return \Illuminate\View\View
+     */
+    public function admin(Request $request)
+    {
+        // CookieからIDとパスワードを読み込む
+        $cookie_id = $request->cookie('remember_id');
+        $cookie_password = $request->cookie('remember_password');
+        
+        // ビューに値を渡す
+        return view('auth.admin-login', [
+            'cookie_id' => $cookie_id,
+            'cookie_password' => $cookie_password,
+        ]);
+    }
+
     /**
      * Handle an incoming authentication request.
      */
