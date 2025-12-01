@@ -196,32 +196,18 @@
         <div class="menu">
             @auth
                 <!-- ログインしていれば -->
-                 {{-- 
-                <li class="nav_item"></li><a href="{{ url('/dayinfo') }}" class="menu_item">{{ __('reserve Today') }}</a></li>
-                <li class="nav_item"></li><a href="{{ url('/shopcalender') }}" class="menu_item">{{ __('Shop Calender') }}</a></li>
-                <li class="nav_item"></li><a href="{{ url('/reservelist') }}" class="menu_item">{{ __('Reserve list') }}</a></li>
-                <li class="nav_item"></li><a href="{{ url('/dashboard') }}" class="menu_item">{{ __('Dashboard') }}</a></li>
-                 --}}
                 <li class="headerAside__item"><a href="{{ url('/dayinfo') }}"      class="headerAside__link">{{ __('reserve Today') }}</a></li>
                 <li class="headerAside__item"><a href="{{ route('reserve.calender', ['user_id' => Auth::user()->id, 'product_id' => 0]) }}" class="headerAside__link">{{ __('Shop Calender') }}</a></li>
                 <li class="headerAside__item"><a href="{{ url('/reservelist') }}"  class="headerAside__link">{{ __('Reserve list') }}</a></li>
                 <li class="headerAside__item"><a href="{{ url('/dashboard') }}"    class="headerAside__link">{{ __('Dashboard') }}</a></li>
             @else
                 <!-- ログインしていない -->
-                {{-- 
-                <li class="nav_item"></li><a href="{{ route('login') }}" class="menu_item">Log in</a></li>
+                <li class="headerAside__item"><a href="{{ route('reserve.telnoinput') }}" class="headerAside__link">{{ __('reservation search') }}</a></li>
+                <li class="headerAside__item"><a href="{{ route('login') }}"      class="headerAside__link">{{ __('Login') }}</a></li>
 
                 @if (Route::has('register'))
                     <!-- registerというルート要素があれば -->
-                    <li class="nav_item"></li><a href="{{ route('register') }}" class="menu_item">Register</a></li>
-                @endif
-                 --}}
-                <li class="headerAside__item"><a href="{{ route('reserve.telnoinput') }}" class="headerAside__link">予約検索</a></li>
-                <li class="headerAside__item"><a href="{{ route('login') }}"      class="headerAside__link">Log in</a></li>
-
-                @if (Route::has('register'))
-                    <!-- registerというルート要素があれば -->
-                    <li class="headerAside__item"><a href="{{ route('register') }}" class="headerAside__link">Register</a></li>
+                    <li class="headerAside__item"><a href="{{ route('register') }}" class="headerAside__link">{{ __('New Shop Entry') }}</a></li>
                 @endif
             @endauth
         </div>

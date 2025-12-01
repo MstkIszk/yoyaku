@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>予約カレンダーの埋め込み</title>
+<style>
+    /* iframeを画面全体に広げるための基本的なCSS */
+    body {
+        margin: 0;
+        padding: 0;
+        overflow: hidden; /* メインページ側の不要なスクロールバーを非表示 */
+        height: 100vh;
+        width: 100vw;
+    }
+
+    .iframe-container {
+        width: 100%;
+        height: 100%;
+    }
+
+    iframe {
+        width: 100%;
+        height: 100%;
+        border: none; /* フレームの境界線を非表示にする */
+    }
+</style>
+</head>
+<body>
+<div class="iframe-container">
+    <iframe 
+        src="https://kyum.chu.jp/yoyaku/public/reserve/calender/1/1" 
+        title="予約カレンダー"
+        allowfullscreen
+    >
+        お使いのブラウザはiframeをサポートしていません。
+    </iframe>
+</div>
+</body>
+</html>

@@ -83,6 +83,30 @@
     .card-body {
         margin: 0px;
     }
+    @media (max-width: 780px) {
+        .card-header {
+            font-size: 1rem;
+        }
+        select {
+            font-size	1rem;
+            line-height: 1.1em;
+            padding: 0.1em 3.1em 0.1em 0.1em;
+        }
+        select.classic {
+            background-position:
+            calc(100% - 20px) calc(1em - 4px),
+            calc(100% - 15px) calc(1em - 4px),
+            100% 0;
+        }
+
+        select.classic:focus {
+            background-position:
+            calc(100% - 15px) calc(1em - 4px),
+            calc(100% - 20px) calc(1em - 4px),
+            100% 0;
+        }
+
+    }
   </style>
 
     <div class="py-12">
@@ -438,12 +462,7 @@
                                                 let fullMemo = '';
                                                 if (dayInfo.memo !== undefined && dayInfo.memo.length > 0) {
                                                     fullMemo = dayInfo.memo;
-                                                    const lines = dayInfo.memo.split(/\r?\n/);
-                                                    if (lines.length > 3) {
-                                                        displayMemo = lines.slice(0, 3).join('<br>') + '...';
-                                                    } else {
-                                                        displayMemo = dayInfo.memo.replace(/\r?\n/g, '<br>');
-                                                    }
+                                                    displayMemo = editDisplayMemo(dayInfo.memo);
                                                 }
 
                                                 //weekStr += '<span class="cyouka_view">';
@@ -454,11 +473,7 @@
                                                     // starClass を追加
                                                     weekStr += '<div class="cyouka_stars ' + starClass + '">' + '★'.repeat(dayInfo.stars) + '</div>';
                                                 }
-                                                
-                                                if(dayInfo.memo !== undefined && dayInfo.memo.length > 0) {
-                                                    const formattedMemo = dayInfo.memo.replace(/\r?\n/g, '<br>');
-                                                    weekStr += '<div class="cyouka_memo">' + formattedMemo + '</div>';
-                                                }
+                                                weekStr += '<div class="cyouka_memo">' + displayMemo + '</div>';
                                                 weekStr += '</span>';
                                             }
                                         }
@@ -495,6 +510,23 @@
                         const newUrl = '{{ Route('reserve.create') }}/{{ $ShopInf->id }}/' + productIDForReserve + '/' + reqDate ;
                         window.location.href = newUrl;            // リダイレクト
                     }
+
+                    //  カレンダー中のMomo文字列を編集
+                    function editDisplayMemo(memo) {
+                        const lines = memo.split(/\r?\n/);
+                        let displayMemo = '';
+                        // writeDateInfoから呼ばれた場合、memoの改行を考慮する必要があるため、ここで処理
+                        if (lines.length > 2) {
+                            if(lines[2].length > 4) {
+                                lines[2] =  lines[2].substring(0, 4);
+                            }
+                            displayMemo = lines.slice(0, 2).join('<br>') + '...';
+                        } else {
+                            displayMemo = memo.replace(/\r?\n/g, '<br>');
+                        }
+                        return displayMemo;
+                    }
+
                     function updateButtonColor(area,data) {
 
                         const selIx = Number(data.operating);
@@ -751,13 +783,7 @@
                                 let fullMemo = '';
                                 if (dayInfo.memo !== undefined && dayInfo.memo.length > 0) {
                                     fullMemo = dayInfo.memo;
-                                    const lines = dayInfo.memo.split(/\r?\n/);
-                                    // writeDateInfoから呼ばれた場合、memoの改行を考慮する必要があるため、ここで処理
-                                    if (lines.length > 3) {
-                                        displayMemo = lines.slice(0, 3).join('<br>') + '...';
-                                    } else {
-                                        displayMemo = dayInfo.memo.replace(/\r?\n/g, '<br>');
-                                    }
+                                    displayMemo = editDisplayMemo(dayInfo.memo);
                                 }
 
                                 // ポップアップ表示のために data 属性を追加し、onclick ハンドラを設定
@@ -768,10 +794,7 @@
                                     weekStr += '<div class="cyouka_stars ' + starClass + '">' + '★'.repeat(dayInfo.stars) + '</div>';
                                 }
                                 
-                                if(dayInfo.memo !== undefined && dayInfo.memo.length > 0) {
-                                    // displayMemo を使用
-                                    weekStr += '<div class="cyouka_memo">' + displayMemo + '</div>';
-                                }
+                                weekStr += '<div class="cyouka_memo">' + displayMemo + '</div>';
                                 weekStr += '</span>';
                             }
 
